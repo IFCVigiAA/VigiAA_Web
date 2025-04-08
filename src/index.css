@@ -1,0 +1,16 @@
+:root {
+  font-family: sans-serif;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  min-width: 100vw;
+  min-height: 100vh;
+  background-color: rgb(224, 223, 223);
+}
+
+
+
+
+
