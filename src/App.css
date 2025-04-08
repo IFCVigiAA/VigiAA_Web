@@ -1,0 +1,25 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
+#root {
+  margin: 0 auto;
+}
+.page-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+
+  .content-wrap {
+    flex: 1;
+    padding-top: 70px; 
+  }
+  
+
+  .hometext {
+    text-align: center;
+  }
+  
+  .italico {
+    font-style: italic;
+  }
