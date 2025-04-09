@@ -1,20 +1,23 @@
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import './App.css'
-import NavBar from '../components/NavBar'
-import Footer from '../components/Footer'
+import Home from "../pages/Home";
+import Cadastro from "../pages/Cadastro";
+import Login from "../pages/Login";
+import Participantes from "../pages/Participantes";
+import Sobre from "../pages/Sobre";
+
 
 function App() {
   return (
-    <div className="page-container">
-      <NavBar />
-      <div className="content-wrap">
-        <div className="hometext">
-          <h1>Projeto de pesquisa</h1>
-          <h1 className="italico">Vigilância do <br /> Aedes Aegypti</h1>
-          <h1>Plataforma georreferenciada</h1>
-        </div>
-      </div>
-      <Footer />
-    </div>
+   <Router>
+    <Routes>
+      <Route path="/" element={<Home/>} />
+      <Route path="/Cadastro" element={<Cadastro/>} />
+      <Route path="/Login" element={<Login/>} />
+      <Route path="/Participantes" element={<Participantes/>} />
+      <Route path="/Sobre" element={<Sobre/>} />
+    </Routes>
+   </Router>
   )
 }
 
