@@ -8,10 +8,11 @@
     flex-direction: column;
   }
   
-
+.page-container img{
+  width: 400px;
+}
   .body {
     flex: 1;
-    display: flex;
     display: flex;
     justify-content: space-between;
   }
@@ -24,7 +25,7 @@
   .hometext {
     display: flex;
     flex-direction: column;
-    margin-left: 40px;
+    margin-left: 20px;
   }
   
   .italico {
@@ -44,10 +45,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-  
     position: relative;
     top: -60px;
-  
     background-color: #054709;
     color: white;
     border-radius: 20px;
@@ -84,4 +83,26 @@
     color: white;
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
   }
-    
+
+
+.banner {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 40px;
+  width: 100%;
+}
+
+.banner img {
+  max-width: 600px;
+  width: 100%;
+  height: 250px;
+  object-fit: contain;
+}
+
+hr {
+  width: 98%;
+  border: none;
+  border-top: 2px solid #054709; /* ou qualquer cor que combine com sua paleta */
+  margin: 40px auto;
+}

@@ -1,24 +1,23 @@
 import react from 'react';
+import { Link } from 'react-router-dom';
 import "./NavBar.css"
 
 const NavBar = () => {
-    return(
-    <>
-        <div class="navbar">
-            <div class="NavTitle">
-                <p class="logo">
-                <span class="span1">Vigi</span><span class="span2">AA</span>
-                </p>
+    return (
+        <>
+            <div class="navbar">
+                <div class="NavTitle">
+                    <Link to="/" class="logo">
+                        VigiAA
+                    </Link>
+                </div>
+                <div class="NavButtons">
+                    <Link to="/Participantes">Participantes</Link>
+                    <Link to="/Cadastro">Cadastro</Link>
+                    <Link to="/Sobre">Sobre</Link>
+                </div>
             </div>
-            <div class="NavButtons">
-                
-                <p>Participantes</p>
-                <p>Documentação</p>
-                <p>Sobre</p>
-            </div>
-        </div>
-        
-    </>
+        </>
     )
 }
 

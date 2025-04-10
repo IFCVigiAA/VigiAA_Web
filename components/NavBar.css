@@ -7,6 +7,8 @@
     color: #ffffff;
     font-size: larger;
     font-weight: 800;
+    z-index: 10;
+    position: relative;
 }
 .NavButtons{
     display: flex;
@@ -14,8 +16,15 @@
     gap: 20px;
     margin-left: 74vw;
 }
+.NavButtons a{
+    color: rgb(255, 255, 255);
+}
 .NavTitle{
     margin-left: 2%;
+    
+}
+.NavTitle a{
+    color: rgb(255, 255, 255);
 }
 .NavLogo img{
     width: 50px;

@@ -12,12 +12,18 @@ function Home() {
           <h1 className="italico">Vigilância do <br /> Aedes Aegypti</h1>
           <h1>Plataforma georreferenciada</h1>
         </div>
-        <div class="cadastro">
-          <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA"/>
+        <div className="cadastro">
+          <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" />
           <button>Cadastro</button>
         </div>
       </div>
-      
+<hr />
+      <div className="banner">
+        <a href="https://mooc.geati.camboriu.ifc.edu.br/" target="_blank" rel="noopener noreferrer">
+        <img src="bannermooc.png" alt="Banner MOOC" className="banner" title='Cursos MOOC'/>
+        </a>
+      </div>
+
       <Footer />
     </div>
   )
