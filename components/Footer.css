@@ -11,6 +11,9 @@
   gap: 20px;
 
 }
+.footer a{
+  color: white;
+}
 
 .footerTitle {
   font-size: 24px;
@@ -23,7 +26,6 @@
   align-items: center;
   justify-content: center;
   gap: 30px;
-  flex-wrap: wrap;
   width: 90%;
 }
 
@@ -40,9 +42,7 @@
   transition: transform 0.3s ease;
 }
 
-.imgBox:hover {
-  transform: scale(1.1);
-}
+
 
 .imgBox img {
   max-width: 100%;

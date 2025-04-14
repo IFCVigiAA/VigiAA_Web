@@ -11,8 +11,14 @@
 .page-container img{
   width: 400px;
 }
+.page-container iframe{
+  display: block;
+  margin: 40px auto;
+  border: none;
+  max-width: 90%;
+  height: 400px;
+}
   .body {
-    flex: 1;
     display: flex;
     justify-content: space-between;
   }
@@ -53,7 +59,6 @@
     border: 2px solid #ffffff;
     cursor: pointer;
     font-weight: bold;
-  
     font-size: 16px;
     overflow: hidden;
     transition: all 0.3s ease;
@@ -103,6 +108,49 @@
 hr {
   width: 98%;
   border: none;
-  border-top: 2px solid #054709; /* ou qualquer cor que combine com sua paleta */
+  border-top: 2px solid #054709; 
   margin: 40px auto;
+}
+..mapsSection {
+  display: flex;
+  flex-direction: column; /* Coloca o iframe e os botões em colunas */
+  align-items: center; /* Centraliza tudo */
+  width: 100%; /* Garante que a div ocupe a largura total */
+  margin-top: 20px; /* Espaço acima */
+  margin-bottom: 40px; /* Espaço abaixo */
+}
+
+.page-container iframe {
+  display: block;
+  margin: 0 auto;
+  border: none;
+  max-width: 90%;
+  height: 400px;
+}
+
+.mapsSection .button-container {
+  display: flex;
+  flex-direction: row; 
+  gap: 20px; 
+  justify-content: center; 
+  width: 100%;
+  margin-top: 20px; 
+}
+
+.mapsSection button {
+  width: 200px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #054709;
+  color: white;
+  border-radius: 20px;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  z-index: 1;
 }

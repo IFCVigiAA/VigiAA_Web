@@ -2,7 +2,7 @@
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
-  scrollbar-width: thin; /* para Firefox */
+  scrollbar-width: thin; 
   scrollbar-color: #8a8a8a transparent;
   
 }
@@ -21,18 +21,18 @@ body {
   display: none;
 }
 
-/* Fundo da scrollbar */
+
 ::-webkit-scrollbar-track {
   background: #f1f1f1; 
 }
 
-/* Barra de rolagem em si */
+
 ::-webkit-scrollbar-thumb {
   background: #979797;
   border-radius: 10px;
 }
 
-/* Scrollbar ao passar o mouse */
+
 ::-webkit-scrollbar-thumb:hover {
   background: #043f08;
 }

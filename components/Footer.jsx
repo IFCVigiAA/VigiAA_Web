@@ -12,7 +12,9 @@ function Footer() {
         <div className="imgBox"><img src="vigilancia_sanitaria.png" alt="Vigilância Sanitária" /></div>
         <div className="imgBox"><img src="logo_prefeitura.png" alt="Prefeitura" /></div>
       </div>
-
+      <a href="https://mail.google.com/mail/?view=cm&fs=1&to=vigiaa.camboriu@ifc.edu.br" target='_blank'>
+      vigiaa.camboriu@ifc.edu.br
+      </a>
       <div className="footerCopyright">
         © VigiAA 2025 - Todos os direitos reservados
       </div>
