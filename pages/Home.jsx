@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import './Home.css'
 import NavBar from '../components/NavBar'
 import Footer from '../components/Footer'
@@ -14,11 +15,11 @@ function Home() {
         </div>
         <div className="cadastro">
           <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" />
-          <button>Cadastro</button>
+          <Link to="/cadastro" className="cadastro-link">Cadastro</Link>
         </div>
       </div>
       <div>
-      <hr />
+        <hr />
         <div className="mapsSection">
           <iframe src="https://www.google.com/maps/d/embed?mid=1uuXwji6rSiNwm92fZL105fCS4C_Z-Eg&ehbc=2E312F" width="640" height="480"></iframe>
           <div className="button-container">

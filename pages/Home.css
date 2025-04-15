@@ -42,17 +42,15 @@
     flex-direction: column;
     align-items: center;
     margin-right: 40px;
-    position: relative;
+    
     top: -80px
   }
-  .cadastro button {
+  .cadastro a {
     width: 200px;
     height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
-    top: -60px;
     background-color: #054709;
     color: white;
     border-radius: 20px;
@@ -63,32 +61,11 @@
     overflow: hidden;
     transition: all 0.3s ease;
     z-index: 1;
+    text-decoration: none;
+    position: relative;
+    top: -60px; 
   }
   
-  .cadastro button::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 0;
-    height: 0;
-    background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 90%);
-    transform: translate(-50%, -50%);
-    border-radius: 50%;
-    transition: width 0.4s ease, height 0.4s ease;
-    z-index: 0;
-  }
-  
-  .cadastro button:hover::before {
-    width: 250%;
-    height: 250%;
-  }
-  
-  .cadastro button:hover {
-    color: white;
-    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-  }
-
 
 .banner {
   display: flex;
@@ -111,13 +88,13 @@ hr {
   border-top: 2px solid #054709; 
   margin: 40px auto;
 }
-..mapsSection {
+.mapsSection {
   display: flex;
-  flex-direction: column; /* Coloca o iframe e os botões em colunas */
-  align-items: center; /* Centraliza tudo */
-  width: 100%; /* Garante que a div ocupe a largura total */
-  margin-top: 20px; /* Espaço acima */
-  margin-bottom: 40px; /* Espaço abaixo */
+  flex-direction: column;
+  align-items: center; 
+  width: 100%; 
+  margin-top: 20px; 
+  margin-bottom: 40px; 
 }
 
 .page-container iframe {
