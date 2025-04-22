@@ -49,4 +49,16 @@
   .formularioLogin button:hover {
     background-color: #06600c;
   }
+  .formularioLogin a {
+    text-align: center;
+    color: #054709;
+    font-weight: bold;
+    text-decoration: none;
+    transition: color 0.3s ease;
+  }
+  
+  .formularioLogin a:hover {
+    color: #06600c;
+    text-decoration: underline;
+  }
   

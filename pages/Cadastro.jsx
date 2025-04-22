@@ -2,7 +2,7 @@ import React from 'react'
 import './Cadastro.css'
 import NavBar from '../components/NavBar'
 import Footer from '../components/Footer'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 
 const Cadastro = () => {
   const navigate = useNavigate()
@@ -22,6 +22,7 @@ const Cadastro = () => {
           <input type="email" placeholder="Email" required />
           <input type="password" placeholder="Senha" required />
           <button type="submit">Cadastrar</button>
+          <Link to="/login">Não tem uma conta?</Link>
         </form>
       </div>
       <Footer />
