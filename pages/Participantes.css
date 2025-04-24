@@ -3,6 +3,8 @@
   flex-direction: column;
   flex: 1;
   align-items: center;
+  padding: 20px;
+  box-sizing: border-box;
 }
 
 .bodyParticipantes ul {
@@ -11,15 +13,17 @@
   gap: 40px;
   list-style: none;
   width: 100%;
+  max-width: 1400px;
   justify-items: center;
-  align-items: center;
-  padding: 0 20px;
+  padding: 0;
+  margin: 0;
 }
 
 .participantes {
   background-color: white;
-  width: 500px;
-  height: 350px;
+  width: 100%;
+  max-width: 500px;
+  height: auto;
   border-radius: 20px;
   display: flex;
   flex-direction: column;
@@ -42,6 +46,7 @@
   flex-direction: row;
   gap: 20px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .conteudo-card img {
@@ -55,4 +60,49 @@
   text-align: left;
   font-size: 16px;
   color: #333;
+}
+
+/* Responsivo para tablets */
+@media (max-width: 1024px) {
+  .bodyParticipantes ul {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .conteudo-card {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .conteudo-card img {
+    width: 120px;
+    height: 160px;
+  }
+
+  .conteudo-card p {
+    text-align: center;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .bodyParticipantes ul {
+    grid-template-columns: 1fr;
+  }
+
+  .participantes {
+    padding: 16px;
+  }
+
+  .conteudo-card img {
+    width: 100px;
+    height: 140px;
+  }
+
+  .conteudo-card p {
+    font-size: 14px;
+  }
+
+  .participantes .nome {
+    font-size: 18px;
+  }
 }
