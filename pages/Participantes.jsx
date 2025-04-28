@@ -46,7 +46,7 @@ const Participantes = () => {
         </div>
 
         <div className="grupo">
-          <h2>Alunos VigiAA</h2>
+          <h2>Bolsistas VigiAA</h2>
           <ul>
             <li className="participantes">
               <div className="nome">Ian</div>
@@ -73,7 +73,7 @@ const Participantes = () => {
         </div>
 
         <div className="grupo">
-          <h2>Alunos Estação Meteorológica</h2>
+          <h2>Bolsistas Estação Meteorológica</h2>
           <ul>
             <li className="participantes">
               <div className="nome">Rafael</div>
@@ -93,7 +93,7 @@ const Participantes = () => {
         </div>
 
         <div className="grupo">
-          <h2>Alunos MOOC</h2>
+          <h2>BOlsistas MOOC</h2>
           <ul>
             <li className="participantes">
               <div className="nome">Nome</div>

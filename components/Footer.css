@@ -1,5 +1,5 @@
 .footer {
-  background-color: #054709;
+  background: linear-gradient(to  right, #0d1b2a, #123524);
   color: #ffffff;
   font-size: 16px;
   font-weight: 600;
@@ -25,7 +25,7 @@
 
 .footerImgs {
   display: flex;
-  flex-wrap: wrap; /* permite quebrar linha em telas menores */
+  flex-wrap: wrap; 
   align-items: center;
   justify-content: center;
   gap: 20px;

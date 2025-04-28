@@ -2,13 +2,13 @@
     display: flex;
     align-items: center;
     width: 100vw;
-    background-color: #054709;
+    background: linear-gradient(to right, #0d1b2a, #123524);
     height: 70px;
     color: #ffffff;
     font-size: larger;
     font-weight: 800;
-    z-index: 10;
-    position: relative;
+    z-index:999;
+    position: sticky;
     
 }
 .NavButtons{

@@ -1,69 +1,93 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
+
 #root {
   margin: 0 auto;
+  font-family: 'Libre Baskerville', serif;
 }
+
 .page-container {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  
-.page-container img{
-  width: 400px;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
 }
-.page-container iframe{
+
+.page-container img {
+  max-width: 100%;
+}
+
+.page-container iframe {
   display: block;
   margin: 40px auto;
   border: none;
   max-width: 90%;
   height: 400px;
 }
-  .body {
-    display: flex;
-    justify-content: space-between;
-    padding: 20px;
-  }
-  .body img{
-    height: 400px;
-    position: relative;
 
-  }
+.home-body {
+  margin: 0;
+  padding: 60px 20px;
+  background: linear-gradient(to  right, #0d1b2a, #123524);
+  color: #ffffff;
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 50px;
+  flex-wrap: wrap;
+}
 
-  .hometext {
-    display: flex;
-    flex-direction: column;
-    margin-left: 20px;
-  }
-  
-  .italico {
-    font-style: italic;
-  }
-  .cadastro{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  .cadastro a {
-    width: 200px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #054709;
-    color: white;
-    border-radius: 20px;
-    border: 2px solid #ffffff;
-    cursor: pointer;
-    font-weight: bold;
-    font-size: 16px;
-    overflow: hidden;
-    transition: all 0.3s ease;
-    z-index: 1;
-    text-decoration: none;
-    position: relative;
-    top: -60px; 
-  }
-  
+.text-box {
+  text-align: left;
+}
+
+.main-title {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.subtitle {
+  font-size: 24px;
+  font-weight: normal;
+  border-top: 2px solid #ffffff;
+  padding-top: 10px;
+  margin-top: 10px;
+}
+
+.logo-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+.logo-img {
+  width: 250px;
+  height: auto;
+}
+
+.cadastro-link {
+  width: 200px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #054709;
+  color: white;
+  border-radius: 20px;
+  border: 2px solid #ffffff;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 16px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  text-decoration: none;
+}
+
+.cadastro-link:hover {
+  background-color: #457b9d;
+}
+
 
 .banner {
   display: flex;
@@ -83,9 +107,11 @@
 hr {
   width: 98%;
   border: none;
-  border-top: 2px solid #054709; 
+  border-top: 2px solid;
   margin: 40px auto;
+  background: linear-gradient(to  right, #0d1b2a, #123524);
 }
+
 .mapsSection {
   display: flex;
   flex-direction: column;
@@ -103,45 +129,10 @@ hr {
   height: 400px;
 }
 
-.mapsSection .button-container {
-  display: flex;
-  flex-direction: row; 
-  gap: 20px; 
-  justify-content: center; 
-  width: 100%;
-  margin-top: 20px; 
-}
-
-.mapsSection button {
-  width: 200px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #054709;
-  color: white;
-  border-radius: 20px;
-  border: 2px solid #ffffff;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  z-index: 1;
-}
-
 @media (max-width: 768px) {
-  .body {
+  .home-body {
     flex-direction: column;
-  }
-
-  .cadastro {
-    margin-top: 20px;
-    position: static;
-  }
-
-  .cadastro a {
-    top: 0;
+    text-align: center;
   }
 
   .page-container iframe {
@@ -151,4 +142,11 @@ hr {
   .mapsSection button {
     width: 80%;
   }
+
+  .text-box {
+    text-align: center;
+  }
+}
+.navbar{
+  position: sticky  ;
 }

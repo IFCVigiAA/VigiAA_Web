@@ -7,21 +7,19 @@ function Home() {
   return (
     <div className="page-container">
       <NavBar />
-      <div className="body">
-        <div className="hometext">
-          <h1>Projeto de pesquisa</h1>
-          <h1 className="italico">Vigilância do <br /> Aedes Aegypti</h1>
-          <h1>Plataforma georreferenciada</h1>
+      <div className="home-body">
+        <div className="text-box">
+          <h1 className="main-title">Plataforma Georreferenciada</h1>
+          <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
         </div>
-        <div className="cadastro">
-          <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" />
-          <Link to="/cadastro" className="cadastro-link">Cadastro</Link>
+        <div className="logo-box">
+          <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
+
       <div>
-        <hr />
         <div className="mapsSection">
-        <iframe src="https://www.google.com/maps/d/embed?mid=1uuXwji6rSiNwm92fZL105fCS4C_Z-Eg&ehbc=2E312F" width="640" height="480"></iframe>
+          <iframe src="https://www.google.com/maps/d/embed?mid=1uuXwji6rSiNwm92fZL105fCS4C_Z-Eg&ehbc=2E312F" width="640" height="480"></iframe>
           <div className="button-container">
             <button>Casos de Dengue</button>
             <button>Mapa de calor</button>
