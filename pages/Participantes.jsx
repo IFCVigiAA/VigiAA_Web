@@ -18,28 +18,28 @@ const Participantes = () => {
               <div className="nome">Angelo</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
             <li className="participantes">
               <div className="nome">Rafael Speroni</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
             <li className="participantes">
               <div className="nome">Lissandra</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
             <li className="participantes">
               <div className="nome">Joice</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
           </ul>
@@ -52,21 +52,21 @@ const Participantes = () => {
               <div className="nome">Ian</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
             <li className="participantes">
               <div className="nome">Luis</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
             <li className="participantes">
               <div className="nome">Nome</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
           </ul>
@@ -79,27 +79,27 @@ const Participantes = () => {
               <div className="nome">Rafael</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
             <li className="participantes">
               <div className="nome">Cauã</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
           </ul>
         </div>
 
         <div className="grupo">
-          <h2>BOlsistas MOOC</h2>
+          <h2>Bolsistas MOOC</h2>
           <ul>
             <li className="participantes">
               <div className="nome">Nome</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vel justo eget.</p>
+                <p>Cargo</p>
               </div>
             </li>
           </ul>

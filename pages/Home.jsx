@@ -1,42 +1,75 @@
-import { Link } from 'react-router-dom'
-import './Home.css'
-import NavBar from '../components/NavBar'
-import Footer from '../components/Footer'
+import { useState, useRef, useEffect } from 'react';
+import './Home.css';
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
 
 function Home() {
+  const iframeRef = useRef(null);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+
+  const handleLayerVisibility = (visible) => {
+    const iframe = iframeRef.current;
+
+    if (iframe && iframe.contentWindow) {
+      const interval = setInterval(() => {
+        const map = iframe.contentWindow.map;
+        const toggleFn = iframe.contentWindow.toggleLayerVisibility;
+
+        if (map && typeof toggleFn === 'function') {
+          clearInterval(interval);
+          toggleFn('json_bairros_camboriu_3', visible);
+          console.log(`Camada 'bairros_camboriu_3' visível: ${visible}`);
+        }
+      }, 100);
+    } else {
+      console.warn('Iframe não encontrado.');
+    }
+  };
+
+  const onIframeLoad = () => {
+    setIframeLoaded(true);
+    console.log('Iframe carregado e pronto para interagir.');
+  };
+
   return (
     <div className="page-container">
       <NavBar />
       <div className="home-body">
         <div className="text-box">
-          <h1 className="main-title">Plataforma Georreferenciada</h1>
+          <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
           <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
         </div>
         <div className="logo-box">
           <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
-
+      <p class="mapTitle">MAPAS</p>
       <div>
-        <div className="mapsSection">
-          <iframe src="https://www.google.com/maps/d/embed?mid=1uuXwji6rSiNwm92fZL105fCS4C_Z-Eg&ehbc=2E312F" width="640" height="480"></iframe>
-          <div className="button-container">
-            <button>Casos de Dengue</button>
-            <button>Mapa de calor</button>
-            <button>Mapa de relevo</button>
-          </div>
+        <div class="mapSection">
+          <iframe class="mapaHome"
+            ref={iframeRef}
+            src="/webmapa/index.html"
+            title="Mapa QGIS"
+            onLoad={onIframeLoad}
+          />
         </div>
-        <hr />
-        <div className="banner">
-          <a href="https://mooc.geati.camboriu.ifc.edu.br/" target="_blank" rel="noopener noreferrer">
-            <img src="bannermooc.png" alt="Banner MOOC" className="banner" title='Cursos MOOC' />
-          </a>
-        </div>
-
+        <div class="mapButtons">
+          <button
+            onClick={() => handleLayerVisibility(false)}
+            disabled={!iframeLoaded}
+          >
+            Ocultar Bairros
+          </button>
+          <button
+            onClick={() => handleLayerVisibility(true)}
+            disabled={!iframeLoaded}
+          >
+            Mostrar Bairros
+          </button></div>
         <Footer />
       </div>
     </div>
-  )
+  );
 }
 
-export default Home
+export default Home;

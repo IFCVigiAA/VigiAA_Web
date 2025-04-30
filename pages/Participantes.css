@@ -5,6 +5,7 @@
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
+  margin-top: 5vh;
 }
 
 .bodyParticipantes ul {
@@ -27,11 +28,12 @@
   border-radius: 20px;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   padding: 20px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
   gap: 20px;
+  width: 12vw;
 }
 
 .participantes .nome {
@@ -42,8 +44,6 @@
 }
 
 .conteudo-card {
-  display: flex;
-  flex-direction: row;
   gap: 20px;
   align-items: center;
   flex-wrap: wrap;
@@ -57,12 +57,11 @@
 
 .conteudo-card p {
   flex: 1;
-  text-align: left;
   font-size: 16px;
   color: #333;
 }
 
-/* Responsivo para tablets */
+
 @media (max-width: 1024px) {
   .bodyParticipantes ul {
     grid-template-columns: repeat(2, 1fr);

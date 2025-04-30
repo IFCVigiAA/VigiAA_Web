@@ -1,8 +1,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
 
 #root {
-  margin: 0 auto;
-  font-family: 'Libre Baskerville', serif;
+  margin: 0;
+  width: 100vw;
 }
 
 .page-container {
@@ -11,7 +11,9 @@
   flex-direction: column;
   overflow: visible;
 }
-
+.text-box{
+  padding: 100px 0px 0px;
+}
 .page-container img {
   max-width: 100%;
 }
@@ -26,19 +28,12 @@
 
 .home-body {
   margin: 0;
-  padding: 60px 20px;
   background: linear-gradient(to  right, #0d1b2a, #123524);
   color: #ffffff;
-  min-height: 80vh;
   display: flex;
-  align-items: center;
-  justify-content: center;
   gap: 50px;
   flex-wrap: wrap;
-}
-
-.text-box {
-  text-align: left;
+  justify-content: space-around;
 }
 
 .main-title {
@@ -47,11 +42,11 @@
 }
 
 .subtitle {
+  display: flex;
   font-size: 24px;
   font-weight: normal;
-  border-top: 2px solid #ffffff;
-  padding-top: 10px;
-  margin-top: 10px;
+  padding-top: 15px;
+  font-weight: bold;
 }
 
 .logo-box {
@@ -62,46 +57,8 @@
 }
 
 .logo-img {
-  width: 250px;
+  width: 30vw;
   height: auto;
-}
-
-.cadastro-link {
-  width: 200px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #054709;
-  color: white;
-  border-radius: 20px;
-  border: 2px solid #ffffff;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  overflow: hidden;
-  transition: all 0.3s ease;
-  text-decoration: none;
-}
-
-.cadastro-link:hover {
-  background-color: #457b9d;
-}
-
-
-.banner {
-  display: flex;
-  justify-content: center;
-  margin-top: 20px;
-  margin-bottom: 40px;
-  width: 100%;
-}
-
-.banner img {
-  max-width: 600px;
-  width: 100%;
-  height: 250px;
-  object-fit: contain;
 }
 
 hr {
@@ -111,14 +68,55 @@ hr {
   margin: 40px auto;
   background: linear-gradient(to  right, #0d1b2a, #123524);
 }
+.mapTitle{
+  font-size: 40px;
+  display: flex;
+  justify-content: center;
+  font-weight: bold;
+}
+.mapaHome {
+  display: block !important;
+  width: 50% !important;
+  height: 70vh !important;
+  border: 2px solid black !important;
+  border-radius: 8px;
+}
 
-.mapsSection {
+.mapSection {
   display: flex;
   flex-direction: column;
-  align-items: center; 
-  width: 100%; 
-  margin-top: 20px; 
-  margin-bottom: 40px; 
+  margin-top: 30px;
+}
+
+.mapButtons {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  flex: 1;
+}
+
+.mapButtons button {
+  background-color: #1f9e61;
+  color: black;
+  height: 40px;
+  border-radius: 4px;
+  border: none;
+  font-weight: bold;
+  padding: 0 20px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.mapButtons button:hover {
+  background-color: #123524;
+  color: white;
+}
+
+.mapButtons button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .page-container iframe {
@@ -128,6 +126,7 @@ hr {
   max-width: 90%;
   height: 400px;
 }
+
 
 @media (max-width: 768px) {
   .home-body {
@@ -146,7 +145,4 @@ hr {
   .text-box {
     text-align: center;
   }
-}
-.navbar{
-  position: sticky  ;
 }
