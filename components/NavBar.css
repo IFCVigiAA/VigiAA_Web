@@ -19,6 +19,9 @@
     margin-left: auto;
     margin-right: 2vw;
   }
+  .NavButtons button{
+    font-size: 16px;
+  }
   
   .NavButtons a {
     color: white;
@@ -26,6 +29,7 @@
     padding: 6px 12px;
     border-radius: 4px;
     transition: all 0.3s ease;
+    
   }
   
   .NavButtons a:hover {
@@ -51,6 +55,46 @@
   
   .NavTitle a:hover {
     color: #3c9aff;
+  }
+  .projetosBtn {
+    background: none;
+    border: none;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+  
+  .projetosBtn:hover {
+    color: #1f9e61;
+  }
+  
+  .projetosModal {
+    position: fixed;
+    top: 60px;
+    right: 40px;
+    background-color: #123524;
+    border: 1px solid #1f9e61;
+    border-radius: 6px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 9999;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  }
+  
+  .projetosModal a {
+    color: white;
+    text-decoration: none;
+    margin: 5px 0;
+    transition: color 0.3s ease;
+  }
+  
+  .projetosModal a:hover {
+    color: #1f9e61;
   }
   
   @media (max-width: 768px) {

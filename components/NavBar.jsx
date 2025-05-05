@@ -1,8 +1,14 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import './NavBar.css'
 
 const NavBar = () => {
+  const [showModal, setShowModal] = useState(false)
+
+  const toggleModal = () => {
+    setShowModal(!showModal)
+  }
+
   return (
     <div className="navbar">
       <div className="NavTitle">
@@ -17,11 +23,18 @@ const NavBar = () => {
         <NavLink to="/Participantes" className={({ isActive }) => isActive ? 'active' : ''}>
           Participantes
         </NavLink>
-        <NavLink to="/Educação" className={({ isActive }) => isActive ? 'active' : ''}>
-          Educação
-        </NavLink>
-        <NavLink to="/Sobre" className={({ isActive }) => isActive ? 'active' : ''}>
-          Sobre
+        
+        <button className="projetosBtn" onClick={toggleModal}>
+          Projetos
+        </button>
+        {showModal && (
+          <div className="projetosModal">
+            <a href="/Educação">Educação</a>
+            <a href="/Estação-meteorologica">Estacao Meteorológica</a>
+          </div>
+        )}
+        <NavLink to="/Publicações" className={({ isActive }) => isActive ? 'active' : ''}>
+          Publicações
         </NavLink>
       </div>
     </div>

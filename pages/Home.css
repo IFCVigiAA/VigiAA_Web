@@ -34,6 +34,8 @@
   gap: 50px;
   flex-wrap: wrap;
   justify-content: space-around;
+  z-index: 1;
+  position: relative;
 }
 
 .main-title {

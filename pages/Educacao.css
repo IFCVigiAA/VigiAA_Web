@@ -12,3 +12,7 @@
     height: 400px;
     object-fit: contain;
   }
+  .hometext{
+    display: flex;
+    justify-content: center;
+  }
