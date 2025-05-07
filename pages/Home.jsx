@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import './Home.css';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -6,6 +6,7 @@ import Footer from '../components/Footer';
 function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [mapSrc, setMapSrc] = useState('/webmapa/index.html');
 
   const handleLayerVisibility = (visible) => {
     const iframe = iframeRef.current;
@@ -43,31 +44,45 @@ function Home() {
           <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
-      <p class="mapTitle">MAPAS</p>
-      <div>
-        <div class="mapSection">
-          <iframe class="mapaHome"
-            ref={iframeRef}
-            src="/webmapa/index.html"
-            title="Mapa QGIS"
-            onLoad={onIframeLoad}
-          />
-        </div>
-        <div class="mapButtons">
-          <button
-            onClick={() => handleLayerVisibility(false)}
-            disabled={!iframeLoaded}
-          >
-            Ocultar Bairros
-          </button>
-          <button
-            onClick={() => handleLayerVisibility(true)}
-            disabled={!iframeLoaded}
-          >
-            Mostrar Bairros
-          </button></div>
-        <Footer />
+
+      <p className="mapTitle">MAPAS</p>
+
+      <div className="mapSection">
+        <iframe
+          className="mapaHome"
+          ref={iframeRef}
+          src={mapSrc}
+          title="Mapa QGIS"
+          onLoad={onIframeLoad}
+        />
       </div>
+
+      <div className="mapButtons">
+        <button onClick={() => handleLayerVisibility(false)} disabled={!iframeLoaded}>
+          Ocultar Bairros
+        </button>
+        <button onClick={() => handleLayerVisibility(true)} disabled={!iframeLoaded}>
+          Mostrar Bairros
+        </button>
+        <button
+          onClick={() => {
+            setIframeLoaded(false);
+            setMapSrc('/webmapa/index.html');
+          }}
+        >
+          Mapa Principal
+        </button>
+        <button
+          onClick={() => {
+            setIframeLoaded(false);
+            setMapSrc('/mapa_calor_positivos/index.html');
+          }}
+        >
+          Mapa de Calor Positivos
+        </button>
+      </div>
+
+      <Footer />
     </div>
   );
 }

@@ -81,13 +81,14 @@ hr {
   width: 50% !important;
   height: 70vh !important;
   border: 2px solid black !important;
-  border-radius: 8px;
+  border-radius: 5px;
 }
 
 .mapSection {
   display: flex;
   flex-direction: column;
   margin-top: 30px;
+
 }
 
 .mapButtons {
@@ -121,13 +122,7 @@ hr {
   cursor: not-allowed;
 }
 
-.page-container iframe {
-  display: block;
-  margin: 0 auto;
-  border: none;
-  max-width: 90%;
-  height: 400px;
-}
+
 
 
 @media (max-width: 768px) {
@@ -140,7 +135,7 @@ hr {
     height: 300px;
   }
 
-  .mapsSection button {
+  .mapSection button {
     width: 80%;
   }
 

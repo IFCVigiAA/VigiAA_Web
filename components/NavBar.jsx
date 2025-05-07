@@ -29,6 +29,7 @@ const NavBar = () => {
         </button>
         {showModal && (
           <div className="projetosModal">
+            <a href="/Sobre">VigiAA</a>
             <a href="/Educação">Educação</a>
             <a href="/Estação-meteorologica">Estacao Meteorológica</a>
           </div>

@@ -8,7 +8,7 @@ const Sobre = () =>{
     <NavBar />
     <div className="body">
       <div className="hometext">
-        <h1>Sobre</h1>
+        <h1>VigiAA</h1>
       </div>
     </div>
     

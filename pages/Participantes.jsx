@@ -15,7 +15,7 @@ const Participantes = () => {
           <h2>Coordenadores</h2>
           <ul>
             <li className="participantes">
-              <div className="nome">Angelo</div>
+              <div className="nome">Angelo Frozza</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
                 <p>Cargo</p>
@@ -29,14 +29,14 @@ const Participantes = () => {
               </div>
             </li>
             <li className="participantes">
-              <div className="nome">Lissandra</div>
+              <div className="nome">Lissandra Fischer</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
                 <p>Cargo</p>
               </div>
             </li>
             <li className="participantes">
-              <div className="nome">Joice</div>
+              <div className="nome">Joice </div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
                 <p>Cargo</p>
@@ -49,7 +49,7 @@ const Participantes = () => {
           <h2>Bolsistas VigiAA</h2>
           <ul>
             <li className="participantes">
-              <div className="nome">Ian</div>
+              <div className="nome">Ian Ferreira</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
                 <p>Cargo</p>
@@ -63,7 +63,7 @@ const Participantes = () => {
               </div>
             </li>
             <li className="participantes">
-              <div className="nome">Nome</div>
+              <div className="nome">Iago Moreira</div>
               <div className="conteudo-card">
                 <img src="usericon.png" alt="" />
                 <p>Cargo</p>
