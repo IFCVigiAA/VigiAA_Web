@@ -17,7 +17,7 @@ const Participantes = () => {
             <li className="participantes">
               <div className="nome">Angelo Frozza</div>
               <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
+                <img src="/participantes/angelo.png" alt="" />
                 <p>Cargo</p>
               </div>
             </li>

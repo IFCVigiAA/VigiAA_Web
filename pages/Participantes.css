@@ -35,6 +35,10 @@
   gap: 20px;
   width: 12vw;
 }
+.participantes img{
+  border-radius: 2px;
+  border: 2px solid black;
+}
 
 .participantes .nome {
   width: 100%;

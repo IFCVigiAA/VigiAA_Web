@@ -7,6 +7,7 @@ function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [mapSrc, setMapSrc] = useState('/webmapa/index.html');
+  const [mapTitle, setMapTitle] = useState('Mapa Principal');
 
   const handleLayerVisibility = (visible) => {
     const iframe = iframeRef.current;
@@ -44,8 +45,27 @@ function Home() {
           <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
-
-      <p className="mapTitle">MAPAS</p>
+      <p className="mapTitle">{mapTitle}</p>
+      <div className="mapButtons">
+        <button
+          onClick={() => {
+            setIframeLoaded(false);
+            setMapSrc('/webmapa/index.html');
+            setMapTitle('Mapa Principal');
+          }}
+        >
+          Mapa Principal
+        </button>
+        <button
+          onClick={() => {
+            setIframeLoaded(false);
+            setMapSrc('/mapa_calor_positivos/index.html');
+            setMapTitle('Mapa de Casos Positivos');
+          }}
+        >
+          Mapa de Calor Positivos
+        </button>
+      </div>
 
       <div className="mapSection">
         <iframe
@@ -56,29 +76,12 @@ function Home() {
           onLoad={onIframeLoad}
         />
       </div>
-
       <div className="mapButtons">
         <button onClick={() => handleLayerVisibility(false)} disabled={!iframeLoaded}>
           Ocultar Bairros
         </button>
         <button onClick={() => handleLayerVisibility(true)} disabled={!iframeLoaded}>
           Mostrar Bairros
-        </button>
-        <button
-          onClick={() => {
-            setIframeLoaded(false);
-            setMapSrc('/webmapa/index.html');
-          }}
-        >
-          Mapa Principal
-        </button>
-        <button
-          onClick={() => {
-            setIframeLoaded(false);
-            setMapSrc('/mapa_calor_positivos/index.html');
-          }}
-        >
-          Mapa de Calor Positivos
         </button>
       </div>
 

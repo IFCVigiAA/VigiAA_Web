@@ -6,7 +6,7 @@
 }
 
 .page-container {
-  min-height: 100vh;
+
   display: flex;
   flex-direction: column;
   overflow: visible;
@@ -87,17 +87,14 @@ hr {
 .mapSection {
   display: flex;
   flex-direction: column;
-  margin-top: 30px;
-
 }
 
 .mapButtons {
   display: flex;
   justify-content: center;
   gap: 30px;
-  margin-top: 30px;
   margin-bottom: 30px;
-  flex: 1;
+  
 }
 
 .mapButtons button {
@@ -110,6 +107,7 @@ hr {
   padding: 0 20px;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
+  font-size: 18px;
 }
 
 .mapButtons button:hover {
