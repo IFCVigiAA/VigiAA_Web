@@ -1,3 +1,42 @@
-.hometext{
-    margin-top: 100px;
-}
+.sobre-container {
+    padding: 40px 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', sans-serif;
+  }
+  
+  .sobre-content h1 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #1f9e61;
+    margin-top: 8vh;
+  }
+  
+  .sobre-content p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #333;
+    margin-bottom: 30px;
+  }
+  
+  .sobre-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 16px;
+    color: #1f9e61;
+  }
+  
+  .tech-list {
+    list-style: none;
+    padding-left: 0;
+  }
+  
+  .tech-list li {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 10px;
+    font-size: 1.05rem;
+    padding: 10px 12px 10px 28px;
+    border-radius: 6px;
+  }
+
+  

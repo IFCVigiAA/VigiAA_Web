@@ -37,7 +37,6 @@
 }
 .participantes img{
   border-radius: 2px;
-  border: 2px solid black;
 }
 
 .participantes .nome {
@@ -63,6 +62,9 @@
   flex: 1;
   font-size: 16px;
   color: #333;
+}
+.grupo h2{
+  font-size: 30px;
 }
 
 

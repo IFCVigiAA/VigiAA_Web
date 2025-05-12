@@ -1,5 +1,6 @@
 import NavBar from '../components/NavBar'
 import Footer from '../components/Footer'
+import ParticipanteCard from '../components/ParticipanteCard'
 import './Participantes.css'
 
 const Participantes = () => {
@@ -12,96 +13,110 @@ const Participantes = () => {
         </div>
 
         <div className="grupo">
-          <h2>Coordenadores</h2>
-          <ul>
-            <li className="participantes">
-              <div className="nome">Angelo Frozza</div>
-              <div className="conteudo-card">
-                <img src="/participantes/angelo.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
-            <li className="participantes">
-              <div className="nome">Rafael Speroni</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
-            <li className="participantes">
-              <div className="nome">Lissandra Fischer</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
-            <li className="participantes">
-              <div className="nome">Joice </div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
+          <h2>Pesquisadores</h2>
+          <ul className="lista-participantes">
+            <ParticipanteCard
+              nome="Angelo A. Frozza"
+              cargo="Coordenador"
+              foto="/participantes/angelo.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Rafael de M. Speroni"
+              cargo="Coordenador"
+              foto="/participantes/usericon.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Joice S. Mota"
+              cargo="Coordenadora"
+              foto="/participantes/joice.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Airton Zancanaro"
+              cargo="Coordenador"
+              foto="/participantes/usericon.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Cleonice Maria Beppler"
+              cargo="Coordenadora"
+              foto="/participantes/usericon.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
           </ul>
         </div>
 
         <div className="grupo">
           <h2>Bolsistas VigiAA</h2>
-          <ul>
-            <li className="participantes">
-              <div className="nome">Ian Ferreira</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
-            <li className="participantes">
-              <div className="nome">Luis</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
-            <li className="participantes">
-              <div className="nome">Iago Moreira</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
+          <ul className="lista-participantes">
+            <ParticipanteCard
+              nome="Iago Moreira"
+              cargo="Bolsista"
+              foto="/participantes/usericon.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Ian M. A. Ferreira"
+              cargo="Bolsista"
+              foto="/participantes/ian.jpg"
+              lattesUrl="http://lattes.cnpq.br/5974108989255365"
+              linkedinUrl="https://www.linkedin.com/in/ianmuradaraujoferreira/"
+            />
+            <ParticipanteCard
+              nome="Luis H. de M. Santiago"
+              cargo="Bolsista"
+              foto="/participantes/usericon.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Lissandra M. Fischer"
+              cargo="Bolsista"
+              foto="/participantes/lissandra.jpg"
+              lattesUrl=""
+              linkedinUrl=""
+            />
           </ul>
         </div>
 
         <div className="grupo">
           <h2>Bolsistas Estação Meteorológica</h2>
-          <ul>
-            <li className="participantes">
-              <div className="nome">Rafael</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
-            <li className="participantes">
-              <div className="nome">Cauã</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
+          <ul className="lista-participantes">
+            <ParticipanteCard
+              nome="Rafael Luiz Pereira"
+              cargo="Bolsista"
+              foto="/participantes/usericon.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Cauã da C. Silva"
+              cargo="Bolsista"
+              foto="/participantes/usericon.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
           </ul>
         </div>
 
         <div className="grupo">
           <h2>Bolsistas MOOC</h2>
-          <ul>
-            <li className="participantes">
-              <div className="nome">Nome</div>
-              <div className="conteudo-card">
-                <img src="usericon.png" alt="" />
-                <p>Cargo</p>
-              </div>
-            </li>
+          <ul className="lista-participantes">
+            <ParticipanteCard
+              nome="Tauana Flores"
+              cargo="Bolsista"
+              foto="/participantes/tauana.png"
+              lattesUrl=""
+              linkedinUrl=""
+            />
           </ul>
         </div>
       </div>
