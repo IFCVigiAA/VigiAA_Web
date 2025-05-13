@@ -59,8 +59,8 @@ const Participantes = () => {
             <ParticipanteCard
               nome="Iago Moreira"
               cargo="Bolsista"
-              foto="/participantes/usericon.png"
-              lattesUrl=""
+              foto="/participantes/iago.png"
+              lattesUrl="http://lattes.cnpq.br/8597751704625279"
               linkedinUrl=""
             />
             <ParticipanteCard
