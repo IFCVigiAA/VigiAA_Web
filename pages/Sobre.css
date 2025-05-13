@@ -17,7 +17,7 @@
   }
   
   .sobre-header h1 span {
-    color: #1f9e61;
+    color: #00a053;
   }
   
   .sobre-header p {
@@ -32,7 +32,7 @@
   .sobre-section h2 {
     font-size: 1.6rem;
     margin-bottom: 15px;
-    color: #1f9e61;
+    color: #00a053;
     display: flex;
     align-items: center;
     gap: 8px;

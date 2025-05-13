@@ -19,35 +19,35 @@ const Participantes = () => {
               nome="Angelo A. Frozza"
               cargo="Coordenador"
               foto="/participantes/angelo.png"
-              lattesUrl=""
+              lattesUrl="http://lattes.cnpq.br/5878372087019892"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Rafael de M. Speroni"
               cargo="Coordenador"
-              foto="/participantes/usericon.png"
-              lattesUrl=""
+              foto="/participantes/speroni.png"
+              lattesUrl="http://lattes.cnpq.br/3483462003007835"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Joice S. Mota"
               cargo="Coordenadora"
               foto="/participantes/joice.png"
-              lattesUrl=""
+              lattesUrl="http://lattes.cnpq.br/7777714279933344"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Airton Zancanaro"
               cargo="Coordenador"
-              foto="/participantes/usericon.png"
-              lattesUrl=""
+              foto="/participantes/airton.png"
+              lattesUrl="http://lattes.cnpq.br/8797858687750467"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Cleonice Maria Beppler"
               cargo="Coordenadora"
-              foto="/participantes/usericon.png"
-              lattesUrl=""
+              foto="/participantes/cleonice.png"
+              lattesUrl="http://lattes.cnpq.br/9868609834605055"
               linkedinUrl=""
             />
           </ul>
@@ -73,15 +73,15 @@ const Participantes = () => {
             <ParticipanteCard
               nome="Luis H. de M. Santiago"
               cargo="Bolsista"
-              foto="/participantes/usericon.png"
-              lattesUrl=""
+              foto="/participantes/luis.png"
+              lattesUrl="http://lattes.cnpq.br/4395447968887299"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Lissandra M. Fischer"
               cargo="Bolsista"
               foto="/participantes/lissandra.jpg"
-              lattesUrl=""
+              lattesUrl="http://lattes.cnpq.br/3849463744234834"
               linkedinUrl=""
             />
           </ul>
@@ -93,15 +93,15 @@ const Participantes = () => {
             <ParticipanteCard
               nome="Rafael Luiz Pereira"
               cargo="Bolsista"
-              foto="/participantes/usericon.png"
-              lattesUrl=""
+              foto="/participantes/rafaelluis.png"
+              lattesUrl="http://lattes.cnpq.br/6550069771613064"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Cauã da C. Silva"
               cargo="Bolsista"
-              foto="/participantes/usericon.png"
-              lattesUrl=""
+              foto="/participantes/caua.png"
+              lattesUrl="http://lattes.cnpq.br/6896619338301324"
               linkedinUrl=""
             />
           </ul>
@@ -114,7 +114,7 @@ const Participantes = () => {
               nome="Tauana Flores"
               cargo="Bolsista"
               foto="/participantes/tauana.png"
-              lattesUrl=""
+              lattesUrl="http://lattes.cnpq.br/6660505753553493"
               linkedinUrl=""
             />
           </ul>
