@@ -8,10 +8,6 @@ const Participantes = () => {
     <div className="page-container">
       <NavBar />
       <div className="bodyParticipantes">
-        <div className="hometext">
-          <h1 className="italico">Participantes</h1>
-        </div>
-
         <div className="grupo">
           <h2>Pesquisadores</h2>
           <ul className="lista-participantes">
@@ -20,35 +16,35 @@ const Participantes = () => {
               cargo="Coordenador"
               foto="/participantes/angelo.png"
               lattesUrl="http://lattes.cnpq.br/5878372087019892"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/angelo-frozza/"
             />
             <ParticipanteCard
               nome="Rafael de M. Speroni"
               cargo="Coordenador"
               foto="/participantes/speroni.png"
               lattesUrl="http://lattes.cnpq.br/3483462003007835"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/rafaelsperoni/"
             />
             <ParticipanteCard
               nome="Joice S. Mota"
               cargo="Coordenadora"
               foto="/participantes/joice.png"
               lattesUrl="http://lattes.cnpq.br/7777714279933344"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/joices/"
             />
             <ParticipanteCard
               nome="Airton Zancanaro"
               cargo="Coordenador"
               foto="/participantes/airton.png"
               lattesUrl="http://lattes.cnpq.br/8797858687750467"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/airton-zancanaro-294297165/"
             />
             <ParticipanteCard
               nome="Cleonice Maria Beppler"
               cargo="Coordenadora"
               foto="/participantes/cleonice.png"
               lattesUrl="http://lattes.cnpq.br/9868609834605055"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/cleonice-beppler-5120b814/"
             />
           </ul>
         </div>
@@ -75,14 +71,14 @@ const Participantes = () => {
               cargo="Bolsista"
               foto="/participantes/luis.png"
               lattesUrl="http://lattes.cnpq.br/4395447968887299"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/luis-henrique-de-melo-santiago-02064a96/"
             />
             <ParticipanteCard
               nome="Lissandra M. Fischer"
               cargo="Bolsista"
               foto="/participantes/lissandra.jpg"
               lattesUrl="http://lattes.cnpq.br/3849463744234834"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/lissandramaiarafischer/"
             />
           </ul>
         </div>

@@ -35,7 +35,8 @@
   gap: 20px;
   width: 12vw;
 }
-.participantes img{
+
+.participantes img {
   border-radius: 2px;
 }
 
@@ -63,7 +64,8 @@
   font-size: 16px;
   color: #333;
 }
-.grupo h2{
+
+.grupo h2 {
   font-size: 30px;
 }
 

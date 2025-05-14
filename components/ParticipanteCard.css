@@ -1,33 +1,32 @@
 .card-participante {
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    padding: 20px;
-    text-align: center;
-    width: 220px;
-    background-color: #f9f9f9;
-  }
-  
-  .foto-participante {
-    width: 150px;
-    height: 200px;
-   border-radius: 2px;
-    object-fit: cover;
-    margin-bottom: 15px;
-  }
-  
-  .botoes-links {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-  }
-  
-  .btn-link {
-    color: #0d1b2a;
-    transition: color 0.3s;
-  }
-  
-  .btn-link:hover {
-    color: #1f9e61;
-  }
-  
+  border: 1px solid #ccc;
+  border-radius: 2px;
+  padding: 20px;
+  text-align: center;
+  width: 220px;
+  background-color: #f9f9f9;
+}
+
+.foto-participante {
+  width: 150px;
+  height: 200px;
+  border-radius: 2px;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.botoes-links {
+  margin-top: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-link {
+  color: #0d1b2a;
+  transition: color 0.3s;
+}
+
+.btn-link:hover {
+  color: #1f9e61;
+}

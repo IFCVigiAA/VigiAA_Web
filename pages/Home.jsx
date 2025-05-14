@@ -45,6 +45,7 @@ function Home() {
           <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
+
       <p className="mapTitle">{mapTitle}</p>
       <div className="mapButtons">
         <button
@@ -68,6 +69,7 @@ function Home() {
       </div>
 
       <div className="mapSection">
+        {/* Mapa local */}
         <iframe
           className="mapaHome"
           ref={iframeRef}
@@ -75,15 +77,28 @@ function Home() {
           title="Mapa QGIS"
           onLoad={onIframeLoad}
         />
+        <div className="mapButtons">
+          <button onClick={() => handleLayerVisibility(false)} disabled={!iframeLoaded}>
+            Ocultar Bairros
+          </button>
+          <button onClick={() => handleLayerVisibility(true)} disabled={!iframeLoaded}>
+            Mostrar Bairros
+          </button>
+        </div>
+        {/* Mapa do QGIS Cloud */}
+        <iframe
+          className="mapaHome"
+          src="https://qgiscloud.com/vigiaa/mapa_dens_demo_camboriu_precipitacao/?l=Recortado%2CPrecipitation_ANA_v1_0!%2Cpositivos_atual_coord_planas%2Chighway_camboriu!%2Cpositivos_atual_mapa_calor1%2Cpositivos_atual_mapa_calor!%2Cpositivos_novo_com_coordenadas%20%E2%80%94%20output_com_coordenadas!%2Cbairros_dens_demo%2Cbairros_camboriu%2CCamboriu%2COSM%20Standard!&t=mapa_dens_demo_camboriu_precipitacao&e=-48.85058%2C-27.10311%2C-48.48509%2C-26.93864"
+          title="Mapa Precipitação e Casos"
+          width="100%"
+          height="600"
+          style={{ border: 'none', marginTop: '40px' }}
+          allowFullScreen
+          loading="lazy"
+        />
       </div>
-      <div className="mapButtons">
-        <button onClick={() => handleLayerVisibility(false)} disabled={!iframeLoaded}>
-          Ocultar Bairros
-        </button>
-        <button onClick={() => handleLayerVisibility(true)} disabled={!iframeLoaded}>
-          Mostrar Bairros
-        </button>
-      </div>
+
+
 
       <Footer />
     </div>
