@@ -24,7 +24,7 @@ const Educação = () => {
               rel="noopener noreferrer"
             >
               <img
-                src="bannermooc.png"
+                src="/logos/bannermooc.png"
                 alt="Banner MOOC"
                 className="banner"
                 title="Cursos MOOC"

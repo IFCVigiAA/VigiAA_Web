@@ -42,7 +42,7 @@ function Home() {
           <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
         </div>
         <div className="logo-box">
-          <img src="logo2.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
+          <img src="/logos/logo_home.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
 

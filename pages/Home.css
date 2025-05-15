@@ -11,12 +11,7 @@
   flex-direction: column;
   overflow: visible;
 }
-.text-box{
-  padding: 100px 0px 0px;
-  display: flex;
-  flex-direction: column;
-  margin-top: 5vh;
-}
+
 .page-container img {
   max-width: 100%;
 }
@@ -31,7 +26,7 @@
 
 .home-body {
   margin: 0;
-  background: linear-gradient(to  right, #0d1b2a, #123524);
+  background: linear-gradient(to  right, #142941, #123524);
   color: #ffffff;
   display: flex;
   gap: 50px;
@@ -53,7 +48,13 @@
   padding-top: 15px;
   font-weight: bold;
 }
-
+.text-box{
+  padding: 100px 0px 0px;
+  display: flex;
+  flex-direction: column;
+  margin-top: 5vh;
+  margin-left: 8vw;
+}
 .logo-box {
   display: flex;
   flex-direction: column;
@@ -62,8 +63,10 @@
 }
 
 .logo-img {
-  width: 30vw;
+  width: 55vw;
   height: auto;
+  margin-top: 2vh;
+  margin-left: 5.5vw;
 }
 
 hr {

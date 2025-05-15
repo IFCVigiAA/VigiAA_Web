@@ -13,7 +13,7 @@ const Participantes = () => {
           <ul className="lista-participantes">
             <ParticipanteCard
               nome="Angelo A. Frozza"
-              cargo="Coordenador"
+              cargo="Coordenador Geral"
               foto="/participantes/angelo.png"
               lattesUrl="http://lattes.cnpq.br/5878372087019892"
               linkedinUrl="https://www.linkedin.com/in/angelo-frozza/"
