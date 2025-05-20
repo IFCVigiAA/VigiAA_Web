@@ -1,1 +1,651 @@
-var json_positivos_novo_com_coordenadasoutput_com_coordenadas_8 = {"type":"FeatureCollection","name":"positivos_novo_com_coordenadasoutput_com_coordenadas_8","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"CORAÇÃO","INÍCIO SINTOMAS":45741.0,"NOTIFICAÇÃO":45741.0,"SINAN":8009707.0,"NOME":"VINICIUS POMPEU DA SILVA","ENDEREÇO":"RUA RIO SOLIMÕES, 107, CENTRO, CAMBORIÚ","BAIRRO":"CENTRO","QUADRA":null,"NOME DA MÃE":"ELISABETE APARECIDA BISCAIA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"POSITIVO","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6451893,-27.0324421]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"ITAPEMA","INÍCIO SINTOMAS":45737.0,"NOTIFICAÇÃO":45737.0,"SINAN":8250528.0,"NOME":"TAINA TAIS LEITE DOS SANTOS","ENDEREÇO":"RUA ALCINO SIMAS FILHO, 73 CENTRO, CAMBORIU","BAIRRO":"CENTRO","QUADRA":null,"NOME DA MÃE":"FERNANDA CRISTINA ANTUNES LEITE","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":"DRIVE","RESULTADO":"POSITIVO","APLICAÇÃO":null,"AGENTE(S)":"NÃO LOCALIZADA","1ª VISITA":"mudou/ tel incorreto","SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6448113,-27.0292638]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"ITAPEMA","INÍCIO SINTOMAS":45724.0,"NOTIFICAÇÃO":45724.0,"SINAN":7751066.0,"NOME":"MARCELO HENRIQUE CAETANO","ENDEREÇO":"RUA TULIPA, 68, TABULEIRO CAMBORIU","BAIRRO":"TABULEIRO","QUADRA":null,"NOME DA MÃE":"EDILMA CAMILA DE OLIVEIRA CAETANO","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":"DRIVE","RESULTADO":"NS1 POSITIVO","APLICAÇÃO":null,"AGENTE(S)":"MAYON","1ª VISITA":"MAYON","SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.65994,-27.0056221]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"ITAJAÍ","INÍCIO SINTOMAS":45693.0,"NOTIFICAÇÃO":45698.0,"SINAN":8800174.0,"NOME":"MUNIQUE SIMOES DE OLIVEIRA","ENDEREÇO":"RUA BELO HORIZONTE, 145, AREIAS, CAMBORIÚ","BAIRRO":"AREIAS","QUADRA":11.0,"NOME DA MÃE":null,"DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"REAGENTE","APLICAÇÃO":null,"AGENTE(S)":null,"1ª VISITA":"45706","SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6632619,-27.0300525]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA BARRA","INÍCIO SINTOMAS":45749.0,"NOTIFICAÇÃO":45750.0,"SINAN":8463197.0,"NOME":"SUZANA RODRIGUES","ENDEREÇO":"RUA MONTE EVEREST, 149, MONTE ALEGRE, CAMBORIÚ","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"JURACI DE JESUS GENTARA WENG","DATA DE NASCIMENTO":30130.0,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"MARI","1ª VISITA":null,"SITUAÇÃO":"INTERNADA"},"geometry":{"type":"Point","coordinates":[-48.6578819,-26.997254]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"RUTH CARDOSO","INÍCIO SINTOMAS":45746.0,"NOTIFICAÇÃO":45750.0,"SINAN":8462320.0,"NOME":"LETICIA DA SILVA","ENDEREÇO":"RUA MONTE FRADE MACAÉ, 172, MONTE ALEGRE, CAMBORIÚ","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"FABIANA DA SILVA","DATA DE NASCIMENTO":38553.0,"OBSERVAÇÕES":null,"RESULTADO":"DENV2 DETECTÁVEL","APLICAÇÃO":null,"AGENTE(S)":"DENY","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6584486,-26.9973204]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UNIMED LITORAL","INÍCIO SINTOMAS":45744.0,"NOTIFICAÇÃO":null,"SINAN":8462167.0,"NOME":"MAURICIO PINHEIRO DA SILVA","ENDEREÇO":"RUA OSVALDO MINELLA, 2029, CEDRO, CAMBORIÚ","BAIRRO":null,"QUADRA":null,"NOME DA MÃE":"ESTER MARA PINHEIRO","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":null,"1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6481458,-27.0392551]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UNIMED LITORAL","INÍCIO SINTOMAS":45743.0,"NOTIFICAÇÃO":null,"SINAN":8462163.0,"NOME":"BRUNA DOS SANTOS CORREA","ENDEREÇO":"RUA LUXEMBURGO, 458, SANTA REGINA, CAMBORIÚ","BAIRRO":"SANTA REGINA","QUADRA":null,"NOME DA MÃE":"SONIA APARECIDA DOS SANTOS CORREA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6702345,-27.0331168]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":null,"INÍCIO SINTOMAS":45747.0,"NOTIFICAÇÃO":null,"SINAN":8462186.0,"NOME":"RAFAEL PINHEIRO DA SILVA","ENDEREÇO":"RUA OSVALDO MINELLA, 2029, CEDRO, CAMBORIÚ","BAIRRO":"CEDRO","QUADRA":null,"NOME DA MÃE":"SIMON DE SOUZA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":null,"1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6481458,-27.0392551]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":null,"INÍCIO SINTOMAS":45747.0,"NOTIFICAÇÃO":45747.0,"SINAN":8462178.0,"NOME":"JOSÉ ANILTO DE OLIVEIRA MOTA","ENDEREÇO":"RUA MONTE FRADE MACAÉ, 172, MONTE ALEGRE, CAMBORIÚ","BAIRRO":"TABULEIRO","QUADRA":null,"NOME DA MÃE":"EDESIA VALTER MOTA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":null,"1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6584486,-26.9973204]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UNIDADE SAÚDE TABULEIRO","INÍCIO SINTOMAS":45749.0,"NOTIFICAÇÃO":45750.0,"SINAN":9030780.0,"NOME":"LUAN CARLOS FIUZA DA SILVA JURIATTI","ENDEREÇO":"RUA CENTENÁRIO, 739, TABULEIRO, CAMBORIÚ","BAIRRO":"TABULEIRO","QUADRA":null,"NOME DA MÃE":"TEREZINHA FIUZA DA SILVA","DATA DE NASCIMENTO":36172.0,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6528651,-27.0131577]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"RUTH CARDOSO","INÍCIO SINTOMAS":45748.0,"NOTIFICAÇÃO":45749.0,"SINAN":8462316.0,"NOME":"ANDREA UMBELINO","ENDEREÇO":"RUA MONTE LIBERTADOR, 316, MONTE ALEGRE, CAMBORIÚ","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"MARINA DE SOUZA UMBELINO","DATA DE NASCIMENTO":28918.0,"OBSERVAÇÕES":null,"RESULTADO":"DENV2 DETECTÁVEL","APLICAÇÃO":null,"AGENTE(S)":"MARI","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6593131,-26.9978476]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA BARRA","INÍCIO SINTOMAS":45747.0,"NOTIFICAÇÃO":45752.0,"SINAN":8463246.0,"NOME":"ISABELI CRISTINI QUIRINO WASCH","ENDEREÇO":"RUA MONTE NEBLINA, 187, MONTE ALEGRE, CAMBORIÚ","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"MARIA DALILLA QUIRINO RODRIGUES LOPES WASCH","DATA DE NASCIMENTO":40543.0,"OBSERVAÇÕES":null,"RESULTADO":"IGM POSITIVO","APLICAÇÃO":null,"AGENTE(S)":"JOAO PEDRO","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6616948,-26.9961809]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"RUTH CARDOSO","INÍCIO SINTOMAS":45749.0,"NOTIFICAÇÃO":45749.0,"SINAN":8463244.0,"NOME":"AMANDA PRISCILA BORBA DE LIMA","ENDEREÇO":"RUA MONTE NEBLINA, 187, MONTE ALEGRE, CAMBORIÚ","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"FABIANA MARIA DE BORBA KRUGUER","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"PCR DETECTÁVEL","APLICAÇÃO":null,"AGENTE(S)":"JOAO PEDRO","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6616948,-26.9961809]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA BARRA","INÍCIO SINTOMAS":45750.0,"NOTIFICAÇÃO":45753.0,"SINAN":8463253.0,"NOME":"FLADSON RIBEIRO DA SILVA","ENDEREÇO":"RUA MONTE NEBLINA, 205, MONTE ALEGRE, CAMBORIÚ","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"DANIELA SOUZA DA SILVA","DATA DE NASCIMENTO":39994.0,"OBSERVAÇÕES":null,"RESULTADO":"ZDC DETECTÁVEL","APLICAÇÃO":null,"AGENTE(S)":"JOAO PEDRO","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6597638,-26.9990017]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA NAÇÕES","INÍCIO SINTOMAS":45750.0,"NOTIFICAÇÃO":null,"SINAN":8933793.0,"NOME":"MARISANGE LA LOCH","ENDEREÇO":"RUA SILVEIRA, 77, TABULEIRO, CAMBORIÚ","BAIRRO":"TABULEIRO","QUADRA":null,"NOME DA MÃE":"ROMILDA LOCH","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"DENY","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6572665,-27.0016806]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UNIMED","INÍCIO SINTOMAS":45751.0,"NOTIFICAÇÃO":null,"SINAN":8462431.0,"NOME":"PAULO HENRIQUE DOS SANTOS","ENDEREÇO":"RUA MONTE NEBLINA, 187, MONTE ALEGRE CAMBORIU","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"ELIANE APARECIDA DOS SANTOS","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"JOAO PEDRO","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6616948,-26.9961809]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA ITAPEMA","INÍCIO SINTOMAS":45751.0,"NOTIFICAÇÃO":null,"SINAN":9085425.0,"NOME":"JESSICA BERTOLDI COELHO","ENDEREÇO":"RUA SANTA RITA, 12, SÃO FRANCISCO, CAMBORIÚ","BAIRRO":"SÃO FRANCISCO","QUADRA":null,"NOME DA MÃE":"MARISTELA BERTOLDI","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":null,"1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6299362,-27.0203231]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA NAÇÕES","INÍCIO SINTOMAS":45751.0,"NOTIFICAÇÃO":45754.0,"SINAN":8463278.0,"NOME":"LAUREN OLIVEIRA DE ALMEIDA","ENDEREÇO":"RUA DANIEL SILVÉRIO, 177, CEDRO, CAMBORIÚ","BAIRRO":"CEDRO","QUADRA":null,"NOME DA MÃE":"LIAMARA XAVIER DE OLIVEIRA DE ALMEIDA","DATA DE NASCIMENTO":38497.0,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":null,"1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6503353,-27.039909]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"BARRA","INÍCIO SINTOMAS":45752.0,"NOTIFICAÇÃO":null,"SINAN":8463197.0,"NOME":"ÍTALO ALEXANDRE LOPES DE MEIRA","ENDEREÇO":"RUA MONTE PEDRA DO SINO, 199 MONTE ALEGRE , CAMBORIÚ","BAIRRO":"MONTE ALEGRE","QUADRA":null,"NOME DA MÃE":"LUZINETE LOPES DA SILVA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"MAYON","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6617426,-26.9997276]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"RUTH CARDOSO","INÍCIO SINTOMAS":45753.0,"NOTIFICAÇÃO":null,"SINAN":8462340.0,"NOME":"SOELI DE OLIVEIRA","ENDEREÇO":"RUA PETÚNIA, 154, CONDE VILA VERDE, CAMBORIÚ","BAIRRO":"CONDE VILA VERDE","QUADRA":null,"NOME DA MÃE":"MARIA SEBASTIANA DE OLIVEIRA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.671395,-27.0031416]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA NACOES","INÍCIO SINTOMAS":null,"NOTIFICAÇÃO":45750.0,"SINAN":8933799.0,"NOME":"ANDRESSA APARECIDA LAURIANO DA SILVA","ENDEREÇO":"RUA SILVEIRA - 500 -","BAIRRO":"TABULEIRO","QUADRA":null,"NOME DA MÃE":"JOSEANE APARECIDA LAURIANO SANTOS DA SILVA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"JOAO PEDRO","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-49.2571548,-25.5085516]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA BARRA","INÍCIO SINTOMAS":45754.0,"NOTIFICAÇÃO":45756.0,"SINAN":8463357.0,"NOME":"GRACIELA CARDOSO BESSESTIL","ENDEREÇO":"RUA SÃO GABRIEL, 722, SÃO FRANCISCO DE ASSIS, CAMBORIÚ","BAIRRO":"SÃO FRANCISCO","QUADRA":null,"NOME DA MÃE":"CATIA REGINA CARDOSO BESSESTIL","DATA DE NASCIMENTO":30366.0,"OBSERVAÇÕES":null,"RESULTADO":"ZDC DETECTÁVEL","APLICAÇÃO":null,"AGENTE(S)":"JOAO PEDRO","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.638016,-27.0247301]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"BARRA","INÍCIO SINTOMAS":45754.0,"NOTIFICAÇÃO":45756.0,"SINAN":8934013.0,"NOME":"VANDERLEI DE SOUZA","ENDEREÇO":"RUA BELEM, 182 AREIAS, CAMBORIU","BAIRRO":"AREIAS","QUADRA":null,"NOME DA MÃE":"MARIA SALETE COELHO DE SOUZA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"ZDC DETECTÁVEL","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6580256,-27.0286244]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA ITAPEMA","INÍCIO SINTOMAS":45755.0,"NOTIFICAÇÃO":null,"SINAN":9084857.0,"NOME":"GABRIEL ANTONIO PEREIRA","ENDEREÇO":"RUA SASSAFRÁS, 810, TABULEIRO, CAMBORIÚ","BAIRRO":"TABULEIRO","QUADRA":null,"NOME DA MÃE":"SONIA RODRIGUES PEREIRA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"JOAO PEDRO","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6564835,-27.0021488]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UNIMED","INÍCIO SINTOMAS":45755.0,"NOTIFICAÇÃO":45755.0,"SINAN":8462449.0,"NOME":"ROSALINA ONOFRE CONCEIÇÃO","ENDEREÇO":"RUA HEITOR SANTOS, 42 , CENTRO CAMBORIÚ","BAIRRO":"CENTRO","QUADRA":null,"NOME DA MÃE":"BRANDINA RODRIGUES DA SILVA","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.648095,-27.0191269]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UNIMED","INÍCIO SINTOMAS":45755.0,"NOTIFICAÇÃO":45755.0,"SINAN":8462450.0,"NOME":"VALDIR FOSS PAULICHEN","ENDEREÇO":"RUA JOAO MORAIS, 125, CENTRO, CAMBORIÚ","BAIRRO":"CENTRO","QUADRA":null,"NOME DA MÃE":"ADELINA FOSS PAULICHEN","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"NS1 REAGENTE","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6469825,-27.0208495]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UPA BARRA","INÍCIO SINTOMAS":45755.0,"NOTIFICAÇÃO":45756.0,"SINAN":8934016.0,"NOME":"ROBSON MURILO ALMEIDA DA SILVA","ENDEREÇO":"RUA JOSÉ FRANCISCO BERNARDES, 1040, AREIAS CAMBORIÚ","BAIRRO":"AREIAS","QUADRA":null,"NOME DA MÃE":"MARIA ALMEIDA DA SILVA","DATA DE NASCIMENTO":36322.0,"OBSERVAÇÕES":null,"RESULTADO":"PCR DETECTÁVEL","APLICAÇÃO":null,"AGENTE(S)":"LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6571299,-27.0319102]}},{"type":"Feature","properties":{"LOCAL ATENDIMENTO":"UNIDADE SAÚDE TABULEIRO","INÍCIO SINTOMAS":45749.0,"NOTIFICAÇÃO":45751.0,"SINAN":9030781.0,"NOME":"VICENTE RIBAS","ENDEREÇO":"RUA MARMELEIRO, 885, TABULEIRO, CAMBORIÚ","BAIRRO":"TABULEIRO","QUADRA":null,"NOME DA MÃE":"DEJANIRA RIBAS","DATA DE NASCIMENTO":null,"OBSERVAÇÕES":null,"RESULTADO":"POSITIVO","APLICAÇÃO":null,"AGENTE(S)":"DENY - LUCIANE","1ª VISITA":null,"SITUAÇÃO":null},"geometry":{"type":"Point","coordinates":[-48.6561018,-27.0042308]}}]}
+
+var json_positivos_novo_com_coordenadasoutput_com_coordenadas_8 ={
+    "type": "FeatureCollection",
+    "name": "positivos_novo_com_coordenadasoutput_com_coordenadas_8",
+    "crs": {
+      "type": "name",
+      "properties": {
+        "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+      }
+    },
+    "features": [
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "CORAÇÃO",
+          "INÍCIO SINTOMAS": 45741.0,
+          "NOTIFICAÇÃO": 45741.0,
+          "SINAN": 8009707.0,
+          "BAIRRO": "CENTRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "POSITIVO",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6451893, -27.0324421]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "ITAPEMA",
+          "INÍCIO SINTOMAS": 45737.0,
+          "NOTIFICAÇÃO": 45737.0,
+          "SINAN": 8250528.0,
+          "BAIRRO": "CENTRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": "DRIVE",
+          "RESULTADO": "POSITIVO",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "NÃO LOCALIZADA",
+          "1ª VISITA": "mudou/ tel incorreto",
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6448113, -27.0292638]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "ITAPEMA",
+          "INÍCIO SINTOMAS": 45724.0,
+          "NOTIFICAÇÃO": 45724.0,
+          "SINAN": 7751066.0,
+          "BAIRRO": "TABULEIRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": "DRIVE",
+          "RESULTADO": "NS1 POSITIVO",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "MAYON",
+          "1ª VISITA": "MAYON",
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.65994, -27.0056221]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "ITAJAÍ",
+          "INÍCIO SINTOMAS": 45693.0,
+          "NOTIFICAÇÃO": 45698.0,
+          "SINAN": 8800174.0,
+          "BAIRRO": "AREIAS",
+          "QUADRA": 11.0,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": null,
+          "1ª VISITA": "45706",
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6632619, -27.0300525]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA BARRA",
+          "INÍCIO SINTOMAS": 45749.0,
+          "NOTIFICAÇÃO": 45750.0,
+          "SINAN": 8463197.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 30130.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "MARI",
+          "1ª VISITA": null,
+          "SITUAÇÃO": "INTERNADA"
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6578819, -26.997254]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "RUTH CARDOSO",
+          "INÍCIO SINTOMAS": 45746.0,
+          "NOTIFICAÇÃO": 45750.0,
+          "SINAN": 8462320.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 38553.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "DENV2 DETECTÁVEL",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "DENY",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6584486, -26.9973204]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UNIMED LITORAL",
+          "INÍCIO SINTOMAS": 45744.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 8462167.0,
+          "BAIRRO": null,
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": null,
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6481458, -27.0392551]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UNIMED LITORAL",
+          "INÍCIO SINTOMAS": 45743.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 8462163.0,
+          "BAIRRO": "SANTA REGINA",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6702345, -27.0331168]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": null,
+          "INÍCIO SINTOMAS": 45747.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 8462186.0,
+          "BAIRRO": "CEDRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": null,
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6481458, -27.0392551]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": null,
+          "INÍCIO SINTOMAS": 45747.0,
+          "NOTIFICAÇÃO": 45747.0,
+          "SINAN": 8462178.0,
+          "BAIRRO": "TABULEIRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": null,
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6584486, -26.9973204]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UNIDADE SAÚDE TABULEIRO",
+          "INÍCIO SINTOMAS": 45749.0,
+          "NOTIFICAÇÃO": 45750.0,
+          "SINAN": 9030780.0,
+          "BAIRRO": "TABULEIRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 36172.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6528651, -27.0131577]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "RUTH CARDOSO",
+          "INÍCIO SINTOMAS": 45748.0,
+          "NOTIFICAÇÃO": 45749.0,
+          "SINAN": 8462316.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 28918.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "DENV2 DETECTÁVEL",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "MARI",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6593131, -26.9978476]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA BARRA",
+          "INÍCIO SINTOMAS": 45747.0,
+          "NOTIFICAÇÃO": 45752.0,
+          "SINAN": 8463246.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 40543.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "IGM POSITIVO",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "JOAO PEDRO",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6616948, -26.9961809]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "RUTH CARDOSO",
+          "INÍCIO SINTOMAS": 45749.0,
+          "NOTIFICAÇÃO": 45749.0,
+          "SINAN": 8463244.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "PCR DETECTÁVEL",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "JOAO PEDRO",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6616948, -26.9961809]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA BARRA",
+          "INÍCIO SINTOMAS": 45750.0,
+          "NOTIFICAÇÃO": 45753.0,
+          "SINAN": 8463253.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 39994.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "ZDC DETECTÁVEL",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "JOAO PEDRO",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6597638, -26.9990017]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA NAÇÕES",
+          "INÍCIO SINTOMAS": 45750.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 8933793.0,
+          "BAIRRO": "TABULEIRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "DENY",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6572665, -27.0016806]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UNIMED",
+          "INÍCIO SINTOMAS": 45751.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 8462431.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "JOAO PEDRO",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6616948, -26.9961809]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA ITAPEMA",
+          "INÍCIO SINTOMAS": 45751.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 9085425.0,
+          "BAIRRO": "SÃO FRANCISCO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": null,
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6299362, -27.0203231]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA NAÇÕES",
+          "INÍCIO SINTOMAS": 45751.0,
+          "NOTIFICAÇÃO": 45754.0,
+          "SINAN": 8463278.0,
+          "BAIRRO": "CEDRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 38497.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": null,
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6503353, -27.039909]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "BARRA",
+          "INÍCIO SINTOMAS": 45752.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 8463197.0,
+          "BAIRRO": "MONTE ALEGRE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "MAYON",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6617426, -26.9997276]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "RUTH CARDOSO",
+          "INÍCIO SINTOMAS": 45753.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 8462340.0,
+          "BAIRRO": "CONDE VILA VERDE",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.671395, -27.0031416]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA NACOES",
+          "INÍCIO SINTOMAS": null,
+          "NOTIFICAÇÃO": 45750.0,
+          "SINAN": 8933799.0,
+          "BAIRRO": "TABULEIRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "JOAO PEDRO",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-49.2571548, -25.5085516]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA BARRA",
+          "INÍCIO SINTOMAS": 45754.0,
+          "NOTIFICAÇÃO": 45756.0,
+          "SINAN": 8463357.0,
+          "BAIRRO": "SÃO FRANCISCO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 30366.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "ZDC DETECTÁVEL",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "JOAO PEDRO",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.638016, -27.0247301]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "BARRA",
+          "INÍCIO SINTOMAS": 45754.0,
+          "NOTIFICAÇÃO": 45756.0,
+          "SINAN": 8934013.0,
+          "BAIRRO": "AREIAS",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "ZDC DETECTÁVEL",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6580256, -27.0286244]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA ITAPEMA",
+          "INÍCIO SINTOMAS": 45755.0,
+          "NOTIFICAÇÃO": null,
+          "SINAN": 9084857.0,
+          "BAIRRO": "TABULEIRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "JOAO PEDRO",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6564835, -27.0021488]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UNIMED",
+          "INÍCIO SINTOMAS": 45755.0,
+          "NOTIFICAÇÃO": 45755.0,
+          "SINAN": 8462449.0,
+          "BAIRRO": "CENTRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.648095, -27.0191269]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UNIMED",
+          "INÍCIO SINTOMAS": 45755.0,
+          "NOTIFICAÇÃO": 45755.0,
+          "SINAN": 8462450.0,
+          "BAIRRO": "CENTRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "NS1 REAGENTE",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6469825, -27.0208495]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UPA BARRA",
+          "INÍCIO SINTOMAS": 45755.0,
+          "NOTIFICAÇÃO": 45756.0,
+          "SINAN": 8934016.0,
+          "BAIRRO": "AREIAS",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": 36322.0,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "PCR DETECTÁVEL",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6571299, -27.0319102]
+        }
+      },
+      {
+        "type": "Feature",
+        "properties": {
+          "LOCAL ATENDIMENTO": "UNIDADE SAÚDE TABULEIRO",
+          "INÍCIO SINTOMAS": 45749.0,
+          "NOTIFICAÇÃO": 45751.0,
+          "SINAN": 9030781.0,
+          "BAIRRO": "TABULEIRO",
+          "QUADRA": null,
+          "DATA DE NASCIMENTO": null,
+          "OBSERVAÇÕES": null,
+          "RESULTADO": "POSITIVO",
+          "APLICAÇÃO": null,
+          "AGENTE(S)": "DENY - LUCIANE",
+          "1ª VISITA": null,
+          "SITUAÇÃO": null
+        },
+        "geometry": {
+          "type": "Point",
+          "coordinates": [-48.6561018, -27.0042308]
+        }
+      }
+    ]
+  }
