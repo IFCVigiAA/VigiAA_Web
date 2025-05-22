@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [mapSrc, setMapSrc] = useState('/webmapa/index.html');
+  const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'webmapa/index.html');
   const [mapTitle, setMapTitle] = useState('Mapa Principal');
 
   const handleLayerVisibility = (visible) => {
@@ -42,7 +42,7 @@ function Home() {
           <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
         </div>
         <div className="logo-box">
-          <img src="/logos/logo_home.png" alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
+          <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
 
@@ -51,7 +51,7 @@ function Home() {
         <button
           onClick={() => {
             setIframeLoaded(false);
-            setMapSrc('/webmapa/index.html');
+            setMapSrc(import.meta.env.BASE_URL + 'webmapa/index.html');
             setMapTitle('Mapa Principal');
           }}
         >
@@ -60,7 +60,7 @@ function Home() {
         <button
           onClick={() => {
             setIframeLoaded(false);
-            setMapSrc('/mapa_calor_positivos/index.html');
+            setMapSrc(import.meta.env.BASE_URL + 'mapa_calor_positivos/index.html');
             setMapTitle('Mapa de Casos Positivos');
           }}
         >
@@ -98,11 +98,9 @@ function Home() {
         />
       </div>
 
-
-
       <Footer />
     </div>
-  );
+   );
 }
 
 export default Home;

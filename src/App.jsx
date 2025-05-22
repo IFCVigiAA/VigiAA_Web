@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
 import Home from "../pages/Home";
 import Participantes from "../pages/Participantes";
@@ -8,8 +8,11 @@ import Estação from "../pages/Estacao";
 import Publicações from "../pages/Publicacoes";
 
 function App() {
+  // Obtenha o base path do Vite
+  const basePath = import.meta.env.BASE_URL;
+  
   return (
-   <Router>
+   <Router basename={basePath}>
     <Routes>
       <Route path="/" element={<Home/>} />
       <Route path="/participantes" element={<Participantes/>} />

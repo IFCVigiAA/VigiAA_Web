@@ -14,35 +14,35 @@ const Participantes = () => {
             <ParticipanteCard
               nome="Angelo A. Frozza"
               cargo="Coordenador Geral"
-              foto="/participantes/angelo.png"
+              foto={import.meta.env.BASE_URL + 'participantes/angelo.png'}
               lattesUrl="http://lattes.cnpq.br/5878372087019892"
               linkedinUrl="https://www.linkedin.com/in/angelo-frozza/"
             />
             <ParticipanteCard
               nome="Rafael de M. Speroni"
               cargo="Coordenador"
-              foto="/participantes/speroni.png"
+              foto={import.meta.env.BASE_URL + 'participantes/speroni.png'}
               lattesUrl="http://lattes.cnpq.br/3483462003007835"
               linkedinUrl="https://www.linkedin.com/in/rafaelsperoni/"
             />
             <ParticipanteCard
               nome="Joice S. Mota"
               cargo="Coordenadora"
-              foto="/participantes/joice.png"
+              foto={import.meta.env.BASE_URL + 'participantes/joice.png'}
               lattesUrl="http://lattes.cnpq.br/7777714279933344"
               linkedinUrl="https://www.linkedin.com/in/joices/"
             />
             <ParticipanteCard
               nome="Airton Zancanaro"
               cargo="Coordenador"
-              foto="/participantes/airton.png"
+              foto={import.meta.env.BASE_URL + 'participantes/airton.png'}
               lattesUrl="http://lattes.cnpq.br/8797858687750467"
               linkedinUrl="https://www.linkedin.com/in/airton-zancanaro-294297165/"
             />
             <ParticipanteCard
               nome="Cleonice Maria Beppler"
               cargo="Coordenadora"
-              foto="/participantes/cleonice.png"
+              foto={import.meta.env.BASE_URL + 'participantes/cleonice.png'}
               lattesUrl="http://lattes.cnpq.br/9868609834605055"
               linkedinUrl="https://www.linkedin.com/in/cleonice-beppler-5120b814/"
             />
@@ -55,28 +55,28 @@ const Participantes = () => {
             <ParticipanteCard
               nome="Iago Moreira"
               cargo="Bolsista"
-              foto="/participantes/iago.png"
+              foto={import.meta.env.BASE_URL + 'participantes/iago.png'}
               lattesUrl="http://lattes.cnpq.br/8597751704625279"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Ian M. A. Ferreira"
               cargo="Bolsista"
-              foto="/participantes/ian.jpg"
+              foto={import.meta.env.BASE_URL + 'participantes/ian.jpg'}
               lattesUrl="http://lattes.cnpq.br/5974108989255365"
               linkedinUrl="https://www.linkedin.com/in/ianmuradaraujoferreira/"
             />
             <ParticipanteCard
               nome="Luis H. de M. Santiago"
               cargo="Bolsista"
-              foto="/participantes/luis.png"
+              foto={import.meta.env.BASE_URL + 'participantes/luis.png'}
               lattesUrl="http://lattes.cnpq.br/4395447968887299"
               linkedinUrl="https://www.linkedin.com/in/luis-henrique-de-melo-santiago-02064a96/"
             />
             <ParticipanteCard
               nome="Lissandra M. Fischer"
               cargo="Bolsista"
-              foto="/participantes/lissandra.jpg"
+              foto={import.meta.env.BASE_URL + 'participantes/lissandra.jpg'}
               lattesUrl="http://lattes.cnpq.br/3849463744234834"
               linkedinUrl="https://www.linkedin.com/in/lissandramaiarafischer/"
             />
@@ -89,14 +89,14 @@ const Participantes = () => {
             <ParticipanteCard
               nome="Rafael Luiz Pereira"
               cargo="Bolsista"
-              foto="/participantes/rafaelluis.png"
+              foto={import.meta.env.BASE_URL + 'participantes/rafaelluis.png'}
               lattesUrl="http://lattes.cnpq.br/6550069771613064"
               linkedinUrl=""
             />
             <ParticipanteCard
               nome="Cauã da C. Silva"
               cargo="Bolsista"
-              foto="/participantes/caua.png"
+              foto={import.meta.env.BASE_URL + 'participantes/caua.png'}
               lattesUrl="http://lattes.cnpq.br/6896619338301324"
               linkedinUrl=""
             />
@@ -109,7 +109,7 @@ const Participantes = () => {
             <ParticipanteCard
               nome="Tauana Flores"
               cargo="Bolsista"
-              foto="/participantes/tauana.png"
+              foto={import.meta.env.BASE_URL + 'participantes/tauana.png'}
               lattesUrl="http://lattes.cnpq.br/6660505753553493"
               linkedinUrl=""
             />
@@ -118,7 +118,7 @@ const Participantes = () => {
       </div>
       <Footer />
     </div>
-  )
+   )
 }
 
 export default Participantes
