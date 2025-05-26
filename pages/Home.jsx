@@ -9,6 +9,8 @@ function Home() {
   const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'webmapa/index.html');
   const [mapTitle, setMapTitle] = useState('Mapa Principal');
 
+  const isMapWithToggleSupport = mapSrc.includes('webmapa') || mapSrc.includes('mapa_calor_positivos');
+
   const handleLayerVisibility = (visible) => {
     const iframe = iframeRef.current;
 
@@ -66,10 +68,18 @@ function Home() {
         >
           Mapa de Calor Positivos
         </button>
+        <button
+          onClick={() => {
+            setIframeLoaded(false);
+            setMapSrc(import.meta.env.BASE_URL + 'mapa_postgres.html');
+            setMapTitle('Mapa do PostGIS');
+          }}
+        >
+          Mapa do PostGIS
+        </button>
       </div>
 
       <div className="mapSection">
-        {/* Mapa local */}
         <iframe
           className="mapaHome"
           ref={iframeRef}
@@ -78,14 +88,13 @@ function Home() {
           onLoad={onIframeLoad}
         />
         <div className="mapButtons">
-          <button onClick={() => handleLayerVisibility(false)} disabled={!iframeLoaded}>
+          <button onClick={() => handleLayerVisibility(false)} disabled={!iframeLoaded || !isMapWithToggleSupport}>
             Ocultar Bairros
           </button>
-          <button onClick={() => handleLayerVisibility(true)} disabled={!iframeLoaded}>
+          <button onClick={() => handleLayerVisibility(true)} disabled={!iframeLoaded || !isMapWithToggleSupport}>
             Mostrar Bairros
           </button>
         </div>
-        {/* Mapa do QGIS Cloud */}
         <iframe
           className="mapaHome"
           src="https://qgiscloud.com/vigiaa/mapa_dens_demo_camboriu_precipitacao/?l=Recortado%2CPrecipitation_ANA_v1_0!%2Cpositivos_atual_coord_planas%2Chighway_camboriu!%2Cpositivos_atual_mapa_calor1%2Cpositivos_atual_mapa_calor!%2Cpositivos_novo_com_coordenadas%20%E2%80%94%20output_com_coordenadas!%2Cbairros_dens_demo%2Cbairros_camboriu%2CCamboriu%2COSM%20Standard!&t=mapa_dens_demo_camboriu_precipitacao&e=-48.85058%2C-27.10311%2C-48.48509%2C-26.93864"
@@ -100,7 +109,8 @@ function Home() {
 
       <Footer />
     </div>
-   );
+  );
 }
 
 export default Home;
+  
