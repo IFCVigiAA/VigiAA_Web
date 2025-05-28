@@ -1,7 +1,6 @@
 .navbar {
   position: fixed;
-  top: 0;
-  left: 0;
+
   width: 100vw;
   display: flex;
   align-items: center;
@@ -63,6 +62,7 @@
 .logoNav {
   width: 180px;
   height: auto;
+  margin-left: -38px; 
 }
 
 .projetosBtn {

@@ -16,8 +16,7 @@ const Sobre = () => {
           <h2>O que é o VigiAA?</h2>
           <p>
             O <strong>VigiAA</strong> é uma plataforma georreferenciada de monitoramento do mosquito
-            <em>Aedes aegypti</em>, vetor de doenças como dengue,
-            zika e chikungunya. A plataforma visa disponibilizar dados claros e acessíveis à
+            <em>Aedes aegypti</em>, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à
             população, pesquisadores e gestores públicos.
           </p>
         </div>
@@ -40,14 +39,15 @@ const Sobre = () => {
             <li><strong>QGIS</strong> – para análise criação de mapas e exportação de dados geográficos</li>
             <li><strong>React</strong> – para construção da interface web</li>
             <li><strong>OpenLayers</strong> – para visualização interativa de mapas</li>
+            <li><strong>PostgreSQL</strong> – para armazenamento de dados</li>
           </ul>
         </div>
 
         <div className="sobre-section">
           <h2>Qual a importância do projeto?</h2>
           <p>
-            O VigiAA reune informações geográficas sonbre as áreas de risco e acompanhe a evolução dos
-            focos de infestação do mosquito Aedes Aegypti em sua cidade, incentivando a conscientização e ações preventivas.
+            O VigiAA reune informações geográficas sobre as áreas de risco e acompanha a evolução dos
+            focos de infestação do mosquito Aedes Aegypti em camboriú, incentivando a conscientização e ações preventivas.
           </p>
         </div>
       </div>

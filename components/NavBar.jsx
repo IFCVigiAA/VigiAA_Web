@@ -13,7 +13,7 @@ const NavBar = () => {
     <div className="navbar">
       <div className="NavTitle">
         <NavLink to="/" className="logo">
-          VigiAA
+          <img src={import.meta.env.BASE_URL + 'logos/logo.svg'} alt="Logo VigiAA" className="logoNav" />
         </NavLink>
       </div>
       <div className="NavButtons">
