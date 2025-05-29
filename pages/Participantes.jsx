@@ -1,7 +1,7 @@
-import NavBar from '../components/NavBar'
-import Footer from '../components/Footer'
-import ParticipanteCard from '../components/ParticipanteCard'
-import './Participantes.css'
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
+import ParticipanteCard from '../components/ParticipanteCard';
+import './Participantes.css';
 
 const Participantes = () => {
   return (
@@ -20,28 +20,28 @@ const Participantes = () => {
             />
             <ParticipanteCard
               nome="Rafael de M. Speroni"
-              cargo="Coordenador"
+              cargo="Pesquisador"
               foto={import.meta.env.BASE_URL + 'participantes/speroni.png'}
               lattesUrl="http://lattes.cnpq.br/3483462003007835"
               linkedinUrl="https://www.linkedin.com/in/rafaelsperoni/"
             />
             <ParticipanteCard
               nome="Joice S. Mota"
-              cargo="Coordenadora"
+              cargo="Pesquisadora"
               foto={import.meta.env.BASE_URL + 'participantes/joice.png'}
               lattesUrl="http://lattes.cnpq.br/7777714279933344"
               linkedinUrl="https://www.linkedin.com/in/joices/"
             />
             <ParticipanteCard
               nome="Airton Zancanaro"
-              cargo="Coordenador"
+              cargo="Pesquisador"
               foto={import.meta.env.BASE_URL + 'participantes/airton.png'}
               lattesUrl="http://lattes.cnpq.br/8797858687750467"
               linkedinUrl="https://www.linkedin.com/in/airton-zancanaro-294297165/"
             />
             <ParticipanteCard
               nome="Cleonice Maria Beppler"
-              cargo="Coordenadora"
+              cargo="Pesquisadora"
               foto={import.meta.env.BASE_URL + 'participantes/cleonice.png'}
               lattesUrl="http://lattes.cnpq.br/9868609834605055"
               linkedinUrl="https://www.linkedin.com/in/cleonice-beppler-5120b814/"
@@ -60,7 +60,7 @@ const Participantes = () => {
               linkedinUrl=""
             />
             <ParticipanteCard
-              nome="Ian M. A. Ferreira"
+              nome="Ian M. AEconomia de espaço e legibilidade Ferreira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/ian.jpg'}
               lattesUrl="http://lattes.cnpq.br/5974108989255365"
@@ -118,7 +118,7 @@ const Participantes = () => {
       </div>
       <Footer />
     </div>
-   )
-}
+  );
+};
 
-export default Participantes
+export default Participantes;

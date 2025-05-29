@@ -1,29 +1,30 @@
 .bodyParticipantes {
   display: flex;
   flex-direction: column;
-  flex: 1;
   align-items: center;
   padding: 20px;
   box-sizing: border-box;
   margin-top: 8vh;
+  background-color: #f9f9f9; /* Fundo leve para contraste */
+  min-height: calc(100vh - 8vh); /* Garante altura mínima */
 }
 
 .bodyParticipantes ul {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 40px;
+  grid-template-columns: repeat(3, 1fr); /* Mantém a estrutura original */
+  gap: 30px; /* Reduzido de 40px para melhor uso do espaço */
   list-style: none;
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px; /* Limita largura para telas grandes */
   justify-items: center;
   padding: 0;
-  margin: 0;
+  margin: 0 auto; /* Centraliza o grid */
 }
 
 .participantes {
   background-color: white;
-  width: 100%;
-  max-width: 500px;
+  width: 100%; /* Remove width: 12vw para consistência */
+  max-width: 300px; /* Limita largura do cartão */
   height: auto;
   border-radius: 5px;
   display: flex;
@@ -32,12 +33,19 @@
   padding: 20px;
   box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
   text-align: center;
-  gap: 20px;
-  width: 12vw;
+  transition: transform 0.3s ease; /* Adiciona hover suave */
+}
+
+.participantes:hover {
+  transform: translateY(-5px); /* Efeito de elevação no hover */
 }
 
 .participantes img {
   border-radius: 2px;
+  width: 150px;
+  height: 200px;
+  object-fit: cover; /* Mantém proporção da imagem */
+  margin-bottom: 15px; /* Espaço abaixo da imagem */
 }
 
 .participantes .nome {
@@ -45,71 +53,191 @@
   text-align: center;
   font-size: 20px;
   font-weight: bold;
+  color: #333;
+  margin-bottom: 8px;
 }
 
 .conteudo-card {
-  gap: 20px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  flex-wrap: wrap;
-}
-
-.conteudo-card img {
-  height: 200px;
-  width: 150px;
-  object-fit: cover;
+  gap: 10px; /* Ajustado para espaçamento consistente */
 }
 
 .conteudo-card p {
-  flex: 1;
   font-size: 16px;
   color: #333;
+  margin: 0;
+}
+
+.conteudo-card a {
+  color: #1f9e61; /* Cor do tema */
+  text-decoration: none;
+  font-size: 14px;
+  transition: color 0.3s ease;
+}
+
+.conteudo-card a:hover {
+  color: #123524; /* Cor de hover do tema */
+}
+
+.grupo {
+  width: 100%;
+  max-width: 1200px; /* Alinha com o ul */
+  margin-bottom: 40px; /* Espaço entre grupos */
 }
 
 .grupo h2 {
   font-size: 30px;
+  text-align: center;
+  color: #333;
+  margin-bottom: 20px;
 }
 
-
+/* Media Queries para Responsividade */
 @media (max-width: 1024px) {
+  .bodyParticipantes {
+    padding: 15px;
+  }
+
   .bodyParticipantes ul {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr); /* 2 colunas, como no original */
+    gap: 20px;
   }
 
-  .conteudo-card {
-    flex-direction: column;
-    align-items: center;
+  .participantes {
+    max-width: 280px;
+    padding: 16px;
   }
 
-  .conteudo-card img {
+  .participantes img {
     width: 120px;
     height: 160px;
   }
 
+  .participantes .nome {
+    font-size: 18px;
+  }
+
   .conteudo-card p {
-    text-align: center;
+    font-size: 15px;
+  }
+
+  .grupo h2 {
+    font-size: 26px;
   }
 }
 
+@media (max-width: 768px) {
+  .bodyParticipantes {
+    padding: 10px;
+    margin-top: 6vh;
+  }
 
-@media (max-width: 600px) {
   .bodyParticipantes ul {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr); /* Mantém 2 colunas para tablets */
+    gap: 15px;
   }
 
   .participantes {
-    padding: 16px;
+    max-width: 250px;
+    padding: 14px;
   }
 
-  .conteudo-card img {
+  .participantes img {
     width: 100px;
     height: 140px;
+  }
+
+  .participantes .nome {
+    font-size: 16px;
   }
 
   .conteudo-card p {
     font-size: 14px;
   }
 
+  .conteudo-card a {
+    font-size: 13px;
+  }
+
+  .grupo h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .bodyParticipantes {
+    padding: 10px;
+    margin-top: 5vh;
+  }
+
+  .bodyParticipantes ul {
+    grid-template-columns: 1fr; /* 1 coluna, como no original */
+    gap: 15px;
+  }
+
+  .participantes {
+    max-width: 300px; /* Ligeiramente maior para ocupar espaço */
+    padding: 12px;
+  }
+
+  .participantes img {
+    width: 100px;
+    height: 140px;
+  }
+
   .participantes .nome {
-    font-size: 18px;
+    font-size: 16px;
+  }
+
+  .conteudo-card p {
+    font-size: 14px;
+  }
+
+  .conteudo-card a {
+    font-size: 13px;
+  }
+
+  .grupo h2 {
+    font-size: 22px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bodyParticipantes {
+    padding: 8px;
+    margin-top: 5vh;
+  }
+
+  .bodyParticipantes ul {
+    grid-template-columns: 1fr; /* 1 coluna para telas pequenas */
+    gap: 10px;
+  }
+
+  .participantes {
+    max-width: 100%; /* Ocupa toda a largura disponível */
+    padding: 10px;
+  }
+
+  .participantes img {
+    width: 90px;
+    height: 120px;
+  }
+
+  .participantes .nome {
+    font-size: 15px;
+  }
+
+  .conteudo-card p {
+    font-size: 13px;
+  }
+
+  .conteudo-card a {
+    font-size: 12px;
+  }
+
+  .grupo h2 {
+    font-size: 20px;
   }
 }
