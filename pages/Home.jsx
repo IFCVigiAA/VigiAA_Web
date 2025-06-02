@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'webmapa/index.html');
+  const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'mapa_postgres.html');
   const [mapTitle, setMapTitle] = useState('Mapa Principal');
   const [isFullscreen, setIsFullscreen] = useState(false); // Estado para controlar o modo tela cheia
 
@@ -108,7 +108,7 @@ function Home() {
         <button
           onClick={() => {
             setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'webmapa/index.html');
+            setMapSrc(import.meta.env.BASE_URL + 'mapa_postgres.html');
             setMapTitle('Mapa Principal');
             if (document.fullscreenElement) document.exitFullscreen(); // Garante que saia da tela cheia ao trocar de mapa
           }}
@@ -128,12 +128,12 @@ function Home() {
         <button
           onClick={() => {
             setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'mapa_postgres.html');
+            setMapSrc(import.meta.env.BASE_URL + 'webmapa/index.html');
             setMapTitle('Mapa do PostGIS');
             if (document.fullscreenElement) document.exitFullscreen(); // Garante que saia da tela cheia ao trocar de mapa
           }}
         >
-          Mapa do Postgres
+          Mapa Primario
         </button>
       </div>
 

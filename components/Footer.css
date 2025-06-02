@@ -16,6 +16,9 @@
   color: white;
   text-decoration: none;
 }
+.footer a:hover{
+  text-decoration: underline;
+}
 
 .footerTitle {
   font-size: 24px;

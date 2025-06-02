@@ -60,7 +60,7 @@ const Participantes = () => {
               linkedinUrl=""
             />
             <ParticipanteCard
-              nome="Ian M. AEconomia de espaço e legibilidade Ferreira"
+              nome="Ian M. A. Ferreira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/ian.jpg'}
               lattesUrl="http://lattes.cnpq.br/5974108989255365"

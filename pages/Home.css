@@ -16,7 +16,6 @@
 }
 
 .home-body {
-  margin: 0;
   background: linear-gradient(to right, #142941, #123524);
   color: #ffffff;
   display: flex;
@@ -26,8 +25,6 @@
   align-items: center;
   z-index: 1;
   position: relative;
-  padding-top: 70px;
-  padding-bottom: 50px;
 }
 
 .main-title {
@@ -38,18 +35,16 @@
 .subtitle {
   display: flex;
   font-size: 24px;
-  font-weight: normal;
   padding-top: 15px;
   font-weight: bold;
 }
 
 .text-box {
-  padding: 100px 0px 0px;
   display: flex;
   flex-direction: column;
-  margin-top: 5vh;
   margin-left: 8vw;
   text-align: left;
+  margin-bottom: 15vh;
 }
 
 .logo-box {
@@ -90,7 +85,7 @@ hr {
   justify-content: center;
   margin-bottom: 50px;
   width: 100%;
-  position: relative; /* Mantém relative para posicionar o botão dentro dele quando não fullscreen */
+  position: relative;
 }
 
 .mapaHome {
@@ -102,14 +97,13 @@ hr {
   margin: 0 auto 20px auto !important;
 }
 
-/* NOVA CLASSE: Para quando o iframe está em modo tela cheia pelo navegador */
 .mapaHome.fullscreen-active {
   width: 100vw !important;
   height: 100vh !important;
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
-  z-index: 10000 !important; /* Garante que fique por cima de tudo */
+  z-index: 10000 !important;
   margin: 0 !important;
   border-radius: 0 !important;
   transition: all 0.3s ease-in-out;
@@ -148,11 +142,7 @@ hr {
   cursor: not-allowed;
 }
 
-
-/* --- Estilos para o BOTÃO de TELA CHEIA/SAIR da TELA CHEIA --- */
-/* Estilo para o botão de tela cheia/sair da tela cheia */
 .fullscreen-toggle-btn {
-  /* Estilo padrão: botão no fluxo normal do documento, abaixo do iframe */
   background-color: #1f9e61;
   color: black;
   border-radius: 4px;
@@ -162,34 +152,30 @@ hr {
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease;
   font-size: 16px;
-  z-index: 10001; /* Ainda alto para garantir visibilidade */
+  z-index: 10001;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  margin: 10px auto; /* Centraliza o botão horizontalmente e adiciona margem */
-  display: block; /* Garante que o botão ocupe a largura necessária */
+  margin: 10px auto;
+  display: block;
 }
 
-/* Hover padrão */
 .fullscreen-toggle-btn:hover {
   background-color: #123524;
   color: white;
 }
 
-/* Estilo para o botão quando o mapa ESTÁ em tela cheia */
 .fullscreen-toggle-btn.exit-mode {
-  position: fixed; /* Fixo no canto inferior direito da viewport */
+  position: fixed;
   bottom: 20px;
   right: 20px;
-  background-color: #ff4500; /* Cor diferente para "Sair" */
+  background-color: #ff4500;
   color: white;
-  z-index: 10002; /* Mais alto para ficar acima do iframe fullscreen */
+  z-index: 10002;
 }
 
-/* Hover no modo de sair da tela cheia */
 .fullscreen-toggle-btn.exit-mode:hover {
   background-color: #cc0000;
 }
 
-/* Ajuste no mapSection para garantir espaçamento */
 .mapSection {
   display: flex;
   flex-direction: column;
@@ -197,14 +183,13 @@ hr {
   justify-content: center;
   margin-bottom: 50px;
   width: 100%;
-  position: relative; /* Ainda necessário para outros elementos posicionados */
+  position: relative;
 }
 
-/* Garantir que os botões de camada apareçam abaixo do botão de tela cheia */
 .mapButtons.map-layer-buttons {
-  margin-top: 10px; /* Espaço entre o botão de tela cheia e os botões de camada */
+  margin-top: 10px;
 }
-/* --- Media Queries para Responsividade --- */
+
 @media (max-width: 1024px) {
   .home-body {
     gap: 30px;
@@ -231,7 +216,6 @@ hr {
   .mapTitle {
     font-size: 34px;
   }
-  /* Ajustes para o botão de tela cheia */
   .fullscreen-toggle-btn {
     bottom: 15px;
     right: 15px;
@@ -290,7 +274,6 @@ hr {
     padding: 12px;
     height: auto;
   }
-  /* Ajustes para o botão de tela cheia no mobile */
   .fullscreen-toggle-btn {
     bottom: 10px;
     right: 10px;
@@ -319,7 +302,6 @@ hr {
     font-size: 14px;
     padding: 10px;
   }
-  /* Ajustes para o botão de tela cheia em telas muito pequenas */
   .fullscreen-toggle-btn {
     bottom: 5px;
     right: 5px;
