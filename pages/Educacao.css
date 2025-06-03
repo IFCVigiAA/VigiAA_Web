@@ -9,7 +9,27 @@
 .hometext {
   margin-bottom: 40px;
 }
+.hometext ul {
+  list-style-type: circle;
+  padding-left: 25px;
+  max-width: 800px;
+  margin: 0 auto;
+}
 
+.hometext ul li {
+  font-size: 1.2rem;
+  line-height: 1.6;
+  margin-bottom: 10px;
+  gap: 10px
+}
+
+.hometext ul li strong {
+  font-weight: bold;
+}
+.hometext li:before{
+  content: '•';
+  margin-right: 10px;
+}
 .hometext h1 {
   text-align: center;
   font-size: 2.5rem;
