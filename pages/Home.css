@@ -140,7 +140,7 @@ hr {
 
 .mapButtons button:disabled {
   background-color: #ccc;
-  cursor: not-allowed;
+  cursor:not-allowed;
 }
 
 .fullscreen-toggle-btn {
