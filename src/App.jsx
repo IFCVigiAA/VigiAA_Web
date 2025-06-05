@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import './App.css'
+import 'leaflet/dist/leaflet.css';
 import Home from "../pages/Home";
 import Participantes from "../pages/Participantes";
 import Sobre from "../pages/Sobre";
