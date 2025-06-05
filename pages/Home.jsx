@@ -107,6 +107,16 @@ function Home() {
           Mapa Principal
         </button>
         <button
+  onClick={() => {
+    setIframeLoaded(false);
+    setMapSrc('http://192.168.70.170:5500/index.html');
+    setMapTitle('Mapa GeoServer Remoto');
+    if (document.fullscreenElement) document.exitFullscreen();
+  }}
+>
+  Mapa GeoServer Remoto
+</button>
+        <button
           onClick={() => {
             setIframeLoaded(false);
             setMapSrc(import.meta.env.BASE_URL + 'mapa_calor_positivos/index.html');

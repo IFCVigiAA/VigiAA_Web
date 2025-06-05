@@ -1,15 +1,16 @@
+
 import React, { useEffect, useState } from 'react';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Removed useMap
 import 'leaflet/dist/leaflet.css';
 import './Sobre.css';
 import L from 'leaflet';
 import markerIconPng from 'leaflet/dist/images/marker-icon.png';
 import markerShadowPng from 'leaflet/dist/images/marker-shadow.png';
-import SimpleMap from '../components/SimpleMap';
+import SimpleMap from '../components/SimpleMap'; // Ensure this path is correct
 
-// Configuração global dos ícones do Leaflet para v1.9.4
+// Configuração global dos ícones do Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: markerIconPng,
@@ -17,38 +18,23 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadowPng,
 });
 
-// Componente para forçar a atualização do tamanho do mapa
-function MapResize({ isFullscreen }) {
-  const map = useMap();
-
-  useEffect(() => {
-    // Remover o setTimeout temporariamente
-    map.invalidateSize();
-
-    // O redraw para TileLayers geralmente não é necessário após invalidateSize,
-    // mas se quiser manter, não faz mal.
-    // map.eachLayer((layer) => {
-    //   if (layer instanceof L.TileLayer) {
-    //     layer.redraw();
-    //   }
-    // });
-  }, [isFullscreen, map]);
-
-  return null;
-}
+// REMOVED MapResize component definition
 
 const Sobre = () => {
   const position = [-26.9905, -48.6295]; // Coordenadas de Camboriú, SC
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
-  // Garante que o mapa só renderiza no lado do cliente
+  // Effect to ensure code runs only on the client-side
   useEffect(() => {
     setIsClient(true);
   }, []);
 
   const toggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+    // When toggling fullscreen, Leaflet might need a manual size invalidation
+    // if the container size changes abruptly. However, react-leaflet often handles this.
+    // If issues persist after fullscreen toggle, might need to get map ref and call invalidateSize.
   };
 
   return (
@@ -60,6 +46,7 @@ const Sobre = () => {
           <p>Vigilância do Aedes Aegypti</p>
         </div>
 
+        {/* Content Sections */}
         <div className="sobre-section">
           <h2>O que é o VigiAA?</h2>
           <p>
@@ -76,7 +63,6 @@ const Sobre = () => {
             <li>Oferecer informação acessível à sociedade.</li>
           </ul>
         </div>
-
         <div className="sobre-section">
           <h2>Tecnologias Utilizadas</h2>
           <p>A plataforma foi desenvolvida com tecnologias como:</p>
@@ -87,7 +73,6 @@ const Sobre = () => {
             <li><strong>PostgreSQL</strong> – para armazenamento de dados</li>
           </ul>
         </div>
-
         <div className="sobre-section">
           <h2>Qual a importância do projeto?</h2>
           <p>
@@ -96,33 +81,42 @@ const Sobre = () => {
           </p>
         </div>
 
+        {/* Map Section */}
         <div className="sobre-section">
           <h2>Localização do Projeto</h2>
           <p>Nosso projeto está baseado em Camboriú, Santa Catarina, onde monitoramos os focos do Aedes aegypti.</p>
-          <SimpleMap/>
+
+          {/* Render SimpleMap component only on client */}
+          {isClient && <SimpleMap />}
+
+          {/* Render main MapContainer only on client */}
           {isClient && (
-            <MapContainer
-              center={position}
-              zoom={13}
-              className={`sobre-mapa ${isFullscreen ? 'fullscreen-active' : ''}`}
-            >
-              {/* MUDANÇA PRINCIPAL AQUI: USAR OPENSTREETMAP */}
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              <Marker position={position}>
-                <Popup>Base do Projeto VigiAA - Camboriú, SC</Popup>
-              </Marker>
-              <MapResize isFullscreen={isFullscreen} />
-            </MapContainer>
+            <div className={`map-wrapper ${isFullscreen ? 'fullscreen-active' : ''}`}>
+              <MapContainer
+                center={position}
+                zoom={13}
+                className="sobre-mapa" // Apply specific class for styling
+                // Ensure CSS for .sobre-mapa defines height/width
+              >
+                <TileLayer
+                  url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                />
+                <Marker position={position}>
+                  <Popup>Base do Projeto VigiAA - Camboriú, SC</Popup>
+                </Marker>
+                {/* REMOVED <MapResize /> component usage */}
+              </MapContainer>
+              <button
+                className={`fullscreen-toggle-btn ${isFullscreen ? 'exit-mode' : ''}`}
+                onClick={toggleFullscreen}
+              >
+                {isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
+              </button>
+            </div>
           )}
-          <button
-            className={`fullscreen-toggle-btn ${isFullscreen ? 'exit-mode' : ''}`}
-            onClick={toggleFullscreen}
-          >
-            {isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
-          </button>
+          {/* Fallback if not client-side yet */}
+          {!isClient && <p>Carregando mapas...</p>}
         </div>
       </div>
       <Footer />
@@ -131,3 +125,4 @@ const Sobre = () => {
 };
 
 export default Sobre;
+

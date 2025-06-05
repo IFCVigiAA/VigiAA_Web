@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'; // Adicionado useMap
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'; // Removed useMap
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import markerIconPng from 'leaflet/dist/images/marker-icon.png';
@@ -13,20 +14,8 @@ L.Icon.Default.mergeOptions({
   shadowUrl: markerShadowPng,
 });
 
-// Componente MapResize (igual ao seu, com setTimeout)
-function MapResize({ isFullscreen }) {
-    const map = useMap();
-  
-    useEffect(() => {
-      const timer = setTimeout(() => {
-        map.invalidateSize();
-        console.log('Map invalidateSize called!'); // Adicione um log para confirmar
-      }, 200); // Tente 200ms aqui
-  
-      return () => clearTimeout(timer);
-    }, [map]); // isFullscreen é opcional aqui se não for usado para lógica de redimensionamento
-    return null;
-  }
+// REMOVED MapResize component definition
+
 const SimpleMap = () => {
   const position = [-26.9905, -48.6295];
   const [isClient, setIsClient] = useState(false);
@@ -36,21 +25,28 @@ const SimpleMap = () => {
   }, []);
 
   return (
-    <div style={{ height: '500px', width: '100%' }}>
+    // Ensure this div has a defined height/width via style or CSS class
+    <div style={{ height: '500px', width: '100%', marginBottom: '20px' }}> 
       {isClient && (
-        <MapContainer center={position} zoom={13} style={{ height: '100%', width: '100%' }}>
+        <MapContainer 
+          center={position} 
+          zoom={13} 
+          style={{ height: '100%', width: '100%' }} // Map takes size of parent div
+        >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
           <Marker position={position}>
-            <Popup>Olá, mundo!</Popup>
+            <Popup>SimpleMap Component</Popup>
           </Marker>
-          <MapResize /> {/* Adicione o MapResize aqui */}
+          {/* REMOVED <MapResize /> component usage */}
         </MapContainer>
       )}
+      {!isClient && <p>Carregando SimpleMap...</p>} 
     </div>
   );
 };
 
 export default SimpleMap;
+
