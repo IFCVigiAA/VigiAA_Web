@@ -77,11 +77,16 @@
 
 /* No seu arquivo Sobre.css */
 .sobre-mapa {
-  height: 400px; /* Ou outra altura que você preferir */
+  height: 400px;
   width: 100%;
-  /* Adicionei algumas propriedades para borda e sombra para uma melhor visualização */
   border-radius: 8px;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  z-index: 10; /* Aumente este valor, por exemplo, 10 ou 100 */
+}
+
+.map-wrapper {
+    position: relative; /* Importante para z-index funcionar */
+    z-index: 9; /* Um z-index ligeiramente menor que o mapa, se aplicável */
 }
 
 .sobre-mapa.fullscreen-active {
