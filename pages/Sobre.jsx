@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import './Sobre.css';
 
 import MapaLab from '../components/MapaLab';
+import WeatherComponent from '../components/WeatherComponent';
 
 const Sobre = () => {
   const position = [-26.9905, -48.6295]; // Coordenadas de Camboriú, SC
@@ -58,6 +59,7 @@ const Sobre = () => {
           <h2>Localização do Projeto</h2>
           <p>Nosso projeto está baseado em Camboriú, Santa Catarina, onde monitoramos os focos do Aedes aegypti.</p>
           <MapaLab/>
+          <WeatherComponent/>
         </div>
       </div>
       <Footer />

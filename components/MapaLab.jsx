@@ -24,8 +24,8 @@ const MapaLaboratorio = () => {
   };
 
   return (
-    <div className="mapa-container">
-      <LoadScript googleMapsApiKey="AIzaSyCcJCCOOmxDLh-0JYuakcoTgGpmjA1lu1c">
+    <div className="mapa-container" style={{ width: '100%', height: '400px' }}>
+      <LoadScript googleMapsApiKey="AIzaSyD7bvTiJLlDzXhVVAz59ltmZKv_thlGios">
         <GoogleMap
           mapContainerStyle={mapStyles}
           zoom={15}
@@ -35,6 +35,24 @@ const MapaLaboratorio = () => {
             mapTypeControl: true,
             fullscreenControl: true,
             zoomControl: true,
+          }}
+          onLoad={(map) => {
+            console.log('GoogleMap onLoad disparado!'); // Adicionado
+            // Força a renderização do mapa após carregamento
+            setTimeout(() => {
+              console.log('setTimeout executado!'); // Adicionado
+              window.google.maps.event.trigger(map, 'resize');
+              // Força a opacidade do iframe
+              const iframe = document.querySelector('.mapa-container iframe');
+              if (iframe) {
+                console.log('Iframe encontrado no setTimeout!'); // Adicionado
+                iframe.style.opacity = '1';
+                iframe.style.visibility = 'visible';
+                console.log('Opacidade e visibilidade do iframe forçadas!'); // Adicionado
+              } else {
+                console.log('Iframe NÃO encontrado no setTimeout!'); // Adicionado
+              }
+            }, 100);
           }}
         >
           <Marker
@@ -69,4 +87,3 @@ const MapaLaboratorio = () => {
 };
 
 export default MapaLaboratorio;
-
