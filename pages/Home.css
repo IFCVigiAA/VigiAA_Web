@@ -44,7 +44,7 @@
   flex-direction: column;
   margin-left: 8vw;
   text-align: left;
-  margin-bottom: 15vh;
+  margin-bottom: 5vh;
 }
 
 .logo-box {
@@ -56,7 +56,7 @@
 }
 
 .logo-img {
-  width: 55vw;
+  width: 30vw;
   height: auto;
   margin-top: 2vh;
   margin-left: 5.5vw;

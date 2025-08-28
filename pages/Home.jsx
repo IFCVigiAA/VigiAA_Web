@@ -83,7 +83,6 @@ function Home() {
   return (
     <div className="page-container">
       {!isFullscreen && <NavBar />}
-      
       <div className="home-body">
         <div className="text-box">
           <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
@@ -93,7 +92,6 @@ function Home() {
           <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
         </div>
       </div>
-
       <p className="mapTitle">{mapTitle}</p>
       <div className="mapButtons">
         <button

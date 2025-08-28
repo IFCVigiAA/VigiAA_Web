@@ -58,7 +58,6 @@ const Sobre = () => {
         <div className="sobre-section">
           <h2>Localização do Projeto</h2>
           <p>Nosso projeto está baseado em Camboriú, Santa Catarina, onde monitoramos os focos do Aedes aegypti.</p>
-          <MapaLab/>
           <WeatherComponent/>
         </div>
       </div>

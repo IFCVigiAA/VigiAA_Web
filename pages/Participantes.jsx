@@ -53,13 +53,6 @@ const Participantes = () => {
           <h2>Bolsistas VigiAA</h2>
           <ul className="lista-participantes">
             <ParticipanteCard
-              nome="Iago Moreira"
-              cargo="Bolsista"
-              foto={import.meta.env.BASE_URL + 'participantes/iago.png'}
-              lattesUrl="http://lattes.cnpq.br/8597751704625279"
-              linkedinUrl=""
-            />
-            <ParticipanteCard
               nome="Ian M. A. Ferreira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/ian.jpg'}
