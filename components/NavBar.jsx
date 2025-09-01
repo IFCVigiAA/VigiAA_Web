@@ -4,13 +4,13 @@ import './NavBar.css';
 
 const NavBar = () => {
   const [showModal, setShowModal] = useState(false);
-  const [showMenu, setShowMenu] = useState(false); // Estado para controlar a abertura/fechamento do menu responsivo
+  const [showMenu, setShowMenu] = useState(false); 
 
   const toggleModal = () => {
     setShowModal(!showModal);
   };
 
-  const toggleMenu = () => { // Função para alternar o estado do menu hamburguer
+  const toggleMenu = () => { 
     setShowMenu(!showMenu);
   };
 
@@ -22,13 +22,13 @@ const NavBar = () => {
         </NavLink>
       </div>
 
-      {/* Botão do menu hamburguer que aparece apenas em telas menores */}
+     
       <button className="hamburger-menu" onClick={toggleMenu}>
-        &#9776; {/* Ícone de hamburguer (três linhas) */}
+        &#9776; 
       </button>
 
-      {/* Os botões de navegação e o modal de projetos serão exibidos/ocultados */}
-      <div className={`NavButtons ${showMenu ? 'show' : ''}`}> {/* Adiciona a classe 'show' quando o menu está aberto */}
+     
+      <div className={`NavButtons ${showMenu ? 'show' : ''}`}> 
         <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setShowMenu(false)}>
           Home
         </NavLink>

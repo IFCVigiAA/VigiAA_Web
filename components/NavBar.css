@@ -158,21 +158,21 @@
   }
 
   .NavButtons button {
-    margin-bottom: 10px; /* Espaço entre o botão e o próximo item */
+    margin-bottom: 10px; 
   }
 
   .hamburger-menu {
-    display: block; /* Mostra o botão hamburguer em telas menores */
+    display: block; 
   }
 
   .projetosModal {
-    position: static; /* Posição estática dentro do menu responsivo, não mais fixa */
-    background: none; /* Remove o fundo do modal para se integrar ao menu */
-    border: none; /* Remove a borda do modal */
-    box-shadow: none; /* Remove a sombra do modal */
-    padding: 0; /* Remove padding */
-    margin-top: 10px; /* Espaço acima do modal */
-    width: 100%; /* Ocupa a largura total do menu responsivo */
+    position: static; 
+    background: none; 
+    border: none; 
+    box-shadow: none; 
+    padding: 0;
+    margin-top: 10px; 
+    width: 100%; 
   }
 
   .projetosModal a {

@@ -83,15 +83,7 @@ function Home() {
   return (
     <div className="page-container">
       {!isFullscreen && <NavBar />}
-      <div className="home-body">
-        <div className="text-box">
-          <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
-          <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
-        </div>
-        <div className="logo-box">
-          <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
-        </div>
-      </div>
+      <br /><br /><br />
       <p className="mapTitle">{mapTitle}</p>
       <div className="mapButtons">
         <button

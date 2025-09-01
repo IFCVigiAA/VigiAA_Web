@@ -12,7 +12,7 @@ const Estacao = () => {
           <p>
             Este projeto tem como objetivo desenvolver uma estação meteorológica acessível, utilizando componentes de baixo custo para realizar o monitoramento ambiental em tempo real. A estação coleta dados como temperatura, umidade, pressão atmosférica, entre outros, e os disponibiliza em uma plataforma digital para consulta pública e uso acadêmico.
           </p>
-
+          <iframe src="https://tb.geati.camboriu.ifc.edu.br/dashboard/c50dabf0-5703-11ee-bdd4-b1244f07481c?publicId=d17ce940-5718-11ee-bdd4-b1244f07481c" width="800" height="600"></iframe>
           <h2>Tecnologias Utilizadas</h2>
           <ul className="tech-list">
             <li><strong>Arduino</strong> – microcontrolador principal da estação</li>

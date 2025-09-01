@@ -3,7 +3,6 @@ import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import './Sobre.css';
 
-import MapaLab from '../components/MapaLab';
 import WeatherComponent from '../components/WeatherComponent';
 
 const Sobre = () => {
