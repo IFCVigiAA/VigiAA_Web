@@ -99,7 +99,7 @@ function Home() {
         <button
   onClick={() => {
     setIframeLoaded(false);
-    setMapSrc('http://192.168.70.170:5500/index.html');
+    setMapSrc('http://192.168.70.116:5500/index.html');
     setMapTitle('Mapa GeoServer Remoto');
     if (document.fullscreenElement) document.exitFullscreen();
   }}
@@ -125,6 +125,16 @@ function Home() {
           }}
         >
           Mapa Primario
+        </button>
+        <button
+          onClick={() => {
+            setIframeLoaded(false);
+            setMapSrc(import.meta.env.BASE_URL + 'mapa_altimetrico.html');
+            setMapTitle('Mapa do PostGIS');
+            if (document.fullscreenElement) document.exitFullscreen();
+          }}
+        >
+          Mapa Altimétrico
         </button>
       </div>
 
