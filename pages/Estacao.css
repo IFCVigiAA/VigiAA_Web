@@ -12,14 +12,14 @@
   margin-top: 10vh;
 }
 .sobre-content iframe{
-  border: #333;
+  border: #000000;
   margin-top: 2vh;
 }
 
 .sobre-content p {
   font-size: 1.1rem;
   line-height: 1.7;
-  color: #333;
+  color: #000000;
   margin-top: 2vh;
   max-width: 1000px;
 }

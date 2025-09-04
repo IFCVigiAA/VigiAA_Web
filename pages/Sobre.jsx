@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import './Sobre.css';
-
 import WeatherComponent from '../components/WeatherComponent';
 
 const Sobre = () => {
@@ -15,9 +14,7 @@ const Sobre = () => {
       <div className="sobre-container">
         <div className="sobre-header">
           <h1>Sobre o Projeto <span>VigiAA</span></h1>
-          <p>Vigilância do Aedes Aegypti</p>
         </div>
-
         <div className="sobre-section">
           <h2>O que é o VigiAA?</h2>
           <p>
@@ -50,13 +47,13 @@ const Sobre = () => {
           <h2>Qual a importância do projeto?</h2>
           <p>
             O VigiAA reúne informações geográficas sobre as áreas de risco e acompanha a evolução dos
-            focos de infestação do mosquito Aedes Aegypti em Camboriú, incentivando a conscientização e ações preventivas.
+            focos de infestação do mosquito Aedes Aegypti, incentivando a conscientização e ações preventivas.
           </p>
         </div>
 
         <div className="sobre-section">
           <h2>Localização do Projeto</h2>
-          <p>Nosso projeto está baseado em Camboriú, Santa Catarina, onde monitoramos os focos do Aedes aegypti.</p>
+          <p>Nosso projeto está localizado em Camboriú, Santa Catarina.</p>
           <WeatherComponent/>
         </div>
       </div>

@@ -5,22 +5,22 @@ import './Publicacoes.css';
 const Publicações = () => {
   const artigos = [
     {
-      titulo: 'Monitoramento Espacial do Aedes Aegypti em Camboriú (SC)',
-      autores: 'Silva, J. et al.',
-      data: 'Março de 2024',
-      link: '/docs/artigo1.pdf',
+      titulo: 'REVISÃO SISTEMÁTICA SIMPLIFICADA DA LITERATURA ACERCA DE GEORREFERENCIAMENTO DE CASOS DE DENGUE E AEDES AEGYPTI',
+      autores: 'Fischer, L. M. et al.',
+      data: 'Agosto de 2025',
+      link: '/docs/FICE2025-VigiAA-ResumoExpandido-Lissandra-.pdf',
     },
     {
-      titulo: 'Uso de Geotecnologias na Prevenção da Dengue',
-      autores: 'Oliveira, M.; Costa, L.',
-      data: 'Outubro de 2023',
-      link: '/docs/artigo2.pdf',
+      titulo: 'AVALIAÇÃO DE SOFTWARES PARA SERVIDOR DE MAPAS WEB',
+      autores: 'Santiago, L. H. M. et al.',
+      data: 'Agosto de 2025',
+      link: '/docs/FICE2025-VigiAA-ResumoExpandido-Luis.pdf',
     },
     {
-      titulo: 'Análise Temporal da Incidência de Casos de Dengue',
-      autores: 'Souza, R. et al.',
-      data: 'Julho de 2023',
-      link: 'https://exemplo.com/artigo3',
+      titulo: 'TÉCNICAS DE GEORREFERENCIAMENTO PARA COMBATE DO AEDES AEGYPTI',
+      autores: 'Ferreira, I. M. A. et al.',
+      data: 'Agosto de 2025',
+      link: '/docs/VigiAA-FICE2025-ResumoExpandido-Ian.pdf',
     },
   ];
 
