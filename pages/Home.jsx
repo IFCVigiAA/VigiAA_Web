@@ -12,26 +12,9 @@ function Home() {
 
   const isMapWithToggleSupport = mapSrc.includes('webmapa') || mapSrc.includes('mapa_calor_positivos');
 
-  const handleLayerVisibility = (visible) => {
-    const iframe = iframeRef.current;
-    if (iframe && iframe.contentWindow) {
-      const interval = setInterval(() => {
-        const map = iframe.contentWindow.map;
-        const toggleFn = iframe.contentWindow.toggleLayerVisibility;
-        if (map && typeof toggleFn === 'function') {
-          clearInterval(interval);
-          toggleFn('json_bairros_camboriu_3', visible);
-          console.log(`Camada 'bairros_camboriu_3' visível: ${visible}`);
-        }
-      }, 100);
-    } else {
-      console.warn('Iframe não encontrado.');
-    }
-  };
-
   const onIframeLoad = () => {
     setIframeLoaded(true);
-    console.log('Iframe carregado e pronto para interagir.');
+    console.log('Iframe carregado e pronto para interagir. %cby ian', 'font-style: italic;');
   };
 
   const toggleFullscreen = () => {
@@ -136,15 +119,6 @@ function Home() {
             {isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
           </button>
         )}
-
-        <div className="mapButtons map-layer-buttons" style={{ display: isFullscreen ? 'none' : 'flex' }}>
-          <button onClick={() => handleLayerVisibility(false)} disabled={!iframeLoaded || !isMapWithToggleSupport}>
-            Ocultar Bairros
-          </button>
-          <button onClick={() => handleLayerVisibility(true)} disabled={!iframeLoaded || !isMapWithToggleSupport}>
-            Mostrar Bairros
-          </button>
-        </div>
       </div>
 
       {!isFullscreen && <Footer />}
