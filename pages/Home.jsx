@@ -99,33 +99,13 @@ function Home() {
         <button
   onClick={() => {
     setIframeLoaded(false);
-    setMapSrc('http://192.168.70.116:5500/index.html');
+    setMapSrc(import.meta.env.BASE_URL + 'mapa_leaflet/index.html');
     setMapTitle('Mapa GeoServer Remoto');
     if (document.fullscreenElement) document.exitFullscreen();
   }}
 >
-  Mapa GeoServer Remoto
+  Mapa GeoServer + LeaFlet
 </button>
-        <button
-          onClick={() => {
-            setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'mapa_calor_positivos/index.html');
-            setMapTitle('Mapa de Casos Positivos');
-            if (document.fullscreenElement) document.exitFullscreen();
-          }}
-        >
-          Mapa de Calor Positivos
-        </button>
-        <button
-          onClick={() => {
-            setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'webmapa/index.html');
-            setMapTitle('Mapa do PostGIS');
-            if (document.fullscreenElement) document.exitFullscreen();
-          }}
-        >
-          Mapa Primario
-        </button>
         <button
           onClick={() => {
             setIframeLoaded(false);

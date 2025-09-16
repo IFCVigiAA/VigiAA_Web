@@ -34,6 +34,7 @@ const Educação = () => {
                 title="Cursos MOOC"
               />
             </a>
+            <p className="legenda">*A imagem contém o link para a <a href="https://mooc.geati.camboriu.ifc.edu.br/" target="_blank"  rel="noopener noreferrer">página de cursos do MOOC.</a></p>
           </div>
         </div>
         <Footer />

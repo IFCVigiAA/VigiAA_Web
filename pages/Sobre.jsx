@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import './Sobre.css';
 import WeatherComponent from '../components/WeatherComponent';
 
 const Sobre = () => {
-  const position = [-26.9905, -48.6295]; // Coordenadas de Camboriú, SC
-
-
   return (
     <div className="page-container">
       <NavBar />
@@ -19,13 +16,13 @@ const Sobre = () => {
           <h2>O que é o VigiAA?</h2>
           <p>
             O <strong>VigiAA</strong> é uma plataforma georreferenciada de monitoramento do mosquito
-            <em>Aedes aegypti</em>, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à
+            <em> Aedes aegypti</em>, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à
             população, pesquisadores e gestores públicos.
           </p>
         </div>
         <div className="sobre-section">
           <h2>Objetivos</h2>
-          <ul>
+          <ul className="tech-list">
             <li>Mapear e visualizar focos do mosquito em tempo real.</li>
             <li>Exibir dados de casos positivos com localização geográfica.</li>
             <li>Oferecer informação acessível à sociedade.</li>
@@ -53,15 +50,26 @@ const Sobre = () => {
 
         <div className="sobre-section">
           <h2>Localização do Projeto</h2>
-          <p>Nosso projeto está localizado em Camboriú, Santa Catarina.</p>
-          <WeatherComponent/>
+          <p>Nosso projeto está localizado no Instituto Federal Catarinense – Camboriú.</p>
+          <div className="map-wrapper">
+            <iframe
+              title="Mapa do Google Maps com a localização do IFC Camboriú"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3175.9755605679343!2d-48.65769206859206!3d-27.01605670990075!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94d8b5000eeb4f79%3A0x6b42a6cef196ef1f!2sGEATI!5e1!3m2!1spt-BR!2sbr!4v1758041982232!5m2!1spt-BR!2sbr"
+              width="100%"
+              height="450"
+              style={{ border: '2px solid grey', borderRadius: '5px' }}
+              allowFullScreen=""
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+            ></iframe>
+          </div>
+          <br /><br />
+          <WeatherComponent />
         </div>
       </div>
       <Footer />
     </div>
   );
 };
-
-
 
 export default Sobre;

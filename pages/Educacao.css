@@ -44,8 +44,10 @@
   margin: 0 auto;
 }
 
-.banner {
-  margin: 40px auto;
+.banner p {
+  font-size: 12px;
+  margin-bottom: 5vh;
+  margin-top: -2px;
 }
 
 .banner img {
