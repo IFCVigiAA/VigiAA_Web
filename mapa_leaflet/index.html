@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Dinâmico - Leaflet & GeoServer</title>
+
+    <!-- Leaflet CSS (pode ficar no head) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    
+    <style>
+        /* Estilo para o contêiner do mapa, ocupando 100% da viewport */
+        #mapid { 
+            height: 100vh;
+            width: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 0; /* Garante que o mapa fique abaixo de outros elementos flutuantes */
+        }
+        /* Estilo para o corpo da página, removendo margens padrão */
+        body { 
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Evita barras de rolagem indesejadas */
+        }
+        /* Estilos para as legendas flutuantes */
+        .map-legend {
+            position: fixed;
+            left: 5vw;
+            max-width: 90vw;
+            z-index: 9999; /* Garante que a legenda fique acima do mapa e do controle de camadas */
+            font-size: 14px;
+            background-color: white;
+            border: 2px solid grey;
+            padding: 10px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+            overflow-x: auto;
+            word-wrap: break-word;
+            border-radius: 8px; /* Cantos arredondados para as legendas */
+        }
+        .map-legend i {
+            display: block; /* Mude para block para que o float funcione corretamente e não empurre o texto */
+            width: 18px;
+            height: 10px;
+            float: left;
+            margin-right: 8px;
+            border: 1px solid #ccc; /* Adiciona uma borda sutil nas cores da legenda */
+            border-radius: 2px; /* Pequenos cantos arredondados para os blocos de cor */
+        }
+    </style>
+</head>
+<body>
+    <div id="mapid"></div>
+
+    <!-- Legenda de Declividade -->
+    <div class="map-legend" style="bottom: 50px;" id="declividade-legend">
+        <b>Declividade (%)</b><br>
+        <i style="background:#006400;"></i> &le; 16,75<br>
+        <i style="background:#66CD00;"></i> 16,75 - 33,40<br>
+        <i style="background:#FFD700;"></i> 33,40 - 50,05<br>
+        <i style="background:#FFA500;"></i> 50,05 - 66,70<br>
+        <i style="background:#FF4500;"></i> 66,70 - 83,35<br>
+        <i style="background:#8B0000;"></i> &gt; 83,35<br>
+        <div style="clear:both;"></div>
+    </div>
+
+    <!-- Legenda de Demografia -->
+    <div class="map-legend" style="bottom: 250px;" id="demografia-legend">
+        <b>Demografia 2022 (%)</b><br>
+        <i style="background:#fce5cd;"></i> &le; 16,75<br>
+        <i style="background:#f9cb9c;"></i> 16,75 - 33,40<br>
+        <i style="background:#f6b26b;"></i> 33,40 - 50,05<br>
+        <i style="background:#e69138;"></i> 50,05 - 66,70<br>
+        <i style="background:#cc0000;"></i> 66,70 - 83,35<br>
+        <i style="background:#990000;"></i> &gt; 83,35<br>
+        <div style="clear:both;"></div>
+    </div>
+
+    <!-- Legenda do Mapa de Calor (inicialmente oculta, visibilidade controlada por JS) -->
+    <div class="map-legend" style="bottom: 450px; display: none;" id="heatmap-legend">
+        <b>Casos Positivos (Mapa de Calor)</b><br>
+        <p style="margin: 5px 0;">Áreas mais escuras indicam maior concentração de casos.</p>
+        <div style="width: 100%; height: 20px; background: linear-gradient(to right, blue, cyan, lime, yellow, red); border-radius: 4px;"></div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
+            <span>Baixa concentração</span>
+            <span>Alta concentração</span>
+        </div>
+    </div>
+    
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+    
+    <!-- 3. Seu Script Customizado (Depende de ambos os anteriores) -->
+    <script>
+        // Use window.onload para garantir que todas as bibliotecas e o DOM estão carregados
+        window.onload = function() {
+            // --- 1. Configuração Inicial do Mapa ---
+            var map = L.map('mapid').setView([-27.0258, -48.6549], 12); // Centro e zoom para Camboriú
+
+            // Adiciona uma camada base (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // --- 2. Variáveis para Armazenar as Camadas ---
+            var bairrosWFSLayer;
+            var bairrosOfcWFSLayer;
+            var setCensWFSLayer;
+            var camboriuWFSLayer;
+            var curvasNivelWFSLayer;
+            var focosWFSLayer;
+            var peWFSLayer;
+            var armWFSLayer;
+            
+            // Variáveis específicas para as duas camadas de Casos Positivos
+            var currentCasosPointLayer; // Para a camada de pontos
+            var currentCasosHeatmapLayer; // Para a camada de mapa de calor
+
+            // --- Novas variáveis para as camadas de imagem ---
+            var declividadeImageLayer;
+            var demografiaImageLayer;
+
+            // --- Variáveis para o Controle de Camadas ---
+            var baseLayers = {}; // Nenhuma camada base controlável neste teste
+            var overlayMaps = {}; // Todas as camadas WFS estarão aqui
+
+            // --- Função Auxiliar para Gerenciar a Atualização de Camadas no Controle ---
+            // Esta função remove a camada antiga do mapa e do controle, e adiciona a nova,
+            // mantendo o estado de visibilidade da camada.
+            function refreshLayerInControl(oldLayer, newLayer, layerName) {
+                // Verifica se a camada antiga estava visível no mapa
+                const wasOnMap = oldLayer && map.hasLayer(oldLayer);
+                if (wasOnMap) {
+                    map.removeLayer(oldLayer); // Remove a camada antiga do mapa
+                }
+
+                // Se o controle de camadas já foi inicializado, remove a referência antiga
+                if (map.layersControl && oldLayer) {
+                    map.layersControl.removeLayer(oldLayer);
+                }
+                
+                // Adiciona a nova camada ao controle de camadas
+                if (map.layersControl) {
+                    map.layersControl.addOverlay(newLayer, layerName);
+                }
+
+                // Se a camada antiga estava no mapa, adiciona a nova camada ao mapa também
+                if (wasOnMap) {
+                    newLayer.addTo(map);
+                }
+            }
+
+            // --- 3. Função Genérica para buscar e adicionar Camadas WFS (para GeoJSON) ---
+            // Esta função é usada para camadas que são visualizadas como GeoJSON (polígonos ou pontos individuais).
+            function fetchWFSData(layerName, displayName, styleFunction, popupFields, version = '2.0.0', isPointLayer = false) {
+                var wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
+                var params = {
+                    service: 'WFS',
+                    version: version,
+                    request: 'GetFeature',
+                    typeName: layerName,
+                    outputFormat: 'application/json'
+                };
+                var queryString = new URLSearchParams(params).toString();
+                var fullUrl = wfsUrl + queryString;
+
+                console.log(`Buscando dados WFS para: ${displayName} (${fullUrl})`);
+
+                return fetch(fullUrl)
+                    .then(response => {
+                        if (!response.ok) { // Verifica se a resposta NÃO foi OK (ou seja, houve um erro HTTP)
+                            throw new Error(`HTTP error! status: ${response.status} for ${displayName}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(`Dados para ${displayName} recebidos.`);
+                        
+                        var layerOptions = {
+                            style: styleFunction, // Aplica a função de estilo para polígonos
+                            onEachFeature: function(feature, layer) {
+                                if (feature.properties) {
+                                    var popupContent = `<b>${displayName.split('(')[0].trim()}:</b><br>`;
+                                    // Se popupFields não for especificado ou for vazio, mostra todas as propriedades
+                                    var fieldsToDisplay = popupFields && popupFields.length > 0 ? popupFields : Object.keys(feature.properties);
+                                    for (var field of fieldsToDisplay) {
+                                        if (feature.properties[field] !== undefined) {
+                                            // Formata o nome do campo para o popup (ex: "nome_campo" -> "Nome Campo")
+                                            let alias = field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                                            popupContent += `<b>${alias}:</b> ${feature.properties[field]}<br>`;
+                                        }
+                                    }
+                                    layer.bindPopup(popupContent); // Associa o popup à feature
+                                }
+                            }
+                        };
+
+                        if (isPointLayer) {
+                            // Se for uma camada de pontos, define como desenhar cada ponto
+                            layerOptions.pointToLayer = function(feature, latlng) {
+                                return L.circleMarker(latlng, styleFunction(feature));
+                            };
+                        }
+
+                        var newLayer = L.geoJSON(data, layerOptions); // Cria a camada GeoJSON
+                        newLayer.name = displayName; // Define um nome para a camada (útil para depuração e controle)
+                        return newLayer;
+                    })
+                    .catch(error => {
+                        console.error(`Erro ao buscar ou processar dados WFS para ${displayName}:`, error);
+                        return null; // Retorna null para que a Promise.all não falhe completamente
+                    });
+            }
+
+            // --- 4. Definição dos Estilos para Camadas GeoJSON ---
+            var bairrosStyleWFS = function(feature) {
+                return {
+                    fillColor: '#add8e6', // Azul claro para bairros
+                    color: 'black',
+                    weight: 1,
+                    fillOpacity: 0.5
+                };
+            };
+            var bairrosOfcStyleWFS = function(feature) {
+                return {
+                    fillColor: '#89d1fa', // Azul claro para bairros
+                    color: 'black',
+                    weight: 1,
+                    fillOpacity: 0.5
+                };
+            };
+            var setCensStyleWFS = function(feature) {
+                return {
+                    fillColor: '#f07b73', // Vermelho claro para setores censitários
+                    color: 'black',
+                    weight: 1,
+                    fillOpacity: 0.5
+                };
+            };
+            var curvasNivelStyleWFS = function (feature) {
+                return {
+                    color: "#faf605",
+                    weight: 2,
+                    opacity: 1.0
+                }
+            };
+            var casosPointStyleWFS = function(feature) {
+                return {
+                    radius: 5,
+                    fillColor: 'red',
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.7
+                };
+            };
+
+            var camboriuStyleWFS = function(feature) {
+                return {
+                    fillColor: '#ffcc00', // Amarelo para Camboriú
+                    color: 'black',
+                    weight: 1,
+                    fillOpacity: 0.5
+                };
+            };
+
+            var focosStyleWFS = function(feature) {
+                return {
+                    radius: 5,
+                    fillColor: 'orange',
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.7
+                };
+            };
+            
+            var peStyleWFS = function(feature) {
+                return {
+                    radius: 5,
+                    fillColor: 'green',
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.7
+                };
+            };
+
+            var armStyleWFS = function(feature) {
+                return {
+                    radius: 5,
+                    fillColor: 'purple',
+                    color: '#000',
+                    weight: 1,
+                    opacity: 1,
+                    fillOpacity: 0.7
+                };
+            };
+
+            // --- 5. Funções de Carga e Atualização (WFS e Imagem) ---
+
+            // Função para carregar Bairros (uma única vez, camada estática)
+            function loadBairrosOnce() {
+                return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ofc', 'Bairros - Oficial (Estático)', bairrosStyleWFS, ['nome']);
+            }
+
+            function loadBairrosOfcOnce() {
+                return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE (Estático)', bairrosOfcStyleWFS, ['NM_BAIRRO']);
+            }
+
+            // Função para carregar Setores Censitários (uma única vez, camada estática)
+            function loadSetCensOnce() {
+                return fetchWFSData('vigiaa_ofc:vw_set_cens_camb', 'Setores Censitários (Estático)', setCensStyleWFS, ['NM_BAIRRO']);
+            }
+
+            // Função para carregar Camboriú (uma única vez, camada estática)
+            function loadCamboriuOnce() {
+                return fetchWFSData('vigiaa_ofc:vw_mun_camb', 'Camboriú (Estático)', camboriuStyleWFS, ['NM_MUN']);
+            }
+
+            // Função para carregar Curva de nível (uma única vez, camada estática)
+            function loadCurvaNivelOnce() {
+                return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_cortadas', 'Curva de Nível (Estático)', curvasNivelStyleWFS, ['CUN_NU_COT']);
+            }            
+
+            // Função para atualizar Focos Aedes (camada dinâmica de pontos)
+            function updadeFocosAedes() {
+                return fetchWFSData('vigiaa:focos_aedes_1604_com_coords', 'Focos Aedes (Dinâmico)', focosStyleWFS, ['id', 'Nº Foco'], '2.0.0', true)
+                    .then(newLayer => {
+                        if (newLayer) {
+                            refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes (Dinâmico)');
+                            focosWFSLayer = newLayer; // Atualiza a referência global
+                        }
+                        return focosWFSLayer; // Retorna a camada atualizada ou null
+                    });
+            }
+
+            // Função para atualizar Pontos Estratégicos (camada dinâmica de pontos)
+            function updatePontosEstrat() {
+                return fetchWFSData('vigiaa:pontos_estrategicos', 'Pontos Estratégicos (Dinâmico)', peStyleWFS, ['id', 'numero'], '2.0.0', true)
+                    .then(newLayer => {
+                        if (newLayer) {
+                            refreshLayerInControl(peWFSLayer, newLayer, 'Pontos Estratégicos (Dinâmico)');
+                            peWFSLayer = newLayer; // Atualiza a referência global
+                        }
+                        return peWFSLayer; // Retorna a camada atualizada ou null
+                    });
+            }
+
+            // Função para atualizar Armadilhas (camada dinâmica de pontos)
+            function updateArmadilhas() {
+                return fetchWFSData('vigiaa:relat_arm', 'Armadilhas (Dinâmico)', armStyleWFS, ['id', 'numero'], '2.0.0', true)
+                    .then(newLayer => {
+                        if (newLayer) {
+                            refreshLayerInControl(armWFSLayer, newLayer, 'Armadilhas (Dinâmico)');
+                            armWFSLayer = newLayer; // Atualiza a referência global
+                        }
+                        return armWFSLayer; // Retorna a camada atualizada ou null
+                    });
+            }
+
+            // --- Função para atualizar Casos Positivos como Pontos (camada dinâmica L.geoJSON) ---
+            function updateCasosPositivosPoints() {
+                return fetchWFSData('vigiaa:casos_positivos', 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id', 'data_diagnostico'], '2.0.0', true)
+                    .then(newLayer => {
+                        if (newLayer) {
+                            refreshLayerInControl(currentCasosPointLayer, newLayer, 'Casos Positivos (Pontos)');
+                            currentCasosPointLayer = newLayer; // Atualiza a referência global
+                        }
+                        return currentCasosPointLayer; // Retorna a camada atualizada ou null
+                    });
+            }
+
+            // --- Função para atualizar Casos Positivos como Mapa de Calor (camada dinâmica Leaflet.heat) ---
+            function updateCasosHeatmap() {
+                const wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
+                const params = {
+                    service: 'WFS',
+                    version: '2.0.0',
+                    request: 'GetFeature',
+                    typeName: 'vigiaa:casos_positivos',
+                    outputFormat: 'application/json'
+                };
+                const queryString = new URLSearchParams(params).toString();
+                const fullUrl = wfsUrl + queryString;
+
+                console.log(`Buscando dados WFS para Casos Positivos (Heatmap): ${fullUrl}`);
+
+                return fetch(fullUrl)
+                    .then(response => {
+                        if (!response.ok) { // Verifica se a resposta NÃO foi OK
+                            throw new Error(`HTTP error! status: ${response.status} for Casos Positivos (Heatmap)`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log(`Dados para Casos Positivos (Heatmap) recebidos.`);
+
+                        var heatData = []; // Variável para armazenar os dados do heatmap
+                        if (data && data.features) {
+                            data.features.forEach(feature => {
+                                if (feature.geometry && feature.geometry.coordinates) {
+                                    var coords = feature.geometry.coordinates; // [longitude, latitude]
+                                    // Leaflet.heat espera [latitude, longitude, [opcionalmente] intensidade]
+                                    heatData.push([coords[1], coords[0]]); 
+                                    // Se você tivesse um atributo de "gravidade" ou "número de casos no local", poderia usar como intensidade:
+                                    // heatData.push([coords[1], coords[0], feature.properties.gravidade || 1]);
+                                }
+                            });
+                        }
+
+                        var newHeatmapLayer = L.heatLayer(heatData, {
+                            radius: 25,     // Tamanho do raio de influência do ponto
+                            blur: 15,       // Intensidade do borrão (suaviza a transição)
+                            maxZoom: 17,    // Zoom máximo em que o heatmap é visível
+                            minOpacity: 0.2, // Opacidade mínima para áreas de baixa concentração
+                            // Gradiente de cores: (0.0 a 1.0) -> cor (começando no azul, indo para o vermelho)
+                            gradient: {
+                                0.0: 'blue',
+                                0.25: 'cyan',
+                                0.5: 'lime',
+                                0.75: 'yellow',
+                                1.0: 'red'
+                            }
+                        });
+
+                        // Gerencia a substituição da camada no controle
+                        refreshLayerInControl(currentCasosHeatmapLayer, newHeatmapLayer, 'Casos Positivos (Mapa de Calor)');
+                        currentCasosHeatmapLayer = newHeatmapLayer; // Atualiza a referência global
+                        
+                        return currentCasosHeatmapLayer;
+                    })
+                    .catch(error => {
+                        console.error(`Erro ao buscar ou processar dados para Casos Positivos (Heatmap):`, error);
+                        return null; // Retorna null para que a Promise.all não falhe completamente
+                    });
+            }
+            
+            // --- Funções para Carregar Camadas de Imagem (Estáticas, uma única vez) ---
+            // IMPORTANTE: VOCÊ PRECISA FORNECER AS BOUNDS CORRETAS AQUI!
+            // Os bounds são obtidos do seu script Python usando get_bounds_from_pgw.
+            function loadImageLayers() {
+                // Bounds de exemplo - SUBSTITUA ESTES PELOS SEUS VALORES REAIS!
+                // Exemplo: [[latitude_sul, longitude_oeste], [latitude_norte, longitude_leste]]
+                const declividadeBounds = [[-27.196900051, -48.88833825645294], [-26.951489787, -48.53321516854706]]; // EXEMPLO, AJUSTE!
+                const demografiaBounds = [[-27.145871184999997, -48.75972971313529], [-26.95321603, -48.493185639864706]]; // EXEMPLO, AJUSTE!
+
+                // URL das imagens - Substitua pela URL real onde suas imagens estão hospedadas
+                // Se as imagens estiverem na mesma pasta do HTML, pode ser só o nome do arquivo.
+                const declividadeImageUrl = "mapa_declividade_transparente.png"; 
+                const demografiaImageUrl = "mapa_dens_transparente.png";
+
+                // Cria a camada de imagem para Declividade
+                declividadeImageLayer = L.imageOverlay(declividadeImageUrl, declividadeBounds, {
+                    opacity: 1.0,
+                    interactive: true, // Permite interações (como popups, embora não tenha um aqui)
+                    alt: 'Mapa de Declividade' // Texto alternativo para acessibilidade
+                });
+                declividadeImageLayer.name = 'Declividade (Imagem)'; // Nome para o controle de camadas
+
+                // Cria a camada de imagem para Demografia
+                demografiaImageLayer = L.imageOverlay(demografiaImageUrl, demografiaBounds, {
+                    opacity: 1.0,
+                    interactive: true,
+                    alt: 'Mapa de Demografia'
+                });
+                demografiaImageLayer.name = 'Demografia (Imagem)'; // Nome para o controle de camadas
+
+                // Retorna as camadas para serem adicionadas ao Promise.all
+                return Promise.resolve([declividadeImageLayer, demografiaImageLayer]);
+            }
+
+            // --- 6. Inicialização das Camadas e do Controle de Camadas ---
+            // Espera que todas as chamadas iniciais de fetch concluam (ou falhem)
+            Promise.all([
+                loadBairrosOnce(),
+                loadBairrosOfcOnce(),
+                loadSetCensOnce(),
+                loadCamboriuOnce(),
+                loadCurvaNivelOnce(),
+                updadeFocosAedes(),
+                updatePontosEstrat(),
+                updateArmadilhas(),
+                updateCasosPositivosPoints(), // Carrega a camada de pontos
+                updateCasosHeatmap(), // Carrega a camada de mapa de calor
+                loadImageLayers() // Carrega as camadas de imagem
+            ]).then(results => {
+                const [
+                    bairrosLayerResult,
+                    bairrosOfcLayerResult,
+                    setCensLayerResult,
+                    camboriuLayerResult,
+                    curvaNivelLayerResult, 
+                    focosLayerResult, 
+                    peLayerResult, 
+                    armLayerResult,
+                    casosPointLayerResult, // Resultado da camada de pontos
+                    casosHeatmapLayerResult, // Resultado da camada de heatmap
+                    imageLayersResults // Resultado das camadas de imagem (array)
+                ] = results;
+
+                // Desestrutura as camadas de imagem
+                const [declividadeImgLayer, demografiaImgLayer] = imageLayersResults;
+
+                // Adiciona Bairros ao overlayMaps se foi carregado
+                if (bairrosLayerResult) {
+                    overlayMaps['Bairros - Oficial (Estático)'] = bairrosLayerResult;
+                }
+
+                if (bairrosOfcLayerResult) {
+                    overlayMaps['Bairros - IBGE (Estático)'] = bairrosOfcLayerResult;
+                }
+
+                // Adiciona Setores Censitários ao overlayMaps se foi carregado
+                if (setCensLayerResult) {
+                    overlayMaps['Setores Censitários (Estático)'] = setCensLayerResult;
+                }
+
+                // Adiciona Curva de Nível ao overlayMaps se foi carregado
+                if (curvaNivelLayerResult) {
+                    overlayMaps['Curva de Nível (Estático)'] = curvaNivelLayerResult;
+                }
+                
+                // Adiciona Camboriú ao overlayMaps se foi carregado
+                if (camboriuLayerResult) {
+                    overlayMaps['Camboriú (Estático)'] = camboriuLayerResult;
+                }
+
+                // Adiciona Focos Aedes ao overlayMaps se foi carregado
+                if (focosLayerResult) {
+                    overlayMaps['Focos Aedes (Dinâmico)'] = focosLayerResult;
+                }
+
+                // Adiciona Pontos Estratégicos ao overlayMaps se foi carregado
+                if (peLayerResult) {
+                    overlayMaps['Pontos Estratégicos (Dinâmico)'] = peLayerResult;
+                }
+
+                // Adiciona Armadilhas ao overlayMaps se foi carregado
+                if (armLayerResult) {
+                    overlayMaps['Armadilhas (Dinâmico)'] = armLayerResult;
+                }
+
+                // Adiciona Casos Positivos (Pontos) ao overlayMaps se foi carregado
+                if (casosPointLayerResult) {
+                    overlayMaps['Casos Positivos (Pontos)'] = casosPointLayerResult;
+                }
+
+                // Adiciona Casos Positivos (Mapa de Calor) ao overlayMaps se foi carregado
+                if (casosHeatmapLayerResult) {
+                    overlayMaps['Casos Positivos (Mapa de Calor)'] = casosHeatmapLayerResult;
+                    // Exibe a legenda do heatmap quando a camada é carregada inicialmente
+                    document.getElementById('heatmap-legend').style.display = 'block';
+                }
+
+                // Adiciona as novas camadas de imagem ao overlayMaps
+                if (declividadeImgLayer) {
+                    overlayMaps['Declividade (Imagem)'] = declividadeImgLayer;
+                    declividadeImageLayer = declividadeImgLayer; // Atualiza a ref global
+                }
+                if (demografiaImgLayer) {
+                    overlayMaps['Demografia (Imagem)'] = demografiaImgLayer;
+                    demografiaImageLayer = demografiaImgLayer; // Atualiza a ref global
+                }
+
+                // Agora, e somente agora, adicionamos o controle de camadas.
+                // Ele terá as referências corretas para as camadas que foram carregadas.
+                map.layersControl = L.control.layers(baseLayers, overlayMaps, { collapsed: false }).addTo(map);
+
+                // Eventos para controlar a visibilidade da legenda do heatmap
+                // A legenda aparece quando a camada é adicionada ao mapa e some quando removida.
+                map.on('overlayadd', function (e) {
+                    if (e.name === 'Casos Positivos (Mapa de Calor)') {
+                        document.getElementById('heatmap-legend').style.display = 'block';
+                    }
+                });
+
+                map.on('overlayremove', function (e) {
+                    if (e.name === 'Casos Positivos (Mapa de Calor)') {
+                        document.getElementById('heatmap-legend').style.display = 'none';
+                    }
+                });
+
+                // Inicia os setIntervals para as camadas dinâmicas
+                setInterval(updateCasosPositivosPoints, 300000); // Atualiza pontos a cada 5 minutos (300 segundos)
+                setInterval(updateCasosHeatmap, 300000); // Atualiza heatmap a cada 5 minutos
+                setInterval(updadeFocosAedes, 300000);
+                setInterval(updatePontosEstrat, 300000);
+                setInterval(updateArmadilhas, 300000);
+
+                console.log("Controle de camadas adicionado. Verifique o mapa e o console para mais informações.");
+            }).catch(error => {
+                console.error("Erro fatal na inicialização das camadas. Alguma camada inicial não pôde ser carregada:", error);
+            });
+        }; // Fim de window.onload
+    </script>
+</body>
+</html>
