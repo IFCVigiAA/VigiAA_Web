@@ -24,7 +24,6 @@ const Sobre = () => {
           <h1>Sobre o Projeto <span>VigiAA</span></h1>
         </div>
         <div className="sobre-section">
-          <h2>O que é o VigiAA?</h2>
           <p>
             O <strong>VigiAA</strong> é uma plataforma georreferenciada de monitoramento do mosquito
             <em> Aedes aegypti</em>, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à
@@ -67,7 +66,7 @@ const Sobre = () => {
               title="Mapa do Google Maps com a localização do IFC Camboriú"
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3175.9755605679343!2d-48.65769206859206!3d-27.01605670990075!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x94d8b5000eeb4f79%3A0x6b42a6cef196ef1f!2sGEATI!5e1!3m2!1spt-BR!2sbr!4v1758041982232!5m2!1spt-BR!2sbr"
               width="100%"
-              height="450"
+              height="390"
               style={{ border: '2px solid #00a053', borderRadius: '5px' }}
               allowFullScreen=""
               loading="lazy"
