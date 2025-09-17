@@ -6,11 +6,9 @@ import Footer from '../components/Footer';
 function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'mapa_postgres.html');
+  const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'mapa_leaflet/index.html');
   const [mapTitle, setMapTitle] = useState('Mapa Principal');
   const [isFullscreen, setIsFullscreen] = useState(false);
-
-  const isMapWithToggleSupport = mapSrc.includes('webmapa') || mapSrc.includes('mapa_calor_positivos');
 
   const onIframeLoad = () => {
     setIframeLoaded(true);
@@ -72,22 +70,22 @@ function Home() {
         <button
           onClick={() => {
             setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'mapa_postgres.html');
+            setMapSrc(import.meta.env.BASE_URL + 'mapa_leaflet/index.html');
             setMapTitle('Mapa Principal');
             if (document.fullscreenElement) document.exitFullscreen();
           }}
         >
-          Mapa Principal
+          Mapa GeoServer + LeaFlet
         </button>
         <button
   onClick={() => {
     setIframeLoaded(false);
-    setMapSrc(import.meta.env.BASE_URL + 'mapa_leaflet/index.html');
+    setMapSrc(import.meta.env.BASE_URL + 'mapa_postgres.html');
     setMapTitle('Mapa GeoServer Remoto');
     if (document.fullscreenElement) document.exitFullscreen();
   }}
 >
-  Mapa GeoServer + LeaFlet
+  Mapa anterior
 </button>
         <button
           onClick={() => {

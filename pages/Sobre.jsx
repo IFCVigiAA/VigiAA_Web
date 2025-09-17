@@ -27,7 +27,7 @@ const Sobre = () => {
           <p>
             O <strong>VigiAA</strong> é uma plataforma georreferenciada de monitoramento do mosquito
             <em> Aedes aegypti</em>, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à
-            população, pesquisadores e gestores públicos.
+            população, pesquisadores e gestores públicos. <br /> Projeto de pesquisa aprovado no edital <strong>37/2024 FAPESC.</strong>
           </p>
         </div>
         <div className="sobre-section">
