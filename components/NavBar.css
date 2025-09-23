@@ -80,7 +80,7 @@
 }
 
 .projetosModal {
-  position: fixed; /* Mantém-se fixo para o desktop */
+  position: fixed; 
   top: 60px;
   right: 40px;
   background-color: #123524;
@@ -105,56 +105,55 @@
   color: #1f9e61;
 }
 
-/* Estilos para o botão de menu hamburguer */
+
 .hamburger-menu {
-  display: none; /* Esconde o botão hamburguer por padrão em telas maiores */
-  background: none;
+  display: none; 
   border: none;
   color: white;
   font-size: 30px;
   cursor: pointer;
-  margin-left: auto; /* Alinha o botão à direita na navbar */
+  margin-left: auto; 
   margin-right: 20px;
 }
 
-/* Media Query para telas menores (desktop redimensionado e celulares) */
+
 @media (max-width: 768px) {
   .navbar {
-    flex-direction: row; /* Mantém o logo e o hamburguer na mesma linha */
-    justify-content: space-between; /* Espaça o logo e o hamburguer */
-    height: 70px; /* Mantém a altura da navbar */
-    padding: 0 15px; /* Adiciona um padding nas laterais */
+    flex-direction: row; 
+    justify-content: space-between; 
+    height: 70px; 
+    padding: 0 15px; 
   }
 
   .NavButtons {
-    flex-direction: column; /* Organiza os itens verticalmente */
-    position: absolute; /* Posição absoluta para o menu flutuar */
-    top: 70px; /* Abaixo da altura da navbar */
+    flex-direction: column; 
+    position: absolute;
+    top: 70px; 
     right: 0;
-    background: linear-gradient(to right, #142941, #123524); /* Fundo igual ao da navbar */
-    width: 100%; /* Ocupa a largura total da tela */
-    height: calc(100vh - 70px); /* Altura restante da viewport */
-    justify-content: flex-start; /* Alinha os itens ao topo */
-    padding-top: 20px; /* Espaçamento no topo dos itens do menu */
-    transform: translateX(100%); /* Esconde o menu para a direita, fora da tela */
-    opacity: 0; /* Começa invisível */
-    pointer-events: none; /* Impede interações quando escondido */
-    display: none; /* Oculta completamente quando o menu está fechado em telas menores */
+    background: linear-gradient(to right, #142941, #123524);
+    width: 100%; 
+    height: calc(100vh - 70px);
+    justify-content: flex-start; 
+    padding-top: 20px; 
+    transform: translateX(100%); 
+    opacity: 0; 
+    pointer-events: none; 
+    display: none; 
   }
 
   .NavButtons.show {
-    transform: translateX(0); /* Move o menu para a posição visível */
-    opacity: 1; /* Torna o menu visível */
-    pointer-events: auto; /* Permite interações com o menu */
-    display: flex; /* Torna o menu visível e flexível */
+    transform: translateX(0); 
+    opacity: 1; 
+    pointer-events: auto; 
+    display: flex; 
   }
 
   .NavButtons a,
   .NavButtons button {
-    width: 90%; /* Largura dos itens do menu para melhor visualização */
+    width: 90%; 
     text-align: center;
-    padding: 15px 0; /* Aumenta o padding para facilitar o clique */
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); /* Separador visual entre os itens */
+    padding: 15px 0; 
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
   }
 
   .NavButtons button {
@@ -176,8 +175,8 @@
   }
 
   .projetosModal a {
-    padding-left: 30px; /* Indenta os links do modal para hierarquia visual */
-    border-bottom: none; /* Remove a borda inferior, pois não precisa aqui */
-    text-align: left; /* Alinha o texto à esquerda para consistência */
+    padding-left: 30px; 
+    border-bottom: none; 
+    text-align: left; 
   }
 }

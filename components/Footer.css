@@ -42,7 +42,7 @@
   width: 80px;
   height: 80px;
   background-color: white;
-  border-radius: 12px;
+  border-radius: 5px;
   padding: 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   display: flex;
@@ -58,10 +58,11 @@
 }
 
 .footerCopyright {
-  font-size: 14px;
+  font-size: 12px;
   margin-top: 10px;
-  opacity: 0.8;
+  opacity: 1;
   max-width: 90%;
+  color: #d3d3d3;
 }
 @media (max-width: 600px) {
   .footerTitle {
@@ -81,4 +82,14 @@
   .footerCopyright {
     font-size: 12px;
   }
+}
+.footerEmail {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+}
+
+.emailIcon {
+   font-size: 18px;
 }

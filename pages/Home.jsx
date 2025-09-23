@@ -85,7 +85,7 @@ function Home() {
     if (document.fullscreenElement) document.exitFullscreen();
   }}
 >
-  Mapa anterior
+  Mapa folium
 </button>
         <button
           onClick={() => {

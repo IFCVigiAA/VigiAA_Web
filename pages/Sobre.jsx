@@ -9,7 +9,7 @@ const Sobre = () => {
     <>
   <NavBar />
     <div className="page-container">
-      <div className="sobre-body">
+      <div className="sobre-banner">
         <div className="text-box">
           <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
           <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
@@ -27,7 +27,7 @@ const Sobre = () => {
           <p>
             O <strong>VigiAA</strong> é uma plataforma georreferenciada de monitoramento do mosquito
             <em> Aedes aegypti</em>, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à
-            população, pesquisadores e gestores públicos. <br /> Projeto de pesquisa aprovado no edital <strong>37/2024 FAPESC.</strong>
+            população, pesquisadores e gestores públicos. <br /> Este projeto de pesquisa foi aprovado no edital <strong>37/2024 FAPESC.</strong>
           </p>
         </div>
         <div className="sobre-section">
