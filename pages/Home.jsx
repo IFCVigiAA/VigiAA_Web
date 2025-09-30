@@ -108,15 +108,6 @@ function Home() {
           onLoad={onIframeLoad}
           allowFullScreen={true}
         />
-        
-        {iframeLoaded && (
-          <button 
-            className={`fullscreen-toggle-btn ${isFullscreen ? 'exit-mode' : 'enter-mode'}`} 
-            onClick={toggleFullscreen}
-          >
-            {isFullscreen ? 'Sair da Tela Cheia' : 'Tela Cheia'}
-          </button>
-        )}
       </div>
 
       {!isFullscreen && <Footer />}

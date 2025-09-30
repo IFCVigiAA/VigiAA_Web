@@ -1,8 +1,22 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden; /* elimina qualquer scroll horizontal */
+}
+
 .sobre-container {
   padding: 40px 20px;
   margin: 0 auto;
-  max-width: 5000px;
+  max-width: 1200px;
   font-family: 'Segoe UI', sans-serif;
+  box-sizing: border-box;
+}
+
+.sobre-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
 .sobre-content h1 {
@@ -10,10 +24,6 @@
   margin-bottom: 20px;
   color: #1f9e61;
   margin-top: 10vh;
-}
-.sobre-content iframe{
-  border: #000000;
-  margin-top: 2vh;
 }
 
 .sobre-content p {
@@ -23,12 +33,27 @@
   margin-top: 2vh;
   max-width: 1000px;
 }
-.sobre-content{
-  display: flex;
-  justify-content: center; 
-  flex-direction: column;
-  align-items: center;
+
+.iframe-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 90%; 
+  height: 0;
+  margin: 20px 0;
+  overflow: hidden;
+  border-radius: 8px;
 }
+
+.iframe-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
 .sobre-content h2 {
   font-size: 1.8rem;
   margin-bottom: 16px;
@@ -37,6 +62,9 @@
 
 .tech-list {
   list-style: none;
+  padding: 0;
+  margin: 0;
+  text-align: left;
 }
 
 .tech-list li {
@@ -44,5 +72,4 @@
   font-size: 1.05rem;
   padding: 10px 12px 10px 28px;
   border-radius: 6px;
-  
 }

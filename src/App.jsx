@@ -9,9 +9,7 @@ import Estação from "../pages/Estacao";
 import Publicações from "../pages/Publicacoes";
 
 function App() {
-  // Obtenha o base path do Vite
   const basePath = import.meta.env.BASE_URL;
-  
   return (
    <Router basename={basePath}>
     <Routes>

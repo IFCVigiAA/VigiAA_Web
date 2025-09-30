@@ -11,12 +11,12 @@
 }
 
 .NavButtons {
-  display: flex; /* Por padrão, em telas grandes, é um flexbox horizontal */
+  display: flex;
   align-items: center;
   gap: 20px;
   margin-left: auto;
   margin-right: 2vw;
-  transition: all 0.3s ease; /* Adicionado para uma transição suave ao abrir/fechar */
+  transition: all 0.3s ease;
 }
 
 .NavButtons button {
@@ -80,7 +80,7 @@
 }
 
 .projetosModal {
-  position: fixed; 
+  position: fixed;
   top: 60px;
   right: 40px;
   background-color: #123524;
@@ -105,78 +105,77 @@
   color: #1f9e61;
 }
 
-
 .hamburger-menu {
   display: none; 
   border: none;
-  color: white;
+  color: white !important;
   font-size: 30px;
   cursor: pointer;
-  margin-left: auto; 
+  margin-left: auto;
   margin-right: 20px;
+  background: none;
+  padding: 0;
 }
 
-
 @media (max-width: 768px) {
-  .navbar {
-    flex-direction: row; 
-    justify-content: space-between; 
-    height: 70px; 
-    padding: 0 15px; 
-  }
-
   .NavButtons {
-    flex-direction: column; 
-    position: absolute;
-    top: 70px; 
+    flex-direction: column;
+    position: fixed;
+    top: 0;
     right: 0;
+    width: 100%;
+    height: 100vh;
     background: linear-gradient(to right, #142941, #123524);
-    width: 100%; 
-    height: calc(100vh - 70px);
-    justify-content: flex-start; 
-    padding-top: 20px; 
-    transform: translateX(100%); 
-    opacity: 0; 
-    pointer-events: none; 
-    display: none; 
+    justify-content: flex-start;
+    padding-top: 70px;
+    transform: translateX(100%);
+    opacity: 0;
+    pointer-events: none;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-y: auto;
+    z-index: 9999;
   }
+  
+  .NavButtons {
+      display: none; 
+  }
+  
 
   .NavButtons.show {
-    transform: translateX(0); 
-    opacity: 1; 
-    pointer-events: auto; 
     display: flex; 
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
   }
+
 
   .NavButtons a,
   .NavButtons button {
-    width: 90%; 
+    width: 100%;
     text-align: center;
-    padding: 15px 0; 
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1); 
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   }
 
-  .NavButtons button {
-    margin-bottom: 10px; 
-  }
 
   .hamburger-menu {
-    display: block; 
+    display: block;
   }
 
   .projetosModal {
-    position: static; 
-    background: none; 
-    border: none; 
-    box-shadow: none; 
+    position: static;
+    background: none;
+    border: none;
+    box-shadow: none;
     padding: 0;
-    margin-top: 10px; 
-    width: 100%; 
+    margin-top: 10px;
+    width: 100%;
   }
 
   .projetosModal a {
-    padding-left: 30px; 
-    border-bottom: none; 
-    text-align: left; 
+    padding-left: 30px;
+    border-bottom: none;
+    text-align: left;
   }
 }
