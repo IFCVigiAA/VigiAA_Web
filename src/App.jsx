@@ -9,9 +9,9 @@ import Estação from "../pages/Estacao";
 import Publicações from "../pages/Publicacoes";
 
 function App() {
-  const basePath = import.meta.env.BASE_URL;
+   // const basePath = import.meta.env.BASE_URL;
   return (
-   <Router basename={basePath}>
+   <Router>
     <Routes>
       <Route path="/" element={<Home/>} />
       <Route path="/participantes" element={<Participantes/>} />

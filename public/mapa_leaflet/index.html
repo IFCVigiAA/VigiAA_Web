@@ -156,7 +156,7 @@
             // --- 3. Função Genérica para buscar e adicionar Camadas WFS (para GeoJSON) ---
             // Esta função é usada para camadas que são visualizadas como GeoJSON (polígonos ou pontos individuais).
             function fetchWFSData(layerName, displayName, styleFunction, popupFields, version = '2.0.0', isPointLayer = false) {
-                var wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
+                var wfsUrl = `http://dados/geoserver/wfs?`;
                 var params = {
                     service: 'WFS',
                     version: version,
@@ -376,7 +376,7 @@
 
             // --- Função para atualizar Casos Positivos como Mapa de Calor (camada dinâmica Leaflet.heat) ---
             function updateCasosHeatmap() {
-                const wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
+                const wfsUrl = `http://dados/geoserver/wfs?`;
                 const params = {
                     service: 'WFS',
                     version: '2.0.0',
