@@ -1,46 +1,58 @@
 .publicacoes-body {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 40px 20px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .titulo-pagina {
-    margin-top: 10vh;
-    text-align: center;
-    font-size: 2em;
-    margin-bottom: 30px;
-  }
-  
-  .lista-artigos {
-    list-style: none;
-    padding: 0;
-  }
-  
-  .item-artigo {
-    border-bottom: 1px solid #ccc;
-    padding: 20px 0;
-  }
-  
-  .titulo-artigo {
-    font-size: 1.3em;
-    margin: 0;
-  }
-  
-  .autores-artigo,
-  .data-artigo {
-    margin: 5px 0;
-    color: #555;
-  }
-  
-  .link-artigo {
-    display: inline-block;
-    margin-top: 10px;
-    color: #007bff;
-    text-decoration: none;
-  }
-  
-  .link-artigo:hover {
-    text-decoration: underline;
-  }
-  
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  font-family: Arial, sans-serif;
+}
+
+.titulo-pagina {
+  margin-top: 10vh;
+  text-align: center;
+  font-size: 2em;
+  margin-bottom: 30px;
+}
+
+.lista-artigos {
+  list-style: none;
+  padding: 0;
+}
+
+.item-artigo {
+  border-bottom: 1px solid #ccc;
+  padding: 20px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.titulo-artigo {
+  font-size: 1.3em;
+  margin: 0;
+}
+
+.autores-artigo,
+.data-artigo {
+  margin: 5px 0;
+  color: #555;
+}
+
+.link-artigo {
+  display: inline-block;
+  margin-top: 10px;
+  color: #007bff;
+  text-decoration: none;
+}
+
+.link-artigo:hover {
+  text-decoration: underline;
+}
+
+/* --- NOVO: ESTILO PARA TAG DE PREMIAÇÃO --- */
+
+.tag-premiado {
+  margin: 5px 0;
+  font-size: 0.9em;
+  display: inline-block;
+  color: #292929; 
+  font-weight: bold;
+  text-transform: uppercase;
+}

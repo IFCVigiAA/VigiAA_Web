@@ -1,11 +1,10 @@
 .bodyParticipantes {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: center; /* Centraliza horizontalmente o conteúdo (os grupos) */
   padding: 20px;
   box-sizing: border-box;
   margin-top: 8vh;
-  background-color: #f9f9f9;
   min-height: calc(100vh - 8vh);
 }
 
@@ -13,6 +12,7 @@
   width: 100%;
   max-width: 1200px;
   margin-bottom: 40px;
+  text-align: center;
 }
 
 .grupo h2 {
@@ -23,14 +23,14 @@
 }
 
 .lista-participantes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 30px;
-  justify-items: center;
-  margin: 0 auto;
-  padding: 0;
+  display: flex;
+  flex-wrap: wrap; 
+  justify-content: center; 
+  gap: 30px; 
   list-style: none;
+  padding: 0; 
   width: 100%;
+  margin: 0 auto;
 }
 
 .participantes {
@@ -39,11 +39,14 @@
   align-items: center;
   transition: transform 0.2s ease;
   cursor: pointer;
+
+  width: 150px; 
 }
 
 .participantes:hover {
   transform: translateY(-5px);
 }
+
 
 .participantes img {
   border-radius: 2px;
@@ -67,50 +70,50 @@
   color: #1f9e61;
 }
 
-/* MEDIA QUERIES */
-@media (max-width: 1024px) {
-  .lista-participantes {
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 20px;
-  }
 
+
+@media (max-width: 1024px) {
+  .participantes {
+    width: 120px; 
+  }
   .participantes img {
     width: 120px;
     height: 160px;
   }
-
   .participantes .nome {
     font-size: 18px;
   }
 }
 
 @media (max-width: 768px) {
+  /* Altera o tamanho do card para caber mais */
   .lista-participantes {
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
     gap: 15px;
   }
-
+  .participantes {
+    width: 100px;
+  }
   .participantes img {
     width: 100px;
     height: 140px;
   }
-
   .participantes .nome {
     font-size: 16px;
   }
 }
 
 @media (max-width: 480px) {
+
   .lista-participantes {
-    grid-template-columns: 1fr;
     gap: 10px;
   }
-
+  .participantes {
+    width: 90px;
+  }
   .participantes img {
     width: 90px;
     height: 120px;
   }
-
   .participantes .nome {
     font-size: 15px;
   }
