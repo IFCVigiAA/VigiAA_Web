@@ -163,6 +163,36 @@ hr {
   margin-top: 10px;
 }
 
+@media (max-width: 2560px) {
+  .fullscreen-toggle-btn {
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 18% !important;  
+    left: 26.2% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto; 
+    bottom: auto;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+  .fullscreen-toggle-btn.exit-mode {
+    position: fixed;    
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 14% !important;  
+    left: 1.3% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+}
+
 @media (max-width: 1366px) {
   .fullscreen-toggle-btn {
     /* NOVO: Sobrescreve a posição fixa de desktop */
