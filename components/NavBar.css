@@ -46,6 +46,8 @@
 
 .NavTitle {
   margin-left: 2%;
+  height: 70px;
+  overflow-y: hidden;
 }
 
 .NavTitle a {
@@ -59,7 +61,7 @@
 }
 
 .logoNav {
-  width: 180px;
+  width: 160px;
   height: auto;
   margin-left: -38px;
 }
