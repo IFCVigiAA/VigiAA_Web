@@ -14,9 +14,8 @@
   max-width: 100%;
   height: auto;
 }
-
-/* NOVO: Estilo para fullscreen na página (esconde o scroll) */
 .page-container.fullscreen-active {
+    /* Esconde todo o conteúdo que não é o mapa */
     position: fixed;
     width: 100vw;
     height: 100vh;
@@ -40,7 +39,6 @@ hr {
   text-align: center;
 }
 
-/* ESTILOS DA SEÇÃO DO MAPA */
 .mapSection {
   display: flex;
   flex-direction: column;
@@ -48,29 +46,27 @@ hr {
   justify-content: center;
   margin-bottom: 50px;
   width: 100%;
-  position: relative; /* Referência para o botão absoluto */
+  position: relative;
 }
 
-/* ESTILO PADRÃO DO IFRAME */
 .mapaHome {
-  display: block;
-  width: 50%; /* Largura padrão */
-  height: 70vh;
-  border: 2px solid rgb(7, 126, 68);
+  display: block !important;
+  width: 50% !important;
+  height: 70vh !important;
+  border: 2px solid rgb(7, 126, 68) !important;
   border-radius: 5px;
-  margin: 0 auto 20px auto;
+  margin: 0 auto 20px auto !important;
 }
 
-/* ESTILO DO IFRAME EM MODO FULLSCREEN */
 .mapaHome.fullscreen-active {
-  width: 100vw;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 10000;
-  margin: 0;
-  border-radius: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  z-index: 10000 !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
   transition: all 0.3s ease-in-out;
 }
 
@@ -107,44 +103,45 @@ hr {
   cursor:not-allowed;
 }
 
-/* ESTILO PADRÃO DO BOTÃO DE FULLSCREEN (ALINHAMENTO COM LEAFLET) */
 .fullscreen-toggle-btn {
-  /* Alinha o botão com a posição dos controles do Leaflet (topo/esquerda) */
-  position: absolute; 
-  top: 10px;        
-  left: 25.8%; /* Cálculo aproximado para 50% de largura */
+  /* Altera a posição do botão no modo normal (fora de fullscreen) */
+  position: absolute; /* Tira ele do fluxo normal */
+  top: 12% !important;        /* 10px do topo do .mapSection */
+  left: 25.8% !important;       /* 10px da esquerda do .mapSection */
+  /* Remover estilos que o centralizavam */
+  margin: 0;
   right: auto;
-  z-index: 1001; 
-
-  /* Estilos visuais */
-  background-color: #1f9e61; 
+  bottom: auto; 
+  display: flex;
+  justify-content: center; /* Centraliza o conteúdo (o ícone) horizontalmente */
+  align-items: center; /* Centraliza o conteúdo (o ícone) verticalmente */
+  /* Seus estilos de aparência */
+  background-color: white;
   color: black;
-  border-radius: 5px;
+  border-radius: 4px;
   border: none;
   font-weight: bold;
-  padding: 8px 12px;
+  padding: 1px 1px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
   font-size: 16px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
 }
 
 .fullscreen-toggle-btn:hover {
-  background-color: #123524;
+  background-color: rgba(48, 45, 45, 0.185);
   color: white;
 }
 
-/* ESTILO DO BOTÃO EM MODO FULLSCREEN (Saída) */
+/* NOVO CÓDIGO: Altere as propriedades para movê-lo para a superior esquerda */
 .fullscreen-toggle-btn.exit-mode {
-  /* No fullscreen, fica fixo na superior esquerda da TELA */
   position: fixed; 
-  top: 10px; 
-  left: 10px; 
-  right: auto;
-  bottom: auto;
+  top: 8.5% !important; 
+  left: 0.91% !important; /* Use um valor fixo em pixels para alinhar com o Leaflet */
 
-  background-color: #ff4500; 
-  color: white;
+  
+  background-color: #201c1a4d;
+  color: white; /* Alterei para white para melhor legibilidade no mapa */
   z-index: 10002;
 }
 
@@ -152,62 +149,251 @@ hr {
   background-color: #cc0000;
 }
 
+.mapSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 50px;
+  width: 100%;
+  position: relative;
+}
+
 .mapButtons.map-layer-buttons {
   margin-top: 10px;
 }
 
-/* --- MEDIA QUERIES (RESPONSIVIDADE) --- */
+@media (max-width: 1366px) {
+  .fullscreen-toggle-btn {
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 18% !important;  
+    left: 26.2% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto; 
+    bottom: auto;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+  .fullscreen-toggle-btn.exit-mode {
+    position: fixed;    
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 14% !important;  
+    left: 1.3% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+}
+
 
 @media (max-width: 1024px) {
-  /* ... estilos mantidos ... */
+  .home-body {
+    gap: 30px;
+    padding-bottom: 30px;
+  }
+  .main-title {
+    font-size: 28px;
+  }
+  .subtitle {
+    font-size: 20px;
+  }
+  .text-box {
+    padding-top: 80px;
+    margin-left: 5vw;
+  }
+  .logo-img {
+    width: 60vw;
+    margin-left: 3vw;
+  }
   .mapaHome {
-    width: 70%; 
-    height: 60vh;
+    width: 70% !important;
+    height: 60vh !important;
   }
   .mapTitle {
     font-size: 34px;
   }
-  
-  /* AJUSTE DO BOTÃO: Alinhado com o canto esquerdo do mapa (70% largura) */
+
   .fullscreen-toggle-btn {
-    left: 15.5%; /* Novo cálculo para 70% de largura */
-    right: auto;
-    top: 15px; 
+    position: absolute;    
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 82px !important;  
+    left: 170px !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
   }
+  .fullscreen-toggle-btn.exit-mode {
+    position: fixed;    
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 14% !important;  
+    left: 1.7% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+
+  .fullscreen-toggle-btn.exit-mode:hover {
+    background-color: #cc0000;
+  }
+
 }
 
 @media (max-width: 768px) {
-  /* ... estilos mantidos ... */
+  .home-body {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    padding-top: 70px;
+    gap: 20px;
+    padding-bottom: 20px;
+  }
+  .main-title {
+    font-size: 28px;
+  }
+  .subtitle {
+    font-size: 20px;
+  }
+  .text-box {
+    padding: 20px;
+    margin: 0;
+    width: 90%;
+  }
+  .logo-box {
+    width: 100%;
+    order: -1;
+    padding: 0 15px;
+    margin-bottom: 20px;
+  }
+  .logo-img {
+    width: 60vw;
+    margin: 0 auto;
+  }
+  .mapTitle {
+    font-size: 30px;
+    margin-top: 30px;
+  }
   .mapaHome {
-    width: 95%; 
-    height: 50vh;
+    width: 95% !important;
+    height: 50vh !important;
   }
   .mapButtons {
-    padding: 0 10px;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 0 50px;
     align-items: center;
   }
   .mapButtons button {
     width: 90%;
+    font-size: 16px;
+    padding: 12px;
+    height: auto;
+    /* Evita que o texto quebre ou esprema os botões */
+    white-space: nowrap;
   }
-
-  /* AJUSTE DO BOTÃO: Alinhado com o canto esquerdo do mapa (95% largura) */
   .fullscreen-toggle-btn {
-    left: 3%; /* Novo cálculo para 95% de largura */
-    right: auto;
-    top: 10px; 
+    position: absolute;
+        
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 80px !important;  
+    left: 26px !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+  .fullscreen-toggle-btn.exit-mode {
+    position: fixed;
+        
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 12% !important;  
+    left: 4.2% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
-  /* ... estilos mantidos ... */
+  .main-title {
+    font-size: 24px;
+  }
+  .subtitle {
+    font-size: 18px;
+  }
+  .logo-img {
+    width: 70vw;
+  }
+  .mapTitle {
+    font-size: 26px;
+  }
   .mapaHome {
-    height: 40vh;
+    height: 40vh !important;
+  }
+  .mapButtons button {
+    font-size: 14px;
+    padding: 10px;
   }
 
-  /* AJUSTE DO BOTÃO */
   .fullscreen-toggle-btn {
-    left: 3%; 
-    right: auto;
-    top: 5px; 
+    position: absolute;
+        
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 80px !important;  
+    left: 26px !important; 
+        
+     /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+  .fullscreen-toggle-btn.exit-mode {
+    position:fixed;
+        
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 12% !important;  
+    left: 4.2% !important; 
+        
+     /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+
+  .fullscreen-toggle-btn.exit-mode:hover {
+    background-color: #cc0000;
   }
 }

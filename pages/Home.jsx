@@ -97,7 +97,7 @@ function Home() {
           {isFullscreen ? (
             <FontAwesomeIcon icon={faXmark} />
           ) : (
-            <FontAwesomeIcon icon={faExpand} />
+            <FontAwesomeIcon icon={faExpand} style={{ marginRight: '2px', marginLeft: '2px', marginTop: '2px', marginBottom: '2px' }}/>
           )}
         </button>
 
