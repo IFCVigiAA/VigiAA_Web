@@ -106,7 +106,7 @@ hr {
 .fullscreen-toggle-btn {
   /* Altera a posição do botão no modo normal (fora de fullscreen) */
   position: absolute; /* Tira ele do fluxo normal */
-  top: 12% !important;        /* 10px do topo do .mapSection */
+  top: 10% !important;        /* 10px do topo do .mapSection */
   left: 25.8% !important;       /* 10px da esquerda do .mapSection */
   /* Remover estilos que o centralizavam */
   margin: 0;
@@ -161,6 +161,66 @@ hr {
 
 .mapButtons.map-layer-buttons {
   margin-top: 10px;
+}
+
+@media (max-width: 2560px) {
+  .fullscreen-toggle-btn {
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 18% !important;  
+    left: 26% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto; 
+    bottom: auto;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+  .fullscreen-toggle-btn.exit-mode {
+    position: fixed;    
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 14% !important;  
+    left: 1.1% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 1900px) {
+  .fullscreen-toggle-btn {
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 14% !important;  
+    left: 25.8% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto; 
+    bottom: auto;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
+  .fullscreen-toggle-btn.exit-mode {
+    position: fixed;    
+    /* NOVO: Sobrescreve a posição fixa de desktop */
+    top: 9% !important;  
+    left: 0.9% !important; 
+        
+    /* CORREÇÃO CRÍTICA (evita esticamento) */
+    right: auto !important; 
+    bottom: auto !important;
+        
+    margin: 0; 
+    padding: 2px 2px;
+    font-size: 14px;
+  }
 }
 
 @media (max-width: 1366px) {
