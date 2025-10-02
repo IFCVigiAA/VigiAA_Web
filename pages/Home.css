@@ -190,21 +190,21 @@ hr {
     width: 90%;
   }
 
-  /* AJUSTE DO BOTÃO: Alinhado com o canto esquerdo do mapa (95% largura) */
+
   .fullscreen-toggle-btn {
-    left: 3%; /* Novo cálculo para 95% de largura */
+    left: 3%; 
     right: auto;
     top: 10px; 
   }
 }
 
 @media (max-width: 480px) {
-  /* ... estilos mantidos ... */
+
   .mapaHome {
     height: 40vh;
   }
 
-  /* AJUSTE DO BOTÃO */
+
   .fullscreen-toggle-btn {
     left: 3%; 
     right: auto;
