@@ -1,0 +1,153 @@
+#mapid { 
+    height: 100vh;
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 0; /* Garante que o mapa fique abaixo de outros elementos flutuantes */
+}
+/* Estilo para o corpo da página, removendo margens padrão */
+body { 
+    margin: 0;
+    padding: 0;
+    /*overflow: hidden; /* Evita barras de rolagem indesejadas */
+}
+/* Estilos para as legendas flutuantes */
+.map-legend {
+    position: fixed;
+    left: 2vw;
+    max-width: 90vw;
+    z-index: 9999; /* Garante que a legenda fique acima do mapa e do controle de camadas */
+    font-size: 14px;
+    background-color: white;
+    border: 2px solid grey;
+    padding: 10px;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+    overflow-x: auto;
+    word-wrap: break-word;
+    border-radius: 8px; /* Cantos arredondados para as legendas */
+}
+.map-legend i {
+    display: block; /* Mude para block para que o float funcione corretamente e não empurre o texto */
+    width: 18px;
+    height: 10px;
+    float: left;
+    margin-right: 8px;
+    border: 1px solid #ccc; /* Adiciona uma borda sutil nas cores da legenda */
+    border-radius: 2px; /* Pequenos cantos arredondados para os blocos de cor */
+}
+/* .line-label {
+    background: rgba(255, 255, 255, 0.7); /* Fundo semi-transparente 
+    border: 1px solid #000;
+    padding: 2px 5px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+} */
+.leaflet-control-toggle-button {
+    background-color: white;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #333;
+    cursor: pointer;
+    border-radius: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+#declividade-legend {
+    bottom: 50px; /* Posicionamento da primeira legenda */
+}
+
+#demografia_ofc-legend {
+    /* Como elas estavam sobrepostas no seu código,
+    você pode reajustar para que apareçam juntas,
+    ou manter a mesma posição se for intencional. */
+    bottom: 50px; 
+}
+
+#demografia-legend {
+    bottom: 250px; /* Posicionamento da segunda legenda */
+}
+
+#heatmap-legend {
+    bottom: 400px; /* Posicionamento da terceira legenda */
+}
+
+
+
+    @media (max-width: 768px) {
+    /* Adjusts the overall style of the legends for mobile */
+    .map-legend {
+        left: 1vw; /* Smaller left margin to save space */
+        max-width: 48vw; /* Takes up less than half the screen width */
+        font-size: 10px; /* A smaller, more compact font size */
+        padding: 5px; /* Reduced padding for a tighter fit */
+    }
+    
+    /* Adjusts the color box icons within the legends */
+    .map-legend i {
+        width: 12px; /* Smaller icon width */
+        height: 8px; /* Smaller icon height */
+        margin-right: 5px; /* Reduced margin */
+    }
+
+    /* A new rule to make the Layer Control more compact on mobile */
+    .leaflet-control-layers {
+        font-size: 10px; /* Smaller font for the layer control */
+        max-height: 20vh; /* Limits the height to prevent it from being too tall */
+        overflow-y: auto; /* Adds a scrollbar if there are too many layers */
+    }
+    #declividade-legend,
+    #demografia_ofc-legend,
+    #heatmap-legend {
+        position:fixed;
+        bottom: 200px; /* Mais perto da borda inferior no mobile */
+    }
+    
+    #demografia-legend {
+        position:fixed;
+        bottom: 180px; /* Menos espaço entre as legendas no mobile */
+    }
+}
+@media (max-width: 480px) {
+    /* Adjusts the overall style of the legends for mobile */
+    .map-legend {
+        left: 1vw; /* Smaller left margin to save space */
+        max-width: 48vw; /* Takes up less than half the screen width */
+        font-size: 10px; /* A smaller, more compact font size */
+        padding: 5px; /* Reduced padding for a tighter fit */
+    }
+    
+    /* Adjusts the color box icons within the legends */
+    .map-legend i {
+        width: 12px; /* Smaller icon width */
+        height: 8px; /* Smaller icon height */
+        margin-right: 5px; /* Reduced margin */
+    }
+
+    /* A new rule to make the Layer Control more compact on mobile */
+    .leaflet-control-layers {
+        font-size: 10px; /* Smaller font for the layer control */
+        max-height: 20vh; /* Limits the height to prevent it from being too tall */
+        overflow-y: auto; /* Adds a scrollbar if there are too many layers */
+    }
+    #declividade-legend,
+    #demografia_ofc-legend,
+    #heatmap-legend {
+        position:fixed;
+        bottom: 200px; /* Mais perto da borda inferior no mobile */
+    }
+    
+    #demografia-legend {
+        position:fixed;
+        bottom: 180px; /* Menos espaço entre as legendas no mobile */
+    } 
+}
+

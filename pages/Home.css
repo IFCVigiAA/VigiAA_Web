@@ -15,6 +15,14 @@
   height: auto;
 }
 
+/* NOVO: Estilo para fullscreen na página (esconde o scroll) */
+.page-container.fullscreen-active {
+    position: fixed;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
 hr {
   width: 98%;
   border: none;
@@ -32,6 +40,7 @@ hr {
   text-align: center;
 }
 
+/* ESTILOS DA SEÇÃO DO MAPA */
 .mapSection {
   display: flex;
   flex-direction: column;
@@ -39,27 +48,29 @@ hr {
   justify-content: center;
   margin-bottom: 50px;
   width: 100%;
-  position: relative;
+  position: relative; /* Referência para o botão absoluto */
 }
 
+/* ESTILO PADRÃO DO IFRAME */
 .mapaHome {
-  display: block !important;
-  width: 50% !important;
-  height: 70vh !important;
-  border: 2px solid rgb(7, 126, 68) !important;
+  display: block;
+  width: 50%; /* Largura padrão */
+  height: 70vh;
+  border: 2px solid rgb(7, 126, 68);
   border-radius: 5px;
-  margin: 0 auto 20px auto !important;
+  margin: 0 auto 20px auto;
 }
 
+/* ESTILO DO IFRAME EM MODO FULLSCREEN */
 .mapaHome.fullscreen-active {
-  width: 100vw !important;
-  height: 100vh !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  z-index: 10000 !important;
-  margin: 0 !important;
-  border-radius: 0 !important;
+  width: 100vw;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+  margin: 0;
+  border-radius: 0;
   transition: all 0.3s ease-in-out;
 }
 
@@ -96,20 +107,26 @@ hr {
   cursor:not-allowed;
 }
 
+/* ESTILO PADRÃO DO BOTÃO DE FULLSCREEN (ALINHAMENTO COM LEAFLET) */
 .fullscreen-toggle-btn {
-  background-color: #1f9e61;
+  /* Alinha o botão com a posição dos controles do Leaflet (topo/esquerda) */
+  position: absolute; 
+  top: 10px;        
+  left: 25.8%; /* Cálculo aproximado para 50% de largura */
+  right: auto;
+  z-index: 1001; 
+
+  /* Estilos visuais */
+  background-color: #1f9e61; 
   color: black;
-  border-radius: 4px;
+  border-radius: 5px;
   border: none;
   font-weight: bold;
-  padding: 10px 15px;
+  padding: 8px 12px;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition: all 0.3s ease;
   font-size: 16px;
-  z-index: 10001;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-  margin: 10px auto;
-  display: block;
 }
 
 .fullscreen-toggle-btn:hover {
@@ -117,11 +134,16 @@ hr {
   color: white;
 }
 
+/* ESTILO DO BOTÃO EM MODO FULLSCREEN (Saída) */
 .fullscreen-toggle-btn.exit-mode {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #ff4500;
+  /* No fullscreen, fica fixo na superior esquerda da TELA */
+  position: fixed; 
+  top: 10px; 
+  left: 10px; 
+  right: auto;
+  bottom: auto;
+
+  background-color: #ff4500; 
   color: white;
   z-index: 10002;
 }
@@ -130,136 +152,62 @@ hr {
   background-color: #cc0000;
 }
 
-.mapSection {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 50px;
-  width: 100%;
-  position: relative;
-}
-
 .mapButtons.map-layer-buttons {
   margin-top: 10px;
 }
 
+/* --- MEDIA QUERIES (RESPONSIVIDADE) --- */
+
 @media (max-width: 1024px) {
-  .home-body {
-    gap: 30px;
-    padding-bottom: 30px;
-  }
-  .main-title {
-    font-size: 28px;
-  }
-  .subtitle {
-    font-size: 20px;
-  }
-  .text-box {
-    padding-top: 80px;
-    margin-left: 5vw;
-  }
-  .logo-img {
-    width: 60vw;
-    margin-left: 3vw;
-  }
+  /* ... estilos mantidos ... */
   .mapaHome {
-    width: 70% !important;
-    height: 60vh !important;
+    width: 70%; 
+    height: 60vh;
   }
   .mapTitle {
     font-size: 34px;
   }
+  
+  /* AJUSTE DO BOTÃO: Alinhado com o canto esquerdo do mapa (70% largura) */
   .fullscreen-toggle-btn {
-    bottom: 15px;
-    right: 15px;
-    padding: 8px 12px;
-    font-size: 14px;
+    left: 15.5%; /* Novo cálculo para 70% de largura */
+    right: auto;
+    top: 15px; 
   }
 }
 
 @media (max-width: 768px) {
-  .home-body {
-    flex-direction: column;
-    text-align: center;
-    align-items: center;
-    padding-top: 70px;
-    gap: 20px;
-    padding-bottom: 20px;
-  }
-  .main-title {
-    font-size: 28px;
-  }
-  .subtitle {
-    font-size: 20px;
-  }
-  .text-box {
-    padding: 20px;
-    margin: 0;
-    width: 90%;
-  }
-  .logo-box {
-    width: 100%;
-    order: -1;
-    padding: 0 15px;
-    margin-bottom: 20px;
-  }
-  .logo-img {
-    width: 60vw;
-    margin: 0 auto;
-  }
-  .mapTitle {
-    font-size: 30px;
-    margin-top: 30px;
-  }
+  /* ... estilos mantidos ... */
   .mapaHome {
-    width: 95% !important;
-    height: 50vh !important;
+    width: 95%; 
+    height: 50vh;
   }
   .mapButtons {
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 20px;
     padding: 0 10px;
+    align-items: center;
   }
   .mapButtons button {
     width: 90%;
-    font-size: 16px;
-    padding: 12px;
-    height: auto;
   }
+
+  /* AJUSTE DO BOTÃO: Alinhado com o canto esquerdo do mapa (95% largura) */
   .fullscreen-toggle-btn {
-    bottom: 10px;
-    right: 10px;
-    padding: 8px 12px;
-    font-size: 14px;
+    left: 3%; /* Novo cálculo para 95% de largura */
+    right: auto;
+    top: 10px; 
   }
 }
 
 @media (max-width: 480px) {
-  .main-title {
-    font-size: 24px;
-  }
-  .subtitle {
-    font-size: 18px;
-  }
-  .logo-img {
-    width: 70vw;
-  }
-  .mapTitle {
-    font-size: 26px;
-  }
+  /* ... estilos mantidos ... */
   .mapaHome {
-    height: 40vh !important;
+    height: 40vh;
   }
-  .mapButtons button {
-    font-size: 14px;
-    padding: 10px;
-  }
+
+  /* AJUSTE DO BOTÃO */
   .fullscreen-toggle-btn {
-    bottom: 5px;
-    right: 5px;
-    padding: 6px 10px;
-    font-size: 12px;
+    left: 3%; 
+    right: auto;
+    top: 5px; 
   }
 }
