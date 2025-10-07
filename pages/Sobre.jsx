@@ -7,15 +7,15 @@
   const Sobre = () => {
     return (
       <>
-    <NavBar />
-      <div className="page-container">
+    
+      <div className="page-container"><NavBar />
         <div className="sobre-banner">
           <div className="text-box">
             <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
             <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
           </div>
           <div className="logo-box">
-            <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
+            <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logoSobre" />
           </div>
         </div>
         <div className="sobre-container">

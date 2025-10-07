@@ -181,3 +181,8 @@
     text-align: left;
   }
 }
+.navbar .logoNav {
+  width: 160px !important;
+  height: auto !important;
+  margin-left: -38px !important;
+}
