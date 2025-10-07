@@ -61,9 +61,9 @@
 }
 
 .logoNav {
-  width: 160px;
-  height: auto;
+  width: 180px;
   margin-left: -38px;
+  margin-top: -7px;
 }
 
 .projetosBtn {
@@ -180,9 +180,4 @@
     border-bottom: none;
     text-align: left;
   }
-}
-.navbar .logoNav {
-  width: 160px !important;
-  height: auto !important;
-  margin-left: -38px !important;
 }

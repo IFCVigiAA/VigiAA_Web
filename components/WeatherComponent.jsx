@@ -65,7 +65,8 @@ const WeatherComponent = () => {
         maxWidth: '300px',
         margin: '15px auto',
         fontSize: '14px',
-        textAlign: 'center'
+        textAlign: 'center',
+        border: '2px solid #00a053'
       }}
     >
       <h4 style={{ marginBottom: '10px', color: '#007b40' }}>

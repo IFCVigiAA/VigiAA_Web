@@ -8,7 +8,8 @@
     return (
       <>
     
-      <div className="page-container"><NavBar />
+      <div className="page-container">
+        <NavBar />
         <div className="sobre-banner">
           <div className="text-box">
             <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
@@ -51,7 +52,6 @@
               focos de infestação do mosquito Aedes Aegypti, incentivando a conscientização e ações preventivas.
             </p>
           </div>
-
           <div className="sobre-section">
             <h2>Localização do Projeto</h2>
             <p>O projeto está localizado no laboratório GEATI no Instituto Federal Catarinense de Camboriú.</p>

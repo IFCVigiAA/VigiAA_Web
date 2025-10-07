@@ -2,6 +2,7 @@ import React from 'react';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
 import './Publicacoes.css';
+import { FaTrophy, FaMedal, FaAward } from 'react-icons/fa';
 
 const Publicações = () => {
   const artigos = [
@@ -43,7 +44,7 @@ const Publicações = () => {
               <p className="data-artigo">{artigo.data}</p>
               {artigo.premiado && (
                 <p className="tag-premiado">
-                  🏆 Premiado: {artigo.premiado}
+                   <FaMedal style={{ color: '#f0da16', marginTop: '2px' }} /> Premiado: {artigo.premiado}
                 </p>
               )}
               
