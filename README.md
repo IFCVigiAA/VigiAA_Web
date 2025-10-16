@@ -1,5 +1,5 @@
 
-# vigiAA_web
+# VigiAA Web
 Plataforma georreferenciada de vigilância do Aedes Aegypti
 
 O VigiAA é uma plataforma georreferenciada de monitoramento do mosquito Aedes aegypti, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à população, pesquisadores e gestores públicos.
