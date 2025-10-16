@@ -2,7 +2,8 @@
 
 #root {
   margin: 0;
-  width: 100vw;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .page-container {
@@ -416,6 +417,7 @@ hr {
   }
   .mapaHome {
     height: 40vh !important;
+    width: 95% !important;
   }
   .mapButtons button {
     font-size: 14px;

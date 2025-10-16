@@ -17,6 +17,9 @@
 display: flex;
 gap: 5px;
 }
+.emailIcon{
+  margin-top: 1.5px;
+}
 .footer a {
   color: white;
   text-decoration: none;
