@@ -45,7 +45,7 @@ function Home() {
 
   const onIframeLoad = () => {
     setIframeLoaded(true);
-    console.log('Iframe carregado e pronto para interagir. %cby ian', 'font-style: italic;');
+    console.log('Iframe carregado e pronto para interagir.');
   };
 
   return (
