@@ -37,20 +37,18 @@ const MapaLaboratorio = () => {
             zoomControl: true,
           }}
           onLoad={(map) => {
-            console.log('GoogleMap onLoad disparado!'); // Adicionado
-            // Força a renderização do mapa após carregamento
+            console.log('GoogleMap onLoad disparado!'); 
             setTimeout(() => {
-              console.log('setTimeout executado!'); // Adicionado
+              console.log('setTimeout executado!'); 
               window.google.maps.event.trigger(map, 'resize');
-              // Força a opacidade do iframe
               const iframe = document.querySelector('.mapa-container iframe');
               if (iframe) {
-                console.log('Iframe encontrado no setTimeout!'); // Adicionado
+                console.log('Iframe encontrado no setTimeout!'); 
                 iframe.style.opacity = '1';
                 iframe.style.visibility = 'visible';
-                console.log('Opacidade e visibilidade do iframe forçadas!'); // Adicionado
+                console.log('Opacidade e visibilidade do iframe forçadas!'); 
               } else {
-                console.log('Iframe NÃO encontrado no setTimeout!'); // Adicionado
+                console.log('Iframe NÃO encontrado no setTimeout!'); 
               }
             }, 100);
           }}

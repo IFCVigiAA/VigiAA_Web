@@ -4,12 +4,8 @@
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: #000000;
   padding-top: 10vh;
-
-  /* --- Alterações para Responsividade --- */
-  /* Adiciona padding nas laterais para telas pequenas */
   padding-left: 20px;
   padding-right: 20px;
-  /* Garante que o padding não aumente a largura total */
   box-sizing: border-box; 
 }
 
@@ -56,47 +52,37 @@
   font-size: 12px;
   margin-bottom: 5vh;
   margin-top: -2px;
-  /* Centraliza a legenda */
   text-align: center; 
 }
 
 .banner img {
   border-radius: 5px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
-
-  /* --- Alterações para Responsividade --- */
-  /* Substitui a largura fixa 'width: 800px;' */
-  max-width: 100%; /* Garante que a imagem nunca ultrapasse o container */
-  height: auto;    /* Mantém a proporção da imagem */
-  display: block;  /* Remove espaços extras abaixo da imagem */
-  margin: 0 auto;  /* Centraliza a imagem */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); 
+  max-width: 100%; 
+  height: auto;    
+  display: block;  
+  margin: 0 auto;  
 }
 
 
-/* --- Bloco de Media Query para Telas Pequenas --- */
-/* Estas regras aplicam-se a telas com 768px de largura ou menos */
 @media (max-width: 768px) {
   
   .body {
-    /* Reduz o padding superior em telas menores */
     padding-top: 5vh; 
   }
   
   .hometext h1 {
-    /* Reduz o tamanho do título principal */
     font-size: 2rem;
     margin-top: 3rem; 
   }
 
   .hometext p,
   .hometext ul li {
-    /* Reduz o tamanho da fonte do texto para melhor leitura */
     font-size: 1rem;
     line-height: 1.5;
   }
 
   .hometext ul {
-    /* Ajusta o recuo da lista */
     padding-left: 20px; 
   }
 }

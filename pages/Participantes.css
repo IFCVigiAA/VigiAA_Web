@@ -86,7 +86,6 @@
 }
 
 @media (max-width: 768px) {
-  /* Altera o tamanho do card para caber mais */
   .lista-participantes {
     gap: 15px;
   }
