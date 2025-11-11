@@ -7,15 +7,16 @@
   const Sobre = () => {
     return (
       <>
-    <NavBar />
+    
       <div className="page-container">
+        <NavBar />
         <div className="sobre-banner">
           <div className="text-box">
             <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
             <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
           </div>
           <div className="logo-box">
-            <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logo-img" />
+            <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logoSobre" />
           </div>
         </div>
         <div className="sobre-container">
@@ -51,7 +52,6 @@
               focos de infestação do mosquito Aedes Aegypti, incentivando a conscientização e ações preventivas.
             </p>
           </div>
-
           <div className="sobre-section">
             <h2>Localização do Projeto</h2>
             <p>O projeto está localizado no laboratório GEATI no Instituto Federal Catarinense de Camboriú.</p>

@@ -26,8 +26,6 @@ const NavBar = () => {
       <button className="hamburger-menu" onClick={toggleMenu}>
         &#9776; 
       </button>
-
-     
       <div className={`NavButtons ${showMenu ? 'show' : ''}`}> 
         <NavLink to="/" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setShowMenu(false)}>
           Home

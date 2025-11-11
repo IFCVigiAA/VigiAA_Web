@@ -1,7 +1,7 @@
 .bodyParticipantes {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centraliza horizontalmente o conteúdo (os grupos) */
+  align-items: center; 
   padding: 20px;
   box-sizing: border-box;
   margin-top: 8vh;
@@ -86,7 +86,6 @@
 }
 
 @media (max-width: 768px) {
-  /* Altera o tamanho do card para caber mais */
   .lista-participantes {
     gap: 15px;
   }
