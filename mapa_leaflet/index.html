@@ -30,6 +30,11 @@
             z-index: 0;
         }
 
+        .leaflet-top.leaflet-right .leaflet-control-layers {
+            margin-top: 80px; /* Ajuste este valor (50px, 60px, etc.) para o deslocamento desejado */
+            position: relative;
+        }
+
         /* 3. Estilos Base das Legendas (POSIÇÃO VERTICAL SERÁ CONTROLADA PELO JS) */
         .map-legend {
             box-sizing: border-box; /* Boa prática! */
@@ -107,10 +112,77 @@
                 overflow-y: auto;        /* barra interna de rolagem */
                 -webkit-overflow-scrolling: touch; /* rolagem suave no iOS */
             }
+
+        }
+
+        /* 7. Estilos para os Filtros (Comboboxes) */
+        .filter-container {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 1000; /* Acima do controle de camadas */
+            background-color: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex; /* Para alinhar as caixas lado a lado */
+            gap: 10px;
+        }
+
+        .filter-container label {
+            font-weight: bold;
+            margin-right: 5px;
+            font-size: 14px;
+            white-space: nowrap; /* Não quebrar linha */
+        }
+
+        .filter-container select {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            min-width: 80px;
+        }
+
+        /* Ajuste para mobile */
+        @media (max-width: 768px) {
+            .filter-container {
+                top: 10px;
+                right: 10px;
+                flex-direction: column; /* Pilhar as caixas no celular */
+                gap: 5px;
+                padding: 5px;
+            }
+            
+            .leaflet-top.leaflet-right .leaflet-control-layers {
+                margin-top: 130px; /* Ajuste este valor (50px, 60px, etc.) para o deslocamento desejado */
+                position: relative;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="filter-container">
+        <div>
+            <label for="filter-ano">Ano:</label>
+            <select id="filter-ano">
+                <option value="">Todos</option>
+                </select>
+        </div>
+        <div>
+            <label for="filter-mes">Mês:</label>
+            <select id="filter-mes" disabled>
+                <option value="">Todos</option>
+                </select>
+        </div>
+        <div>
+            <label for="filter-dia">Dia:</label>
+            <select id="filter-dia" disabled>
+                <option value="">Todos</option>
+                </select>
+        </div>
+    </div>
+
     <div id="mapid"></div>
 
     <!-- Legenda de Declividade -->
@@ -176,10 +248,54 @@
 
     <script>
 
-        // --- Sua função principal (window.onload) ---
+        // --- Sua função principal ---
         window.onload = function() {
             // --- 1. Configuração Inicial do Mapa ---
             var map = L.map('mapid').setView([-27.0258, -48.6549], 12);
+
+            // Variáveis para armazenar o estado atual dos filtros
+            let selectedYear = '';
+            let selectedMonth = '';
+            let selectedDay = '';
+
+            // Elementos HTML dos filtros
+            const selectYear = document.getElementById('filter-ano');
+            const selectMonth = document.getElementById('filter-mes');
+            const selectDay = document.getElementById('filter-dia');
+
+            // Constrói a sintaxe de filtro WFS (Common Query Language)
+            function buildCqlFilter() {
+                let filter = '';
+                
+                // 1. Filtro de Ano
+                if (selectedYear && selectedYear !== '') {
+                    // Assume que a coluna 'ano' na sua tabela/view tem o ano (Ex: '2023')
+                    filter += `ano='${selectedYear}'`;
+                }
+                
+                // 2. Filtro de Mês
+                if (selectedMonth && selectedMonth !== '') {
+                    // Se já tem ano, adiciona AND
+                    if (filter.length > 0) {
+                        filter += ' AND ';
+                    }
+                    // Assume que a coluna 'meses' na sua tabela/view tem o mês (Ex: '03')
+                    filter += `meses='${selectedMonth}'`;
+                }
+
+                // 3. Filtro de dia
+                if (selectedDay && selectedDay !== '') {
+                    // Se já tem mês, adiciona AND
+                    if (filter.length > 0) {
+                        filter += ' AND ';
+                    }
+                    // Assume que a coluna 'dia' na sua tabela/view tem o dia (Ex: '03')
+                    filter += `dias='${selectedDay}'`;
+                }
+
+                // Se não há filtro, GeoServer retorna todos os dados
+                return filter.length > 0 ? filter : '1=1'; 
+            }
 
             // Adiciona uma camada base (OpenStreetMap)
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -227,14 +343,15 @@
             }
 
             // --- Função Genérica para buscar e adicionar Camadas WFS (para GeoJSON) ---
-            function fetchWFSData(layerName, displayName, styleFunction, popupFields, version = '2.0.0', isPointLayer = false) {
+            function fetchWFSData(layerName, displayName, styleFunction, popupFields, version = '2.0.0', isPointLayer = false, cqlFilter = '1=1') {
                 var wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
                 var params = {
                     service: 'WFS',
                     version: version,
                     request: 'GetFeature',
                     typeName: layerName,
-                    outputFormat: 'application/json'
+                    outputFormat: 'application/json',
+                    cql_filter: cqlFilter
                 };
                 var queryString = new URLSearchParams(params).toString();
                 var fullUrl = wfsUrl + queryString;
@@ -325,6 +442,197 @@
             var peStyleWFS = function(feature) { return { radius: 5, fillColor: 'green', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.7 }; };
             var armStyleWFS = function(feature) { return { radius: 5, fillColor: 'purple', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.7 }; };
 
+            // Localização: Dentro do seu window.onload, ANTES das chamadas loadBairrosOnce()
+
+            // --- Variáveis de Configuração do GeoServer ---
+            const GEOSERVER_WFS_URL = 'http://192.168.70.63:8080/geoserver/wfs';
+            const WORKSPACE = 'vigiaa';
+
+            const LAYER_NAME_ANOS = 'anos_geo';    // Sua View de Anos (com geometry e ano)
+            const LAYER_NAME_DATAS = 'datas_casos'; // Sua View de Datas (com geometry, meses, dias, etc.)
+
+
+            // --- FUNÇÃO PRINCIPAL DE BUSCA DE DADOS DE FILTRO (AGORA DEFINIDA) ---
+            async function fetchGeoServerFilterData(layerName, cqlFilter = '1=1', requiredProps = '') {
+                
+                const fullLayerName = `${WORKSPACE}:${layerName}`;
+                
+                const params = {
+                    service: 'WFS',
+                    version: '2.0.0',
+                    request: 'GetFeature',
+                    typeName: fullLayerName,
+                    outputFormat: 'application/json',
+                    cql_filter: cqlFilter,
+                    propertyName: requiredProps 
+                };
+                
+                const queryString = new URLSearchParams(params).toString();
+                const fullUrl = `${GEOSERVER_WFS_URL}?${queryString}`;
+                
+                console.log(`Buscando dados de filtro WFS: ${fullUrl}`);
+                
+                try {
+                    const response = await fetch(fullUrl);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status} ao consultar ${layerName}`);
+                    }
+                    const data = await response.json();
+                    
+                    // Retorna a lista de features (objetos de propriedades)
+                    return data.features.map(f => f.properties);
+                    
+                } catch (error) {
+                    console.error(`Erro ao buscar dados de filtro para ${layerName}:`, error);
+                    return [];
+                }
+            }
+
+
+            // --- FUNÇÕES DE MANIPULAÇÃO DOS FILTROS ---
+
+            // 1. Popula a lista de Anos (Usa 'anos_geo' e remove repetições via JS Set)
+            async function populateYears() {
+                
+                // Solicita SÓ o atributo 'ano' da View 'anos_geo'
+                const anosData = await fetchGeoServerFilterData(LAYER_NAME_ANOS, '1=1', 'ano');
+                
+                const distinctYears = new Set();
+                
+                anosData.forEach(data => {
+                    if (data.ano) {
+                        distinctYears.add(data.ano);
+                    }
+                });
+
+                selectYear.innerHTML = '<option value="">Todos</option>'; 
+                
+                Array.from(distinctYears).sort().forEach(ano => {
+                    const option = document.createElement('option');
+                    option.value = ano;
+                    option.textContent = ano;
+                    selectYear.appendChild(option);
+                });
+
+                selectYear.addEventListener('change', handleYearChange);
+                // Não chama updateMapLayers aqui, pois será chamado no final do handleYearChange
+            }
+
+            // 2. Lida com a mudança de Ano
+            async function handleYearChange(event) {
+                selectedYear = event.target.value;
+                
+                // Resetar Mês e Dia
+                selectedMonth = '';
+                selectedDay = '';
+                
+                selectDay.innerHTML = '<option value="">Todos</option>';
+                selectDay.disabled = true;
+
+                selectMonth.innerHTML = '<option value="">Todos</option>';
+                
+                if (selectedYear) {
+                    selectMonth.disabled = false;
+                    await populateMonths(selectedYear);
+                } else {
+                    selectMonth.disabled = true;
+                }
+                
+                // Dispara a atualização do mapa
+                updateMapLayers();
+            }
+
+            // 3. Popula a lista de Meses (Usa 'datas_casos' filtrando por ano)
+            async function populateMonths(year) {
+                
+                const cql = `ano='${year}'`;
+                // Solicita SÓ as colunas de Mês
+                const mesesData = await fetchGeoServerFilterData(LAYER_NAME_DATAS, cql, 'meses,nome_mes');
+                
+                const distinctMonths = new Map(); 
+                
+                mesesData.forEach(data => {
+                    if (data.meses && !distinctMonths.has(data.meses)) {
+                        distinctMonths.set(data.meses, { meses: data.meses, nome_mes: data.nome_mes });
+                    }
+                });
+                
+                const sortedMonths = Array.from(distinctMonths.values()).sort((a, b) => a.meses.localeCompare(b.meses));
+                
+                selectMonth.innerHTML = '<option value="">Todos</option>';
+                
+                sortedMonths.forEach(data => {
+                    const option = document.createElement('option');
+                    option.value = data.meses; 
+                    option.textContent = data.nome_mes;
+                    selectMonth.appendChild(option);
+                });
+
+                selectMonth.addEventListener('change', handleMonthChange);
+            }
+
+            // 4. Lida com a mudança de Mês
+            async function handleMonthChange(event) {
+                selectedMonth = event.target.value;
+
+                selectedDay = '';
+                selectDay.innerHTML = '<option value="">Todos</option>';
+                
+                if (selectedMonth && selectedYear) {
+                    selectDay.disabled = false;
+                    await populateDays(selectedYear, selectedMonth);
+                } else {
+                    selectDay.disabled = true;
+                }
+
+                // Dispara a atualização do mapa
+                updateMapLayers();
+            }
+
+            // 5. Popula a lista de Dias (Usa 'datas_casos' filtrando por ano e mês)
+            async function populateDays(year, month) {
+                
+                const cql = `ano='${year}' AND meses='${month}'`;
+                // Solicita SÓ a coluna 'dias'
+                const diasData = await fetchGeoServerFilterData(LAYER_NAME_DATAS, cql, 'dias');
+                
+                const distinctDays = new Set();
+                diasData.forEach(data => {
+                    if (data.dias) {
+                        distinctDays.add(data.dias);
+                    }
+                });
+                
+                const sortedDays = Array.from(distinctDays).sort();
+
+                selectDay.innerHTML = '<option value="">Todos</option>';
+                
+                sortedDays.forEach(dia => {
+                    const option = document.createElement('option');
+                    option.value = dia; 
+                    option.textContent = dia;
+                    selectDay.appendChild(option);
+                });
+
+                selectDay.addEventListener('change', handleDayChange);
+            }
+
+            // 6. Lida com a mudança de Dia
+            function handleDayChange(event) {
+                selectedDay = event.target.value;
+                updateMapLayers();
+            }
+
+            // 7. Função unificada para recarregar as camadas do mapa com o filtro CQL
+            function updateMapLayers() {
+                console.log(`Filtro Aplicado: Ano=${selectedYear}, Mês=${selectedMonth}, Dia=${selectedDay}. Recarregando camadas...`);
+                
+                // Essas funções (que você já deve ter no código) precisam ser reescritas
+                // para usar o filtro CQL (buildCqlFilter)
+                updateCasosPositivosPoints();
+                updateCasosHeatmap();
+            }
+            
             // --- 5. Funções de Carga e Atualização (WFS e Imagem) ---
             function loadBairrosOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ofc', 'Bairros - Oficial (Estático)', bairrosStyleWFS, ['nome']); }
             function loadBairrosOfcOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE (Estático)', bairrosOfcStyleWFS, ['NM_BAIRRO']); }
@@ -352,14 +660,25 @@
                 });
             }
             function updateCasosPositivosPoints() {
-                return fetchWFSData('vigiaa:casos_positivos', 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id', 'data_diagnostico'], '2.0.0', true).then(newLayer => {
+                const filter = buildCqlFilter(); // <--- CHAMA O NOVO FILTRO AQUI
+                var wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
+                var params = { 
+                    service: 'WFS', 
+                    version: '2.0.0', 
+                    request: 'GetFeature', 
+                    typeName: 'vigiaa:casos_positivos', 
+                    outputFormat: 'application/json',
+                    cql_filter: filter // <--- ADICIONA O FILTRO CQL
+                };
+                return fetchWFSData('datas_casos', 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id'], '2.0.0', true, filter).then(newLayer => {
                     if (newLayer) { refreshLayerInControl(currentCasosPointLayer, newLayer, 'Casos Positivos (Pontos)'); currentCasosPointLayer = newLayer; }
                     return currentCasosPointLayer;
                 });
             }
             function updateCasosHeatmap() {
+                const filter = buildCqlFilter();
                 const wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
-                const params = { service: 'WFS', version: '2.0.0', request: 'GetFeature', typeName: 'vigiaa:casos_positivos', outputFormat: 'application/json' };
+                const params = { service: 'WFS', version: '2.0.0', request: 'GetFeature', typeName: 'vigiaa:datas_casos', outputFormat: 'application/json', cql_filter: filter };
                 const queryString = new URLSearchParams(params).toString();
                 const fullUrl = wfsUrl + queryString;
                 console.log(`Buscando dados WFS para Casos Positivos (Heatmap): ${fullUrl}`);
@@ -452,7 +771,7 @@
                 if (declividadeImgLayer) { overlayMaps['Declividade (Imagem)'] = declividadeImgLayer; declividadeImageLayer = declividadeImgLayer; }
                 if (demografiaImgLayer) { overlayMaps['Demografia (Imagem)'] = demografiaImgLayer; demografiaImageLayer = demografiaImgLayer; }
 
-                map.layersControl = L.control.layers(baseLayers, overlayMaps, { collapsed: false }).addTo(map);
+                map.layersControl = L.control.layers(baseLayers, overlayMaps, { position: 'topright', collapsed: true }).addTo(map);
 
                 map.on('overlayadd', function (e) {
                     if (e.name === 'Casos Positivos (Mapa de Calor)') { document.getElementById('heatmap-legend').style.display = 'block'; }
@@ -477,6 +796,7 @@
             }).catch(error => {
                 console.error("Erro fatal na inicialização das camadas. Alguma camada inicial não pôde ser carregada:", error);
             });
+            populateYears();    
         }; 
         
     </script>
