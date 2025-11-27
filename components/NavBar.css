@@ -4,10 +4,11 @@
   display: flex;
   align-items: center;
   background: linear-gradient(to right, #142941, #123524);
-  height: 50px;
+  height: 45px;
   color: #ffffff;
   font-weight: 800;
   z-index: 999;
+  overflow-y: hidden;
 }
 
 .NavButtons {
