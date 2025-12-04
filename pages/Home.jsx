@@ -28,7 +28,7 @@ function Home() {
 
           <div className="map-box">
             <a href="/mapas" className="map-link">
-              MAPA
+              VER MAPAS
             </a>
           </div>
         </div>

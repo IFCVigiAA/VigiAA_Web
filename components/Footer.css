@@ -12,6 +12,7 @@
   text-align: center;
   width: 100%; 
   box-sizing: border-box;
+  
 }
 .footerEmail {
 display: flex;
@@ -43,6 +44,7 @@ gap: 5px;
   width: 100%;
   padding: 0; 
   box-sizing: border-box;
+  overflow-y: hidden;
 }
 
 .imgBox {
@@ -56,6 +58,7 @@ gap: 5px;
   justify-content: center;
   align-items: center;
   transition: transform 0.3s ease;
+   overflow-y: hidden;
 }
 
 .imgBox img {

@@ -15,24 +15,35 @@
   display: flex;
   padding: 40px;
   margin-top: 40px;
-
-  /* garante que a direita não seja empurrada pra fora */
   align-items: flex-start;
 }
 
+.map-link{
+  background-color: #1f9e61;
+  text-decoration: none;
+  color: white;
+  border-radius: 4px;
+  width: 200px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.map-link:hover{
+  color: black;
+  transition: all 0.5s ease;
+  border: 1px solid black;
+}
 .left-side {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
 
-  /* REMOVE tudo que empurrava o conteúdo */
   width: auto !important;
   min-height: auto !important;
   max-height: none !important;
   overflow: visible !important;
-
-  /* impede a esquerda de esmagar/empurrar a direita */
   flex-shrink: 0;
 }
 
@@ -63,7 +74,7 @@
 @media (max-width: 900px) {
   .home-content {
     flex-direction: column;
-    margin-top: 100px; /* compensação da navbar mobile */
+    margin-top: 100px; 
   }
 
   .logo-text {
@@ -71,7 +82,7 @@
   }
 }
 
-/* ======== FORÇA ABSOLUTA NA LOGO DA HOME ======== */
+
 
 .home-only-logo {
   height: auto !important;
@@ -84,21 +95,21 @@
   object-fit: contain !important;
 }
 
-/* Mata QUALQUER regra global de img */
+
 .home-container img {
   max-height: none !important;
   height: auto !important;
   width: auto !important;
 }
 
-/* Mata especificamente qualquer regra da navbar */
+
 .logoNav,
 .navbar img,
 .navbar .logo img {
   max-height: none !important;
 }
 
-/* A imagem continua livre, sem empurrar nada */
+
 .left-side img,
 .homeLogo {
   width: auto !important;
@@ -106,6 +117,6 @@
   max-height: 65vh !important;
   object-fit: contain !important;
   overflow: visible !important;
-  margin-left: -16vw;
+  margin-left: -14vw;
   margin-top: -10vh;
 }
