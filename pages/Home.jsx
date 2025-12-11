@@ -58,7 +58,7 @@ function Home() {
         <button
           onClick={() => {
             setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'mapa_leaflet/index.html');
+            setMapSrc(import.meta.env.BASE_URL + 'map_src/index.html');
             setMapTitle('Mapa Principal');
             if (document.fullscreenElement) document.exitFullscreen();
           }}
