@@ -1,15 +1,13 @@
 // Acesso aos elementos do DOM
 const selectYear = document.getElementById('filter-ano');
-const selectMonth = document.getElementById('filter-mes');
-const selectDay = document.getElementById('filter-dia');
+const selectSE = document.getElementById('filter-SE');
 const declividadeLegend = document.getElementById('declividade-legend');
 const demografiaOfcLegend = document.getElementById('demografia_ofc-legend');
 const heatmapLegend = document.getElementById('heatmap-legend');
 
 // Variáveis de estado do filtro (inicializadas em map-main)
 let selectedYear = '';
-let selectedMonth = '';
-let selectedDay = '';
+let selectedSE = '';
 let map; // Variável para a instância do mapa
 
 // --- Funções de Ajuda para o Mapa ---
@@ -19,17 +17,23 @@ function refreshLayerInControl(oldLayer, newLayer, layerName) {
     const wasOnMap = oldLayer && map.hasLayer(oldLayer);
     if (wasOnMap) { map.removeLayer(oldLayer); }
 
-    if (map.layersControl && oldLayer) {
-        map.layersControl.removeLayer(oldLayer);
-    }
-    
     if (map.layersControl) {
+        map.layersControl.removeLayer(oldLayer);
         map.layersControl.addOverlay(newLayer, layerName);
     }
 
     if (wasOnMap) {
         newLayer.addTo(map);
     }
+}
+
+function resetFiltersToDefault() {
+    selectedYear = '';
+    selectedSE = '';
+    selectYear.value = ''; // Volta o HTML para "Todos"
+    selectSE.innerHTML = '<option value="">Todos</option>';
+    selectSE.disabled = true;
+    console.log("Filtros resetados pelo clique do usuário.");
 }
 
 // Função Genérica para buscar e adicionar Camadas WFS (para GeoJSON)
@@ -41,14 +45,15 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
     }
     //const fullLayerName = `${WORKSPACE}:${layerName}`;
     //const wfsUrl = `${GEOSERVER_WFS_URL}?`;
-    var wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
+    var wfsUrl = `http://192.168.0.190:8080/geoserver/wfs?`;
     
     var params = {
         service: 'WFS', version: version, request: 'GetFeature', typeName: fullLayerName,
         outputFormat: 'application/json', cql_filter: cqlFilter
     };
     const queryString = new URLSearchParams(params).toString();
-    const fullUrl = wfsUrl + queryString;
+    //const fullUrl = wfsUrl + queryString;
+    const fullUrl = `${GEOSERVER_WFS_URL}?` + new URLSearchParams(params).toString();
 
     return fetch(fullUrl)
         .then(response => {
@@ -103,9 +108,13 @@ function loadCurvaNivelOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_cambor
 function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_union', 'Declividade (Polígonos)', declividadePlStyle, ['CLASSE', 'AREA_METROS']); }
 
 // Funções de atualização dinâmica (chamadas na inicialização e no filtro/intervalo)
-function updadeFocosAedes() {
-    return fetchWFSData('vigiaa:focos_aedes_1604_com_coords', 'Focos Aedes (Dinâmico)', focosStyleWFS, ['id', 'Nº Foco'], '2.0.0', true).then(newLayer => {
-        if (newLayer) { refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes (Dinâmico)'); focosWFSLayer = newLayer; }
+function updateFocosAedes() {
+    const filter = buildCqlFilter(selectedYear, selectedSE);
+    return fetchWFSData(LAYER_FOCOS_SE, 'Focos Aedes (Dinâmico)', focosStyleWFS, ['id', 'n_foco'], '2.0.0', true, filter).then(newLayer => {
+        if (newLayer) { 
+            refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes (Dinâmico)'); 
+            focosWFSLayer = newLayer; 
+        }
         return focosWFSLayer;
     });
 }
@@ -124,53 +133,123 @@ function updateArmadilhas() {
 }
 
 function updateCasosPositivosPoints() {
-    const filter = buildCqlFilter(selectedYear, selectedMonth, selectedDay); // Obtém filtro atual
-    return fetchWFSData(LAYER_NAME_DATAS, 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id', 'data'], '2.0.0', true, filter).then(newLayer => {
+    const filter = buildCqlFilter(selectedYear, selectedSE); // Obtém filtro atual
+    return fetchWFSData(LAYER_CASOS, 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id', 'iniciosintomas'], '2.0.0', true, filter).then(newLayer => {
         if (newLayer) { refreshLayerInControl(currentCasosPointLayer, newLayer, 'Casos Positivos (Pontos)'); currentCasosPointLayer = newLayer; }
         return currentCasosPointLayer;
     });
 }
 
-function updateCasosHeatmap() {
-    const filter = buildCqlFilter(selectedYear, selectedMonth, selectedDay);
-    const wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
-    const params = { service: 'WFS', version: '2.0.0', request: 'GetFeature', typeName: `${WORKSPACE}:${LAYER_NAME_DATAS}`, outputFormat: 'application/json', cql_filter: filter };
-    const queryString = new URLSearchParams(params).toString();
-    const fullUrl = wfsUrl + queryString;
+// function updateCasosHeatmap() {
+//     const filter = buildCqlFilter(selectedYear, selectedSE);
+//     const wfsUrl = `http://192.168.0.190:8080/geoserver/wfs?`;
+//     const params = { service: 'WFS', version: '2.0.0', request: 'GetFeature', typeName: `${WORKSPACE}:${LAYER_CASOS}`, outputFormat: 'application/json', cql_filter: filter };
+//     const queryString = new URLSearchParams(params).toString();
+//     const fullUrl = wfsUrl + queryString;
     
+//     return fetch(fullUrl)
+//         .then(response => {
+//             if (!response.ok) { throw new Error(`HTTP error! status: ${response.status} for Casos Positivos (Heatmap)`); }
+//             return response.json();
+//         })
+//         .then(data => {
+//             var heatData = [];
+//             if (data && data.features) {
+//                 data.features.forEach(feature => {
+//                     if (feature.geometry && feature.geometry.coordinates) {
+//                         var coords = feature.geometry.coordinates; 
+//                         heatData.push([coords[1], coords[0]]);
+//                     }
+//                 });
+//             }
+            
+//             if (currentCasosHeatmapLayer && map.hasLayer(currentCasosHeatmapLayer)){
+//                 map.removeLayer(currentCasosHeatmapLayer);
+//             };
+
+//             var newHeatmapLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17, minOpacity: 0.2, gradient: { 0.0: 'blue', 0.25: 'cyan', 0.5: 'lime', 0.75: 'yellow', 1.0: 'red' } });
+//             newHeatmapLayer.name = 'Casos Positivos (Mapa de Calor)';
+            
+//             // 🔑 REATIVANDO a lógica de substituição de camadas para atualizações dinâmicas
+//             if (currentCasosHeatmapLayer) {
+//                 // Se currentCasosHeatmapLayer existe (após a 1ª carga), use o refreshLayerInControl
+//                 refreshLayerInControl(currentCasosHeatmapLayer, newHeatmapLayer, newHeatmapLayer.name);
+//                 currentCasosHeatmapLayer = newHeatmapLayer;
+//             } else {
+//                 // Durante a primeira carga (no Promise.all), apenas atribua e retorne.
+//                 currentCasosHeatmapLayer = newHeatmapLayer;
+//             }
+//             refreshLayerInControl(currentCasosHeatmapLayer, newHeatmapLayer, newHeatmapLayer.name);
+//             currentCasosHeatmapLayer = newHeatmapLayer;
+
+//             return newHeatmapLayer; // Retorna a camada para o Promise.all (inicialização)
+            
+//         })
+//         .catch(error => { console.error(`Erro ao buscar ou processar dados para Casos Positivos (Heatmap):`, error); return null; });
+// }
+
+function updateHeatmapSwitch() {
+    // 1. Detecta o contexto (se o usuário está vendo Casos ou Focos)
+    const context = getActiveLayerContext(); 
+    const isFocos = context.type === 'focos';
+    const targetLayer = isFocos ? currentFocosHeatmapLayer : currentCasosHeatmapLayer;
+
+    if (!map.hasLayer(targetLayer)) return;
+
+    // 2. Define os parâmetros baseados no switch
+    //const layerName = isFocos ? 'Focos (Mapa de Calor)' : 'Casos Positivos (Mapa de Calor)';
+    //const oldLayer = isFocos ? currentFocosHeatmapLayer : currentCasosHeatmapLayer;
+    const filter = buildCqlFilter(selectedYear, selectedSE);
+    const params = { 
+        service: 'WFS', 
+        version: '2.0.0', 
+        request: 'GetFeature', 
+        typeName: `${WORKSPACE}:${context.table}`, // Usa a tabela do switch
+        outputFormat: 'application/json', 
+        cql_filter: filter
+    };
+    
+    const fullUrl = `http://192.168.0.190:8080/geoserver/wfs?` + new URLSearchParams(params).toString();
+
     return fetch(fullUrl)
-        .then(response => {
-            if (!response.ok) { throw new Error(`HTTP error! status: ${response.status} for Casos Positivos (Heatmap)`); }
-            return response.json();
-        })
+        .then(response => response.json())
         .then(data => {
-            var heatData = [];
-            if (data && data.features) {
-                data.features.forEach(feature => {
-                    if (feature.geometry && feature.geometry.coordinates) {
-                        var coords = feature.geometry.coordinates; 
-                        heatData.push([coords[1], coords[0]]);
-                    }
-                });
-            }
+            // 3. Limpa a camada anterior do mapa
+            // if (oldLayer && map.hasLayer(oldLayer)) {
+            //     map.removeLayer(oldLayer);
+            // }
+
+            const heatData = data.features.map(f => [
+                f.geometry.coordinates[1], 
+                f.geometry.coordinates[0]
+            ]);
             
-            var newHeatmapLayer = L.heatLayer(heatData, { radius: 25, blur: 15, maxZoom: 17, minOpacity: 0.2, gradient: { 0.0: 'blue', 0.25: 'cyan', 0.5: 'lime', 0.75: 'yellow', 1.0: 'red' } });
-            newHeatmapLayer.name = 'Casos Positivos (Mapa de Calor)';
+            // 4. Cria o novo Heatmap com cores diferentes para cada tipo
+            const gradient = isFocos 
+                ? { 0.0: 'blue', 0.5: 'lime', 1.0: 'orange' } // Focos em Laranja
+                : { 0.0: 'blue', 0.5: 'yellow', 1.0: 'red' }; // Casos em Vermelho
+
+            // const newHeatLayer = L.heatLayer(heatData, { 
+            //     radius: 25, blur: 15, gradient: gradient 
+            // });
+            // newHeatLayer.name = layerName;
+
+            // newHeatLayer.addTo(map);
             
-            // 🔑 REATIVANDO a lógica de substituição de camadas para atualizações dinâmicas
-            if (currentCasosHeatmapLayer) {
-                // Se currentCasosHeatmapLayer existe (após a 1ª carga), use o refreshLayerInControl
-                refreshLayerInControl(currentCasosHeatmapLayer, newHeatmapLayer, newHeatmapLayer.name);
-                currentCasosHeatmapLayer = newHeatmapLayer;
-            } else {
-                // Durante a primeira carga (no Promise.all), apenas atribua e retorne.
-                currentCasosHeatmapLayer = newHeatmapLayer;
-            }
+            // // 5. Atualiza o controle de camadas e a variável global correta
+            // refreshLayerInControl(oldLayer, newHeatLayer, layerName);
             
-            return newHeatmapLayer; // Retorna a camada para o Promise.all (inicialização)
+            // if (isFocos) {
+            //     currentFocosHeatmapLayer = newHeatLayer;
+            // } else {
+            //     currentCasosHeatmapLayer = newHeatLayer;
+            // }
             
+            // Em vez de criar uma nova camada, apenas atualizamos os dados da existente
+            targetLayer.setLatLngs(heatData);
+            targetLayer.setOptions({ gradient: gradient });
         })
-        .catch(error => { console.error(`Erro ao buscar ou processar dados para Casos Positivos (Heatmap):`, error); return null; });
+        .catch(error => console.error(`Erro no Switch Heatmap (${context.type}):`, error));
 }
 
 // Funções de imagem (overlay)
@@ -192,109 +271,177 @@ function loadImageLayers() {
 
 // --- Funções de Filtro (Lógica de Eventos) ---
 
-async function populateYears() {
-    const anosData = await fetchGeoServerFilterData(LAYER_NAME_ANOS, '1=1', 'ano');
-    const distinctYears = new Set(anosData.map(data => data.ano).filter(a => a));
-    
-    selectYear.innerHTML = '<option value="">Todos</option>'; 
-    Array.from(distinctYears).sort().forEach(ano => {
-        const option = document.createElement('option');
-        option.value = ano;
-        option.textContent = ano;
-        selectYear.appendChild(option);
+
+
+async function populateSpecificYears(context, layerName, selectId) {
+    const selectElement = document.getElementById(selectId);
+    const data = await fetchGeoServerFilterData(layerName, '1=1', 'ano_se');
+    const years = [...new Set(data.map(item => item.ano_se))].filter(a => a).sort((a, b) => b - a);
+
+    selectElement.innerHTML = '<option value="">Ano</option>';
+    years.forEach(year => {
+        const opt = document.createElement('option');
+        opt.value = year;
+        opt.textContent = year;
+        selectElement.appendChild(opt);
     });
 
-    selectYear.addEventListener('change', handleYearChange);
-}
-
-async function handleYearChange(event) {
-    selectedYear = event.target.value;
-    
-    selectedMonth = ''; selectedDay = '';
-    
-    selectDay.innerHTML = '<option value="">Todos</option>';
-    selectDay.disabled = true;
-
-    selectMonth.innerHTML = '<option value="">Todos</option>';
-    
-    if (selectedYear) {
-        selectMonth.disabled = false;
-        await populateMonths(selectedYear);
-    } else {
-        selectMonth.disabled = true;
+    if (!selectElement.dataset.hasListener) {
+        selectElement.addEventListener('change', (e) => handleYearChangeNew(context, e.target.value));
+        selectElement.dataset.hasListener = "true";
     }
-    
-    updateMapLayers();
 }
 
-async function populateMonths(year) {
-    const cql = `ano='${year}'`;
-    const mesesData = await fetchGeoServerFilterData(LAYER_NAME_DATAS, cql, 'meses,nome_mes');
-    const distinctMonths = new Map(); 
+async function handleYearChangeNew(context, year) {
+    const isCasos = context === 'casos';
+    const table = isCasos ? LAYER_CASOS : LAYER_FOCOS_SE;
+    const seSelectId = isCasos ? 'filter-se-casos' : 'filter-se-focos';
+    const seSelect = document.getElementById(seSelectId);
+
+    if (!year) {
+        seSelect.innerHTML = '<option value="">SE*</option>';
+        seSelect.disabled = true;
+        updateLayerByContext(context); // Atualiza para "Todos"
+        return;
+    }
+
+    const data = await fetchGeoServerFilterData(table, `ano_se=${year}`, 'se_num');
+    const ses = [...new Set(data.map(item => item.se_num))].filter(s => s).sort((a, b) => a - b);
+
+    seSelect.innerHTML = '<option value="">Todos</option>';
+    ses.forEach(se => {
+        const opt = document.createElement('option');
+        opt.value = se;
+        opt.textContent = `SE ${se}`;
+        seSelect.appendChild(opt);
+    });
+    seSelect.disabled = false;
+
+    if (!seSelect.dataset.hasListener) {
+        seSelect.addEventListener('change', () => updateLayerByContext(context));
+        seSelect.dataset.hasListener = "true";
+    }
+
+    updateLayerByContext(context);
+}
+
+// Função para atualizar os dados da camada (WFS) sem recriar o objeto
+async function updateLayerByContext(context) {
+    const isCasos = context === 'casos';
+    const year = document.getElementById(isCasos ? 'filter-ano-casos' : 'filter-ano-focos').value;
+    const se = document.getElementById(isCasos ? 'filter-se-casos' : 'filter-se-focos').value;
+    const layer = isCasos ? currentCasosPointLayer : focosWFSLayer;
+    const table = isCasos ? LAYER_CASOS : LAYER_FOCOS_SE;
+
+    const filter = buildCqlFilter(year, se);
     
-    mesesData.forEach(data => {
-        if (data.meses && !distinctMonths.has(data.meses)) {
-            distinctMonths.set(data.meses, { meses: data.meses, nome_mes: data.nome_mes });
+    // IMPORTANTE: Use clearLayers e adicione novos dados para manter a posição
+    const url = `${GEOSERVER_WFS_URL}?service=WFS&version=2.0.0&request=GetFeature&typeName=${WORKSPACE}:${table}&outputFormat=application/json&cql_filter=${encodeURIComponent(filter)}`;
+    
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // Verifica se a camada existe e limpa
+        if (layer && typeof layer.clearLayers === 'function') {
+            layer.clearLayers();
+            layer.addData(data);
         }
-    });
-    
-    const sortedMonths = Array.from(distinctMonths.values()).sort((a, b) => a.meses.localeCompare(b.meses));
-    
-    selectMonth.innerHTML = '<option value="">Todos</option>';
-    
-    sortedMonths.forEach(data => {
-        const option = document.createElement('option');
-        option.value = data.meses; 
-        option.textContent = data.nome_mes;
-        selectMonth.appendChild(option);
-    });
-
-    selectMonth.addEventListener('change', handleMonthChange);
-}
-
-async function handleMonthChange(event) {
-    selectedMonth = event.target.value;
-
-    selectedDay = '';
-    selectDay.innerHTML = '<option value="">Todos</option>';
-    
-    if (selectedMonth && selectedYear) {
-        selectDay.disabled = false;
-        await populateDays(selectedYear, selectedMonth);
-    } else {
-        selectDay.disabled = true;
+        
+        // PONTO 3: Atualizar o mapa de calor vinculado
+        updateHeatmapData(context, data);
+        
+    } catch (e) {
+        console.error(`Erro ao filtrar ${context}:`, e);
     }
-
-    updateMapLayers();
 }
 
-async function populateDays(year, month) {
-    const cql = `ano='${year}' AND meses='${month}'`;
-    const diasData = await fetchGeoServerFilterData(LAYER_NAME_DATAS, cql, 'dias');
-    const distinctDays = new Set(diasData.map(data => data.dias).filter(d => d));
-    const sortedDays = Array.from(distinctDays).sort();
-
-    selectDay.innerHTML = '<option value="">Todos</option>';
+function updateHeatmapData(context, geojsonData) {
+    const isCasos = context === 'casos';
+    const targetHeatLayer = isCasos ? currentCasosHeatmapLayer : currentFocosHeatmapLayer;
     
-    sortedDays.forEach(dia => {
-        const option = document.createElement('option');
-        option.value = dia; 
-        option.textContent = dia;
-        selectDay.appendChild(option);
-    });
+    if (!targetHeatLayer) return;
 
-    selectDay.addEventListener('change', handleDayChange);
+    const heatPoints = geojsonData.features.map(f => [
+        f.geometry.coordinates[1], 
+        f.geometry.coordinates[0]
+    ]);
+
+    targetHeatLayer.setLatLngs(heatPoints);
 }
 
-function handleDayChange(event) {
-    selectedDay = event.target.value;
+async function populateSE(year) {
+    if (!year) return;
+    const context = getActiveLayerContext(); // Pega o contexto atual
+    const cql = `ano_se=${year}`;
+
+    const seData = await fetchGeoServerFilterData(context.table, cql, 'se_num');
+    //filtrar valores únicos
+
+    const distinctSE = [...new Set(seData.map(item => item.se_num))].sort((a, b) => a - b);
+
+    selectSE.innerHTML = '<option value="">Todos</option>';        
+    distinctSE.forEach(se => {
+        const option = document.createElement('option');
+        option.value = se; 
+        option.textContent = `SE ${se}`;
+        selectSE.appendChild(option);
+    });
+    //Garante listner
+    selectSE.disabled = false;
+    selectSE.removeEventListener('change', handleSEChange);
+    selectSE.addEventListener('change', handleSEChange);
+}
+
+async function handleSEChange(event) {
+    selectedSE= event.target.value;
     updateMapLayers();
+}
+
+// Detecta se o usuário está focado em Casos ou Focos para regular o filtro
+function getActiveLayerContext() {
+    // // Se a camada de pontos de Casos ou o Heatmap de Casos estiverem ativos
+    // if ((currentCasosPointLayer && map.hasLayer(currentCasosPointLayer)) || 
+    //     (currentCasosHeatmapLayer && map.hasLayer(currentCasosHeatmapLayer))) {
+    //     return { table: LAYER_CASOS, type: 'casos' };
+    // }
+    // // Se a camada de Focos ou o Heatmap de Focos estiverem ativos
+    // if ((focosWFSLayer && map.hasLayer(focosWFSLayer)) || 
+    //     (currentFocosHeatmapLayer && map.hasLayer(currentFocosHeatmapLayer))) {
+    //     return { table: LAYER_FOCOS_SE, type: 'focos' };
+    // }
+    
+    // return { table: LAYER_CASOS, type: 'casos' }; // Fallback padrão
+    // Priorizamos a detecção das camadas de PONTOS para definir a tabela de consulta
+    
+    if (currentCasosPointLayer && map.hasLayer(currentCasosPointLayer)) {
+        return { table: LAYER_CASOS, type: 'casos' };
+    }
+    if (focosWFSLayer && map.hasLayer(focosWFSLayer)) {
+        return { table: LAYER_FOCOS_SE, type: 'focos' };
+    }
+    
+    // Fallback: Se o usuário estiver apenas com o Heatmap ligado, 
+    // tentamos detectar por ele, mas a prioridade acima evita conflitos.
+    if (currentFocosHeatmapLayer && map.hasLayer(currentFocosHeatmapLayer)) return { table: LAYER_FOCOS_SE, type: 'focos' };
+    
+    return { table: LAYER_CASOS, type: 'casos' };
 }
 
 // Recarrega as camadas dinâmicas com o filtro atual
 function updateMapLayers() {
-    updateCasosPositivosPoints();
-    updateCasosHeatmap();
+    //updateCasosPositivosPoints();
+    //updateCasosHeatmap();
+    //updateFocosAedes()
+    const context = getActiveLayerContext();
+
+    if (context.type === 'casos') {
+        if (map.hasLayer(currentCasosPointLayer)) updateCasosPositivosPoints();
+        if (map.hasLayer(currentCasosHeatmapLayer)) updateHeatmapSwitch();
+    } else {
+        if (map.hasLayer(focosWFSLayer)) updateFocosAedes();
+        if (map.hasLayer(currentFocosHeatmapLayer)) updateHeatmapSwitch();
+    }
 }
 
 // --- FUNÇÃO DE INICIALIZAÇÃO (window.onload) ---
@@ -311,15 +458,15 @@ window.onload = function() {
 
     Promise.all([
         loadBairrosOnce(), loadBairrosOfcOnce(), loadSetCensOnce(), loadCamboriuOnce(), loadCurvaNivelOnce(),
-        updadeFocosAedes(), updatePontosEstrat(), updateArmadilhas(), 
-        updateCasosPositivosPoints(), updateCasosHeatmap(),
+        updateFocosAedes(), updatePontosEstrat(), updateArmadilhas(), 
+        updateCasosPositivosPoints(), //updateHeatmapSwitch(),updateCasosHeatmap(),
         loadImageLayers(), loadDeclividadePoligonoOnce(), loadDensDemoSetCensOnce()
     ]).then(results => {
         // Atribui os resultados às variáveis globais e as adiciona ao overlayMaps
         [
             bairrosWFSLayer, bairrosOfcWFSLayer, setCensWFSLayer, camboriuWFSLayer, curvasNivelWFSLayer, 
             focosWFSLayer, peWFSLayer, armWFSLayer, 
-            currentCasosPointLayer, currentCasosHeatmapLayer,
+            currentCasosPointLayer, //currentCasosHeatmapLayer,
             [declividadeImageLayer, demografiaImageLayer], declividadePlLayer, setCensDemoCambLayer
         ] = results;
 
@@ -339,27 +486,150 @@ window.onload = function() {
         if (declividadeImageLayer) { overlayMaps[declividadeImageLayer.name] = declividadeImageLayer; }
         if (demografiaImageLayer) { overlayMaps[demografiaImageLayer.name] = demografiaImageLayer; }
 
+        // ALTERAÇÃO 2: Crie camadas de Heatmap "vazias" apenas para o controle de camadas
+        // Isso permite que o usuário veja a opção no menu sem que os dados sejam baixados antes
+        currentCasosHeatmapLayer = L.heatLayer([], { radius: 25 });
+        currentCasosHeatmapLayer.name = 'Casos Positivos (Mapa de Calor)';
+
+        currentFocosHeatmapLayer = L.heatLayer([], { radius: 25 });
+        currentFocosHeatmapLayer.name = 'Focos (Mapa de Calor)';
+
+        // Adicione-as ao overlayMaps para aparecerem no seletor
+        overlayMaps[currentCasosHeatmapLayer.name] = currentCasosHeatmapLayer;
+        overlayMaps[currentFocosHeatmapLayer.name] = currentFocosHeatmapLayer;
 
         // 3. Adiciona Controle de Camadas
         map.layersControl = L.control.layers(baseLayers, overlayMaps, { position: 'topright', collapsed: true }).addTo(map);
 
+        map.layersControl.getContainer().addEventListener('click', function(event) {
+            // Pegamos o rótulo da camada clicada
+                const label = event.target.closest('label');
+                if (!label) return;
+                
+                const clickedLayerName = label.innerText.trim();
+
+                // LISTA DE CAMADAS QUE RESETAM O FILTRO
+                // Se clicar em qualquer outra (como Heatmap), o filtro permanece como está
+                const resetLayers = ['Casos Positivos (Pontos)', 'Focos Aedes (Dinâmico)'];
+
+                if (resetLayers.includes(clickedLayerName)) {
+                    setTimeout(() => {
+                        resetFiltersToDefault();
+                        populateYears(); 
+                        updateMapLayers(); 
+                        console.log("Filtro resetado: troca de contexto de pontos.");
+                    }, 50);
+                }
+            }, true);
+
+        function organizarLegendas() {
+            const legendas = [
+                document.getElementById('declividade-legend'),
+                document.getElementById('demografia_ofc-legend'),
+                document.getElementById('heatmap-legend')
+            ];
+
+            let alturaAcumulada = 10; // Espaçamento inicial do fundo (10vh ou pixels)
+            const espacamento = 15; // Espaço entre uma legenda e outra
+
+            legendas.forEach(legenda => {
+                if (legenda && legenda.style.display !== 'none') {
+                    // Define a posição da legenda atual baseada na altura acumulada
+                    legenda.style.bottom = alturaAcumulada + "px";
+                    
+                    // Soma a altura desta legenda para a próxima ficar acima dela
+                    // offsetHeight pega a altura real do elemento no momento
+                    alturaAcumulada += legenda.offsetHeight + espacamento;
+                }
+            });
+        }
+
         // 4. Configuração de Eventos do Mapa (Legendas)
         map.on('overlayadd', function (e) {
-            if (e.name === 'Casos Positivos (Mapa de Calor)') { heatmapLegend.style.display = 'block'; }
+            const mainContainer = document.getElementById('main-filter-container');
+            const layersControl = document.querySelector('.leaflet-control-layers');
+    
+            if (e.name === 'Casos Positivos (Pontos)') {
+                    mainContainer.style.display = 'flex';
+                    document.getElementById('group-filter-casos').style.display = 'block';
+                    layersControl.classList.add('leaflet-control-layers-pushed');
+                    populateSpecificYears('casos', LAYER_CASOS, 'filter-ano-casos');
+            }
+            
+            if (e.name.includes('Focos Aedes')) {
+                mainContainer.style.display = 'flex';
+                document.getElementById('group-filter-focos').style.display = 'block';
+                layersControl.classList.add('leaflet-control-layers-pushed');
+                populateSpecificYears('focos', LAYER_FOCOS_SE, 'filter-ano-focos');
+            }
+
+            // --- NOVA LÓGICA: Legenda do Mapa de Calor ---
+            if (e.name.includes('Mapa de Calor')) {
+                heatmapLegend.style.display = 'block';
+            }
+
             if (e.name === 'Declividade (Polígonos)') { declividadeLegend.style.display = 'block'; }
             if (e.name === 'Densidade Demográfica (SC)') { demografiaOfcLegend.style.display = 'block'; }
+
+
+            // DISPARO AQUI: Reorganiza após as legendas aparecerem
+            setTimeout(organizarLegendas, 100);
         });
 
         map.on('overlayremove', function (e) {
-            if (e.name === 'Casos Positivos (Mapa de Calor)') { heatmapLegend.style.display = 'none'; }
+            // Verificação exata para fechar o bloco de Casos
+            if (e.name === 'Casos Positivos (Pontos)') {
+                document.getElementById('group-filter-casos').style.display = 'none';
+            }
+            
+            if (e.name === 'Focos Aedes (Dinâmico)') {
+                document.getElementById('group-filter-focos').style.display = 'none';
+            }
+
+            const casosAtivo = map.hasLayer(currentCasosPointLayer);
+            const focosAtivo = map.hasLayer(focosWFSLayer);
+            const layersControl = document.querySelector('.leaflet-control-layers');
+
+            if (!casosAtivo && !focosAtivo) {
+                document.getElementById('main-filter-container').style.display = 'none';
+                if (layersControl) { layersControl.classList.remove('leaflet-control-layers-pushed'); }
+                resetFilterSelectors();
+            }
+
+            // Esconder legenda do Heatmap apenas se ambos sumirem
+            const heatmapCasosAtivo = map.hasLayer(currentCasosHeatmapLayer);
+            const heatmapFocosAtivo = map.hasLayer(currentFocosHeatmapLayer);
+
+            if (!heatmapCasosAtivo && !heatmapFocosAtivo) {
+                heatmapLegend.style.display = 'none';
+            }
+            
+            // Legendas estáticas
             if (e.name === 'Declividade (Polígonos)') { declividadeLegend.style.display = 'none'; }
             if (e.name === 'Densidade Demográfica (SC)') { demografiaOfcLegend.style.display = 'none'; }
+        
+            // DISPARO AQUI: Reorganiza as legendas que ficaram
+            organizarLegendas();
         });
+
+// Função auxiliar para limpar os campos quando tudo é fechado
+function resetFilterSelectors() {
+    ['casos', 'focos'].forEach(ctx => {
+        const ano = document.getElementById(`filter-ano-${ctx}`);
+        const se = document.getElementById(`filter-se-${ctx}`);
+        if(ano) ano.value = "";
+        if(se) {
+            se.innerHTML = '<option value="">SE*</option>';
+            se.disabled = true;
+        }
+    });
+}
         
         // 5. Configuração de Atualização em Intervalos
         setInterval(updateCasosPositivosPoints, 300000); 
-        setInterval(updateCasosHeatmap, 300000);
-        setInterval(updadeFocosAedes, 300000);
+        //setInterval(updateCasosHeatmap, 300000);
+        setInterval(updateHeatmapSwitch, 300000);
+        setInterval(updateFocosAedes, 300000);
         setInterval(updatePontosEstrat, 300000);
         setInterval(updateArmadilhas, 300000);
 

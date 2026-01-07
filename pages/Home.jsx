@@ -8,7 +8,7 @@ import { faExpand, faXmark } from '@fortawesome/free-solid-svg-icons';
 function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'mapa_leaflet/index.html');
+  const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'map_src/index.html');
   const [mapTitle, setMapTitle] = useState('Mapa Principal');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
