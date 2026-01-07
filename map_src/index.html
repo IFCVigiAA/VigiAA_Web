@@ -8,10 +8,22 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
     <link rel="stylesheet" href="style.css"></head>
 <body>
-    <div class="filter-container">
-        <div><label for="filter-ano">Ano:</label><select id="filter-ano"><option value="">Todos</option></select></div>
-        <div><label for="filter-mes">Mês:</label><select id="filter-mes" disabled><option value="">Todos</option></select></div>
-        <div><label for="filter-dia">Dia:</label><select id="filter-dia" disabled><option value="">Todos</option></select></div>
+    <div class="filter-container" id="main-filter-container">
+        <div id="group-filter-casos" class="filter-group" style="display: none;">
+            <span class="filter-title">Casos Positivos</span>
+            <div class="filter-row">
+                <select id="filter-ano-casos"><option value="">Ano</option></select>
+                <select id="filter-se-casos" disabled><option value="">SE*</option></select>
+            </div>
+        </div>
+
+        <div id="group-filter-focos" class="filter-group" style="display: none;">
+            <span class="filter-title">Focos Aedes</span>
+            <div class="filter-row">
+                <select id="filter-ano-focos"><option value="">Ano</option></select>
+                <select id="filter-se-focos" disabled><option value="">SE*</option></select>
+            </div>
+        </div>
     </div>
 
     <div id="mapid"></div>
@@ -53,8 +65,8 @@
         <div style="clear:both;"></div>
     </div>
     <div class="map-legend" style=" display: none;" id="heatmap-legend">
-        <b>Casos Positivos (Mapa de Calor)</b><br>
-        <p style="margin: 5px 0;">Áreas mais escuras indicam maior concentração de casos.</p>
+        <b>Mapa de Calor</b><br>
+        <p style="margin: 5px 0;">Áreas mais escuras indicam maior concentração de pontos.</p>
         <div style="width: 100%; height: 20px; background: linear-gradient(to right, blue, cyan, lime, yellow, red); border-radius: 4px;"></div>
         <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
             <span>Baixa concentração</span>

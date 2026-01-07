@@ -1,8 +1,8 @@
 // --- 1. Variáveis de Configuração Global ---
-const GEOSERVER_WFS_URL = 'http://192.168.70.63:8080/geoserver/wfs';
+const GEOSERVER_WFS_URL = 'http://192.168.0.190:8080/geoserver/wfs';
 const WORKSPACE = 'vigiaa';
-const LAYER_NAME_ANOS = 'anos_geo';
-const LAYER_NAME_DATAS = 'datas_casos';
+const LAYER_CASOS = 'casosposi_se';
+const LAYER_FOCOS_SE = 'vw_focos_aedes';
 
 // --- 2. Variáveis de Camadas (Serão populadas em map-main.js, mas declaradas globalmente) ---
 // Usamos 'let' pois elas serão reatribuídas com as instâncias das camadas Leaflet
@@ -19,6 +19,7 @@ let currentCasosPointLayer;
 let currentCasosHeatmapLayer;
 let declividadeImageLayer;
 let demografiaImageLayer;
+let currentFocosHeatmapLayer;
 
 // --- 3. Definição dos Estilos (Funções Puras) ---
 const bairrosStyleWFS = function(feature) { return { fillColor: '#add8e6', color: 'black', weight: 1, fillOpacity: 0.5 }; };
@@ -61,28 +62,18 @@ const armStyleWFS = function(feature) { return { radius: 5, fillColor: 'purple',
 // --- 4. Funções de Utilitário (Ajudam a construir o mapa/filtro) ---
 
 // Constrói a sintaxe de filtro WFS (Common Query Language)
-function buildCqlFilter(year, month, day) {
-    let filter = '';
+function buildCqlFilter(year, se) {
+    let filterArray = [];
     
     if (year && year !== '') {
-        filter += `ano=${year}`;
+        filterArray.push(`ano_se = ${year}`);
     }
     
-    if (month && month !== '') {
-        if (filter.length > 0) {
-            filter += ' AND ';
-        }
-        filter += `meses='${month}'`;
+    if (se && se !== '') {
+        filterArray.push(`se_num = ${se}`);
     }
 
-    if (day && day !== '') {
-        if (filter.length > 0) {
-            filter += ' AND ';
-        }
-        filter += `dias='${day}'`;
-    }
-
-    return filter.length > 0 ? filter : '1=1'; 
+    return filterArray.length > 0 ? filterArray.join(' AND ') : '1=1'; 
 }
 
 // Busca dados GeoServer para os filtros (Retorna apenas os atributos, sem a geometria)

@@ -41,6 +41,9 @@ html, body {
     word-wrap: break-word;
     border-radius: 8px;
 }
+.map-legend {
+    transition: bottom 0.3s ease-in-out; /* Faz a legenda deslizar suavemente */
+}
 
 /* 4. Estilos dos Ícones da Legenda */
 .map-legend i {
@@ -106,31 +109,58 @@ html, body {
 
 /* 7. Estilos para os Filtros (Comboboxes) */
 .filter-container {
+    display: none; /* Ativado via JS */
+    flex-direction: column;
     position: fixed;
     top: 10px;
-    right: 10px;
-    z-index: 1000; /* Acima do controle de camadas */
+    right: 10px; /* Aumente para não sobrepor o botão de fechar do Leaflet */
+    z-index: 1100;
     background-color: white;
     padding: 10px;
     border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    display: flex; /* Para alinhar as caixas lado a lado */
-    gap: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 200px; /* Largura fixa para evitar o "quadrado pequeno" */
+    gap: 8px;
 }
 
-.filter-container label {
-    font-weight: bold;
-    margin-right: 5px;
-    font-size: 14px;
-    white-space: nowrap; /* Não quebrar linha */
+.leaflet-top.leaflet-right .leaflet-control-layers {
+    margin-top: 10px; /* Valor base */
+    transition: margin-top 0.3s ease; /* Transição suave */
 }
 
-.filter-container select {
-    padding: 5px;
+/* Classe auxiliar que aplicaremos via JS para descer o menu */
+.leaflet-control-layers-pushed {
+    margin-top: 190px !important; /* Ajuste conforme a altura do seu filtro */
+}
+
+/* Grupos Individuais (Casos e Focos) */
+.filter-group {
+    border: 1px solid #e0e0e0;
+    padding: 8px;
     border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 14px;
-    min-width: 80px;
+    background: #fcfcfc;
+}
+
+.filter-title {
+    display: block;
+    font-weight: bold;
+    font-size: 12px;
+    margin-bottom: 8px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 4px;
+}
+
+.filter-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 5px;
+}
+
+.filter-row select {
+    flex: 1; /* Faz os selects ocuparem o espaço disponível */
+    padding: 4px;
+    font-size: 12px;
 }
 
 /* Ajuste para mobile */
