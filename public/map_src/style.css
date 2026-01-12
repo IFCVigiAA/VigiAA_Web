@@ -163,6 +163,13 @@ html, body {
     font-size: 12px;
 }
 
+/* Estilo para ícones circulares/poligonais na legenda */
+.map-legend i.cluster-icon {
+    border-radius: 50%; /* Faz o ícone da legenda parecer uma bolha de cluster */
+    opacity: 0.7;
+    border: 1px solid #333;
+}
+
 /* Ajuste para mobile */
 @media (max-width: 768px) {
     .filter-container {
@@ -171,8 +178,14 @@ html, body {
         flex-direction: column; /* Pilhar as caixas no celular */
         gap: 5px;
         padding: 5px;
+        width: 160px; /* Reduz um pouco a largura no mobile */
+        max-height: 40vh; /* Limita a altura do filtro */
+        overflow-y: auto; /* Permite rolar os filtros se houver muitos */
     }
-    
+    .leaflet-control-layers-pushed {
+        margin-top: 160px !important; /* Ajuste o empurrão do menu no mobile */
+    }
+
     .leaflet-top.leaflet-right .leaflet-control-layers {
         margin-top: 130px; /* Ajuste este valor (50px, 60px, etc.) para o deslocamento desejado */
         position: relative;
