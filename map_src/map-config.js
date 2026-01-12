@@ -20,6 +20,8 @@ let currentCasosHeatmapLayer;
 let declividadeImageLayer;
 let demografiaImageLayer;
 let currentFocosHeatmapLayer;
+let clusterCasosLayer;
+let clusterFocosLayer;
 
 // --- 3. Definição dos Estilos (Funções Puras) ---
 const bairrosStyleWFS = function(feature) { return { fillColor: '#add8e6', color: 'black', weight: 1, fillOpacity: 0.5 }; };
