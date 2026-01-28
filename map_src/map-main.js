@@ -20,12 +20,16 @@ function refreshLayerInControl(oldLayer, newLayer, layerName) {
     const wasOnMap = oldLayer && map.hasLayer(oldLayer);
     if (wasOnMap) { map.removeLayer(oldLayer); }
 
-    if (map.layersControl) {
+    // ADICIONE ESTA VERIFICAÇÃO:
+    if (map.layersControl && oldLayer && typeof oldLayer.on === 'function') { 
         map.layersControl.removeLayer(oldLayer);
+    }
+    
+    if (map.layersControl && newLayer) {
         map.layersControl.addOverlay(newLayer, layerName);
     }
 
-    if (wasOnMap) {
+    if (wasOnMap && newLayer) {
         newLayer.addTo(map);
     }
 }
@@ -33,12 +37,30 @@ function refreshLayerInControl(oldLayer, newLayer, layerName) {
 function resetFiltersToDefault() {
     selectedYear = '';
     selectedSE = '';
-    const elYear = document.getElementById('filter-ano'); // Busca direta para evitar cache null
-    if (elYear) elYear.value = '';
-    selectYear.value = ''; // Volta o HTML para "Todos"
-    // selectSE.innerHTML = '<option value="">Todos</option>';
-    // selectSE.disabled = true;
-    console.log("Filtros resetados pelo clique do usuário.");
+
+    // IDs dos seus selects de Casos
+    const elYearCasos = document.getElementById('filter-ano-casos');
+    const elSECasos = document.getElementById('filter-se-casos');
+    
+    // IDs dos seus selects de Focos
+    const elYearFocos = document.getElementById('filter-ano-focos');
+    const elSEFocos = document.getElementById('filter-se-focos');
+
+    // Reseta Casos se existirem
+    if (elYearCasos) elYearCasos.value = '';
+    if (elSECasos) {
+        elSECasos.innerHTML = '<option value="">SE*</option>';
+        elSECasos.disabled = true;
+    }
+
+    // Reseta Focos se existirem
+    if (elYearFocos) elYearFocos.value = '';
+    if (elSEFocos) {
+        elSEFocos.innerHTML = '<option value="">SE*</option>';
+        elSEFocos.disabled = true;
+    }
+
+    console.log("Filtros contextuais resetados.");
 }
 
 // Função Genérica para buscar e adicionar Camadas WFS (para GeoJSON)
@@ -115,7 +137,7 @@ function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_n
 // Funções de atualização dinâmica (chamadas na inicialização e no filtro/intervalo)
 function updateFocosAedes() {
     const filter = buildCqlFilter(selectedYear, selectedSE);
-    return fetchWFSData(LAYER_FOCOS_SE, 'Focos Aedes (Dinâmico)', focosStyleWFS, ['id', 'n_foco'], '2.0.0', true, filter).then(newLayer => {
+    return fetchWFSData(LAYER_FOCOS_SE, 'Focos Aedes (Dinâmico)', focosStyleWFS, ['id', 'n_foco', 'a_aegypti_form_aquaticas', 'a_aegypti_form_adultas', 'a_albopictus_form_aquaticas', 'a_albopictus_form_adultas', 'ovo_a_aegypti'], '2.0.0', true, filter).then(newLayer => {
         if (newLayer) { 
             refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes (Dinâmico)'); 
             focosWFSLayer = newLayer; 
@@ -125,13 +147,13 @@ function updateFocosAedes() {
 }
 // ... Outras funções dinâmicas (updatePontosEstrat, updateArmadilhas) ...
 function updatePontosEstrat() {
-    return fetchWFSData('vigiaa:pontos_estrategicos', 'Pontos Estratégicos (Dinâmico)', peStyleWFS, ['id', 'numero'], '2.0.0', true).then(newLayer => {
+    return fetchWFSData('vigiaa_ofc:pontos_estrategicos', 'Pontos Estratégicos (Dinâmico)', peStyleWFS, ['id', 'numero'], '2.0.0', true).then(newLayer => {
         if (newLayer) { refreshLayerInControl(peWFSLayer, newLayer, 'Pontos Estratégicos (Dinâmico)'); peWFSLayer = newLayer; }
         return peWFSLayer;
     });
 }
 function updateArmadilhas() {
-    return fetchWFSData('vigiaa:relat_arm', 'Armadilhas (Dinâmico)', armStyleWFS, ['id', 'numero'], '2.0.0', true).then(newLayer => {
+    return fetchWFSData('vigiaa_ofc:relat_arm', 'Armadilhas (Dinâmico)', armStyleWFS, ['id', 'numero', 'tipo_imovel'], '2.0.0', true).then(newLayer => {
         if (newLayer) { refreshLayerInControl(armWFSLayer, newLayer, 'Armadilhas (Dinâmico)'); armWFSLayer = newLayer; }
         return armWFSLayer;
     });
@@ -139,7 +161,7 @@ function updateArmadilhas() {
 
 function updateCasosPositivosPoints() {
     const filter = buildCqlFilter(selectedYear, selectedSE); // Obtém filtro atual
-    return fetchWFSData(LAYER_CASOS, 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id', 'iniciosintomas'], '2.0.0', true, filter).then(newLayer => {
+    return fetchWFSData(LAYER_CASOS, 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id', 'inicio_sintomas'], '2.0.0', true, filter).then(newLayer => {
         if (newLayer) { refreshLayerInControl(currentCasosPointLayer, newLayer, 'Casos Positivos (Pontos)'); currentCasosPointLayer = newLayer; }
         return currentCasosPointLayer;
     });
@@ -410,55 +432,28 @@ async function updateLayerByContext(context) {
     const table = isCasos ? LAYER_CASOS : LAYER_FOCOS_SE;
 
     const filter = buildCqlFilter(year, se);
-    
-    // IMPORTANTE: Use clearLayers e adicione novos dados para manter a posição
     const url = `${GEOSERVER_WFS_URL}?service=WFS&version=2.0.0&request=GetFeature&typeName=${WORKSPACE}:${table}&outputFormat=application/json&cql_filter=${encodeURIComponent(filter)}`;
-    
-    if (context === 'casos') {
-        clusterCasosLayer = updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', clusterCasosLayer, 'casos');
+
+    // Chamada correta para os clusters (aguardando a atualização)
+    if (isCasos) {
+        updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos', clusterCasosLayer, 'casos');
     } else {
-        clusterFocosLayer = updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Mosquitos (Áreas Críticas)', clusterFocosLayer, 'focos');
+        updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos', clusterFocosLayer, 'focos');
     }
 
     try {
         const response = await fetch(url);
         const data = await response.json();
         
-        // Verifica se a camada existe e limpa
         if (layer && typeof layer.clearLayers === 'function') {
             layer.clearLayers();
             layer.addData(data);
         }
         
-        // --- LÓGICA IGUAL AO HEATMAP ---
-        // Se a camada de pontos está no mapa, nós atualizamos o cluster silenciosamente
-        if (isCasos) {
-            updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos', clusterCasosLayer, 'casos');
-        } else {
-            updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos', clusterFocosLayer, 'focos');
-        }
-
-        // PONTO 3: Atualizar o mapa de calor vinculado
         updateHeatmapData(context, data);
-        
     } catch (e) {
         console.error(`Erro ao filtrar ${context}:`, e);
     }
-
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-
-        if (layer && typeof layer.clearLayers === 'function') {
-            layer.clearLayers();
-            layer.addData(data);
-        }
-
-        // Só atualiza o heatmap se os dados não forem nulos e a camada estiver ativa
-        if (data && data.features && data.features.length > 0) {
-            updateHeatmapData(context, data);
-        }
-    } catch (e) { console.error(e); }
 }
 
 function updateHeatmapData(context, geojsonData) {
@@ -627,7 +622,7 @@ window.onload = function() {
                 if (resetLayers.includes(clickedLayerName)) {
                     setTimeout(() => {
                         resetFiltersToDefault();
-                        populateYears(); 
+                        //populateYears(); 
                         updateMapLayers(); 
                         console.log("Filtro resetado: troca de contexto de pontos.");
                     }, 50);

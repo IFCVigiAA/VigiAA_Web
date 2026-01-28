@@ -1,8 +1,8 @@
 // --- 1. Variáveis de Configuração Global ---
 const GEOSERVER_WFS_URL = 'http://192.168.0.190:8080/geoserver/wfs';
-const WORKSPACE = 'vigiaa';
-const LAYER_CASOS = 'casosposi_se';
-const LAYER_FOCOS_SE = 'vw_focos_aedes';
+const WORKSPACE = 'vigiaa_ofc';
+const LAYER_CASOS = 'vw_casosposi_se';
+const LAYER_FOCOS_SE = 'vw_focos_aedes_se';
 
 // --- 2. Variáveis de Camadas (Serão populadas em map-main.js, mas declaradas globalmente) ---
 // Usamos 'let' pois elas serão reatribuídas com as instâncias das camadas Leaflet
