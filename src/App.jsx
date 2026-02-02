@@ -8,6 +8,7 @@ import Educação from "../pages/Educacao";
 import Estação from "../pages/Estacao";
 import Publicações from "../pages/Publicacoes";
 import Casos from "../pages/cadastro_casos";
+import UploadPlanilhas from "../pages/Teste_planilhas";
 
 function App() {
    // const basePath = import.meta.env.BASE_URL;
@@ -21,6 +22,7 @@ function App() {
       <Route path="/Estação-meteorologica" element={<Estação/>} />
       <Route path="/Publicações" element={<Publicações/>} />
       <Route path="/casos" element={<Casos />} />
+      <Route path="/UploadPlanilhas" element={<UploadPlanilhas />} />
 
     </Routes>
    </Router>

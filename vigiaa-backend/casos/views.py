@@ -1,8 +1,12 @@
-from django.shortcuts import render
 from django.http import JsonResponse
-from .models import Caso
+from django.contrib.auth.decorators import login_required
 
-
-def listar_casos(request):
-    casos = list(Caso.objects.values())
-    return JsonResponse(casos, safe=False)
+@login_required
+def me(request):
+    u = request.user
+    return JsonResponse({
+        "authenticated": True,
+        "username": u.username,
+        "is_staff": u.is_staff,
+        "is_superuser": u.is_superuser,
+    })
