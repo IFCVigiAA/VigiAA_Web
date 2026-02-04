@@ -1,5 +1,5 @@
 // --- 1. Variáveis de Configuração Global ---
-const GEOSERVER_WFS_URL = 'http://192.168.0.190:8080/geoserver/wfs';
+const GEOSERVER_WFS_URL = 'http://192.168.70.63:8080/geoserver/wfs';
 const WORKSPACE = 'vigiaa_ofc';
 const LAYER_CASOS = 'vw_casosposi_se';
 const LAYER_FOCOS_SE = 'vw_focos_aedes_se';
