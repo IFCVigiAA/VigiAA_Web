@@ -34,11 +34,13 @@ INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'django.contrib.gis',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "corsheaders",
-    "casos",
+    "casos",    
+    
 ]
 
 CSRF_COOKIE_SAMESITE = "Lax"
@@ -88,11 +90,18 @@ WSGI_APPLICATION = 'vigiaa.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        "NAME": "vigiaa_temp",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "192.168.70.63",
+        "PORT": "5432",
     }
 }
-
+REST_FRAMEWORK = {
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 1000,
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
