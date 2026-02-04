@@ -58,7 +58,7 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
         fullLayerName = `${WORKSPACE}:${layerName}`;
     }
 
-    var wfsUrl = `http://192.168.0.190:8080/geoserver/wfs?`;
+    var wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
     
     var params = {
         service: 'WFS', version: version, request: 'GetFeature', typeName: fullLayerName,
@@ -174,7 +174,7 @@ function updateHeatmapSwitch() {
         cql_filter: filter
     };
     
-    const fullUrl = `http://192.168.0.190:8080/geoserver/wfs?` + new URLSearchParams(params).toString();
+    const fullUrl = `http://192.168.70.63:8080/geoserver/wfs?` + new URLSearchParams(params).toString();
 
     return fetch(fullUrl)
         .then(response => response.json())
