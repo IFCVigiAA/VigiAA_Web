@@ -4,6 +4,7 @@ from casos.importadores.focos import upload_focos
 from casos.importadores.armadilhas import upload_armadilhas
 from casos.importadores.pontos import upload_pontos_estrategicos
 from casos.importadores.positivos import upload_casos_positivos
+from casos.sincronizar import sincronizar_oficial_api
 from .views_csrf import csrf
 from .views import me
 
@@ -15,4 +16,6 @@ urlpatterns = [
     path("upload/armadilhas/", upload_armadilhas, name="upload_armadilhas"),
     path("upload/pontos/", upload_pontos_estrategicos, name="upload_pontos"),
     path("upload/positivos/", upload_casos_positivos, name="upload_positivos"),
+
+    path("sincronizar/", sincronizar_oficial_api, name="sincronizar_oficial"),
 ]
