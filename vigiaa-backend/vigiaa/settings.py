@@ -96,7 +96,16 @@ DATABASES = {
         "PASSWORD": "postgres",
         "HOST": "192.168.70.63",
         "PORT": "5432",
-    }
+    },
+    "oficial": {  # banco final
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": "vigiaa_ofc",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "192.168.70.63",
+        "PORT": "5432",
+    },
+    
 }
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",

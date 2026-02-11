@@ -1,65 +1,24 @@
-import unicodedata
 import pandas as pd
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.contrib.gis.geos import Point
-from casos.models import Armadilha
+
+from casos.models import ArmadilhaTemp
+from casos.importadores._utils import col, to_str, to_int, hash_row
 
 
-CENTRO_CAMBORIU = (-27.022986, -48.652135)  # (lat, lon)
+def _norm(v):
+    return str(v or "").strip().lower().replace("\u00a0", " ")
 
 
-def _norm(s) -> str:
-    if s is None:
-        return ""
-    s = str(s).replace("\u00a0", " ").strip()
-    s = "".join(
-        c for c in unicodedata.normalize("NFD", s)
-        if unicodedata.category(c) != "Mn"
-    )
-    s = s.upper()
-    s = s.replace("º", "O").replace("°", "O")
-    return " ".join(s.split())
-
-
-def _find_header_row(df_raw: pd.DataFrame) -> int | None:
-    needed_sets = [
-        {"NUMERO", "MUNICIPIO", "LOCALIDADE", "ENDERECO"},
-        {"NÚMERO", "MUNICÍPIO", "LOCALIDADE", "ENDEREÇO"},
-        {"NUMERO", "LOCALIDADE", "ENDERECO"},
-        {"TIPO ARMADILHA", "NUMERO"},
-    ]
-
-    for i in range(min(len(df_raw), 25)):
-        row = [_norm(x) for x in df_raw.iloc[i].tolist() if pd.notna(x)]
-        row_set = set(row)
-        for req in needed_sets:
-            if req.issubset(row_set):
-                return i
+def _find_header_idx(df_raw):
+    for i in range(len(df_raw)):
+        row = [_norm(x) for x in df_raw.iloc[i].tolist()]
+        if ("número" in row or "numero" in row) and "localidade" in row and ("endereço" in row or "endereco" in row) and "latitude" in row and "longitude" in row:
+            return i
     return None
-
-
-def _colmap(df: pd.DataFrame) -> dict:
-    m = {}
-    for c in df.columns:
-        m[_norm(c)] = c
-    return m
-
-
-def _pick(m: dict, *names):
-    for n in names:
-        key = _norm(n)
-        if key in m:
-            return m[key]
-    return None
-
-
-def _to_str(v):
-    if pd.isna(v):
-        return ""
-    return str(v).strip()
 
 
 @require_POST
@@ -72,112 +31,84 @@ def upload_armadilhas(request):
 
     try:
         df_raw = pd.read_excel(arquivo, header=None)
-        header_idx = _find_header_row(df_raw)
+        header_idx = _find_header_idx(df_raw)
         if header_idx is None:
-            return JsonResponse(
-                {
-                    "erro": "Cabeçalho não encontrado (armadilhas).",
-                    "amostra_topo": df_raw.head(8).fillna("").values.tolist(),
-                },
-                status=400,
-            )
+            header_idx = 3
 
         df = pd.read_excel(arquivo, header=header_idx)
-        df.columns = [str(c).replace("\u00a0", " ").strip() for c in df.columns]
-        m = _colmap(df)
+        df.columns = df.columns.astype(str).str.strip().str.replace("\u00a0", " ", regex=False)
 
-        c_num = _pick(m, "NUMERO", "NÚMERO")
-        c_mun = _pick(m, "MUNICIPIO", "MUNICÍPIO")
-        c_loc = _pick(m, "LOCALIDADE")
-        c_end = _pick(m, "ENDERECO", "ENDEREÇO", "RUA/NUMERO", "RUA/NÚMERO")
-        c_comp = _pick(m, "COMPLEMENTO")
-        c_quart = _pick(m, "QUARTEIROES", "QUARTEIRÕES", "QUARTEIRAO", "QUARTEIRÃO")
-        c_tipo_imovel = _pick(m, "TIPO IMOVEL", "TIPO IMÓVEL")
-        c_tipo_arm = _pick(m, "TIPO ARMADILHA")
+        c_num = col(df, "Número", "Numero", "NÚMERO", "NUMERO")
+        c_mun = col(df, "Município", "Municipio", "MUNICÍPIO", "MUNICIPIO")
+        c_loc = col(df, "Localidade", "LOCALIDADE")
+        c_end = col(df, "Endereço", "Endereco", "ENDEREÇO", "ENDERECO")
+        c_comp = col(df, "Complemento", "COMPLEMENTO")
+        c_quart = col(df, "Quarteiroes", "Quarteirões", "QUARTEIROES", "QUARTEIRÕES")
+        c_imovel = col(df, "Tipo Imóvel", "Tipo Imovel", "TIPO IMÓVEL", "TIPO IMOVEL")
+        c_tipo = col(df, "Tipo Armadilha", "TIPO ARMADILHA")
 
-        c_lat = _pick(m, "LATITUDE", "LAT")
-        c_lon = _pick(m, "LONGITUDE", "LON", "LNG")
+        c_lat = col(df, "Latitude", "LATITUDE")
+        c_lon = col(df, "Longitude", "LONGITUDE")
 
-        obrig = [c_num, c_mun, c_loc, c_end, c_quart, c_tipo_imovel, c_tipo_arm]
-        if any(c is None for c in obrig):
-            return JsonResponse(
-                {
-                    "erro": "Colunas obrigatórias não encontradas",
-                    "lidas": list(df.columns),
-                    "esperadas": ["Numero", "Municipio", "Localidade", "Endereco", "Quarteiroes", "Tipo Imovel", "Tipo Armadilha"],
-                },
-                status=400,
-            )
-
-        inseridos = 0
-        duplicados = 0
-        pulados = 0
+        inseridos = atualizados = pulados = 0
 
         for _, r in df.iterrows():
-            if any(pd.isna(r.get(c)) for c in obrig):
+            latv = r.get(c_lat)
+            lonv = r.get(c_lon)
+            if pd.isna(latv) or pd.isna(lonv):
                 pulados += 1
                 continue
 
-            lat = None
-            lon = None
-            if c_lat and c_lon:
-                try:
-                    lat = float(r.get(c_lat))
-                    lon = float(r.get(c_lon))
-                except:
-                    lat = None
-                    lon = None
-
-            if lat is None or lon is None:
-                lat, lon = CENTRO_CAMBORIU
-
-            numero = _to_str(r.get(c_num))
-            municipio = _to_str(r.get(c_mun))
-            localidade = _to_str(r.get(c_loc))
-            endereco = _to_str(r.get(c_end))
-            complemento = _to_str(r.get(c_comp)) if c_comp else ""
-            quarteiroes = _to_str(r.get(c_quart))
-            tipo_imovel = _to_str(r.get(c_tipo_imovel))
-            tipo_armadilha = _to_str(r.get(c_tipo_arm))
-
-            # 🔒 anti-duplicado: só cria se não existir registro igual
-            exists = Armadilha.objects.filter(
-                numero=numero,
-                municipio=municipio,
-                localidade=localidade,
-                endereco=endereco,
-                complemento=complemento,
-                quarteiroes=quarteiroes,
-                tipo_imovel=tipo_imovel,
-                tipo_armadilha=tipo_armadilha,
-            ).exists()
-
-            if exists:
-                duplicados += 1
+            try:
+                latv = float(latv)
+                lonv = float(lonv)
+                geom = Point(lonv, latv, srid=4674)
+            except:
+                pulados += 1
                 continue
 
-            Armadilha.objects.create(
-                numero=numero,
-                municipio=municipio,
-                localidade=localidade,
-                endereco=endereco,
-                complemento=complemento,
-                quarteiroes=quarteiroes,
-                tipo_imovel=tipo_imovel,
-                tipo_armadilha=tipo_armadilha,
-                geometry=Point(lon, lat, srid=4674),
-            )
-            inseridos += 1
+            numero = to_str(r.get(c_num))
+            municipio = to_str(r.get(c_mun))
+            localidade = to_str(r.get(c_loc))
+            endereco = to_str(r.get(c_end))
+            complemento = to_str(r.get(c_comp))
+            quarteiroes = to_int(r.get(c_quart))
+            tipo_imovel = to_str(r.get(c_imovel))
+            tipo_armadilha = to_str(r.get(c_tipo))
 
-        return JsonResponse(
-            {
-                "sucesso": True,
-                "header_row": int(header_idx),
-                "inseridos": inseridos,
-                "duplicados": duplicados,
-                "pulados": pulados,
-            }
-        )
+            h = hash_row(
+                "ARM_TEMP",
+                numero,
+                municipio,
+                localidade,
+                endereco,
+                tipo_imovel,
+                tipo_armadilha,
+                round(lonv, 6),
+                round(latv, 6),
+            )
+
+            obj, created = ArmadilhaTemp.objects.update_or_create(
+                hash_registro=h,
+                defaults=dict(
+                    numero=numero or "-",
+                    municipio=municipio or "-",
+                    localidade=localidade or "-",
+                    endereco=endereco or "-",
+                    complemento=complemento or "",
+                    quarteiroes=str(quarteiroes) if quarteiroes is not None else "",
+                    tipo_imovel=tipo_imovel or "",
+                    tipo_armadilha=tipo_armadilha or "",
+                    latitude=latv,
+                    longitude=lonv,
+                    geometry=geom,
+                ),
+            )
+
+            inseridos += int(created)
+            atualizados += int(not created)
+
+        return JsonResponse({"sucesso": True, "inseridos": inseridos, "atualizados": atualizados, "pulados": pulados})
 
     except Exception as e:
         return JsonResponse({"erro": str(e)}, status=400)

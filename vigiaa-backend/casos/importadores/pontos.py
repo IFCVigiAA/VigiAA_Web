@@ -5,8 +5,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.contrib.gis.geos import Point
 
-from casos.models import PontoEstrategico, Importacao
-from casos.importadores._utils import sha256_arquivo, col, to_str
+from casos.models import PontoEstrategicoTemp
+from casos.importadores._utils import col, to_str, hash_row
 
 
 @require_POST
@@ -17,91 +17,72 @@ def upload_pontos_estrategicos(request):
     if not arquivo:
         return JsonResponse({"erro": "Arquivo não enviado"}, status=400)
 
-    h = sha256_arquivo(arquivo)
     try:
-        if Importacao.objects.filter(tipo="pontos", hash=h).exists():
-            return JsonResponse({"sucesso": True, "ja_importado": True, "inseridos": 0, "ignorados": 0})
-    except Exception:
-        pass
+        # no teu print o header começa na linha 4 (index 3)
+        df = pd.read_excel(arquivo, header=3)
+        df.columns = df.columns.astype(str).str.strip().str.replace("\u00a0", " ", regex=False)
 
-    try:
-        df_raw = pd.read_excel(arquivo, header=None)
+        c_num = col(df, "Número", "Numero", "NÚMERO", "NUMERO")
+        c_mun = col(df, "Municipio", "Município", "MUNICIPIO", "MUNICÍPIO")
+        c_loc = col(df, "Localidade", "LOCALIDADE")
+        c_end = col(df, "Endereço", "Endereco", "ENDEREÇO", "ENDERECO")
+        c_quart = col(df, "Quarteiroes", "Quarteirões", "QUARTEIROES", "QUARTEIRÕES")
+        c_comp = col(df, "Complemento", "COMPLEMENTO")
+        c_lat = col(df, "Latitude", "LATITUDE")
+        c_lon = col(df, "Longitude", "LONGITUDE")
 
-        header_idx = None
-        for i in range(min(len(df_raw), 40)):
-            row = [str(x).strip().upper().replace("\u00a0", " ") for x in df_raw.iloc[i].tolist() if pd.notna(x)]
-            s = set(row)
-            if ("NUMERO" in s or "NÚMERO" in s) and ("ENDERECO" in s or "ENDEREÇO" in s) and ("LATITUDE" in s) and ("LONGITUDE" in s):
-                header_idx = i
-                break
-
-        if header_idx is None:
-            return JsonResponse({"erro": "Cabeçalho não encontrado", "amostra_topo": df_raw.head(12).fillna("").values.tolist()}, status=400)
-
-        df = pd.read_excel(arquivo, header=header_idx)
-        df.columns = (
-            df.columns.astype(str)
-            .str.strip()
-            .str.replace("\u00a0", " ", regex=False)
-            .str.upper()
-        )
-
-        c_num = col(df, "NUMERO", "NÚMERO")
-        c_mun = col(df, "MUNICIPIO", "MUNICÍPIO")
-        c_loc = col(df, "LOCALIDADE")
-        c_end = col(df, "ENDERECO", "ENDEREÇO")
-        c_quart = col(df, "QUARTEIROES", "QUARTEIRÕES")
-        c_comp = col(df, "COMPLEMENTO")
-        c_lat = col(df, "LATITUDE")
-        c_lon = col(df, "LONGITUDE")
-
-        obrig = [c_num, c_mun, c_loc, c_end, c_quart, c_comp, c_lat, c_lon]
-        if any(c is None for c in obrig):
-            return JsonResponse({"erro": "Colunas obrigatórias não encontradas", "lidas": df.columns.tolist()}, status=400)
-
-        existentes = set(PontoEstrategico.objects.values_list("numero", flat=True))
-        vistos = set()
-
-        objs = []
-        ignorados = 0
+        inseridos = atualizados = pulados = 0
 
         for _, r in df.iterrows():
-            numero = to_str(r.get(c_num), default=None)
-            if not numero:
-                ignorados += 1
+            latv = r.get(c_lat)
+            lonv = r.get(c_lon)
+            if pd.isna(latv) or pd.isna(lonv):
+                pulados += 1
                 continue
 
-            if numero in existentes or numero in vistos:
-                ignorados += 1
+            try:
+                geom = Point(float(lonv), float(latv), srid=4674)
+            except:
+                pulados += 1
                 continue
 
-            lat = r.get(c_lat)
-            lon = r.get(c_lon)
-            if pd.isna(lat) or pd.isna(lon):
-                ignorados += 1
-                continue
+            numero = to_str(r.get(c_num))
+            municipio = to_str(r.get(c_mun))
+            localidade = to_str(r.get(c_loc))
+            endereco = to_str(r.get(c_end))
+            quarteiroes = to_str(r.get(c_quart))
+            complemento = to_str(r.get(c_comp))
 
-            objs.append(
-                PontoEstrategico(
-                    numero=numero,
-                    municipio=to_str(r.get(c_mun), default=""),
-                    localidade=to_str(r.get(c_loc), default=""),
-                    endereco=to_str(r.get(c_end), default=""),
-                    quarteiroes=to_str(r.get(c_quart), default=""),
-                    complemento=to_str(r.get(c_comp), default=""),
-                    geometry=Point(float(lon), float(lat), srid=4674),
-                )
+            h = hash_row(
+                "PONTO_TEMP",
+                numero,
+                municipio,
+                localidade,
+                endereco,
+                complemento,
+                round(float(geom.x), 6),
+                round(float(geom.y), 6),
             )
-            vistos.add(numero)
 
-        PontoEstrategico.objects.bulk_create(objs, batch_size=1000)
+            obj, created = PontoEstrategicoTemp.objects.update_or_create(
+                hash_registro=h,
+                defaults=dict(
+                    numero=numero,
+                    municipio=municipio,
+                    localidade=localidade,
+                    endereco=endereco,
+                    quarteiroes=quarteiroes,
+                    complemento=complemento,
+                    latitude=float(latv),
+                    longitude=float(lonv),
+                    geometry=geom,
+                ),
+            )
 
-        try:
-            Importacao.objects.create(tipo="pontos", nome_arquivo=getattr(arquivo, "name", "pontos"), hash=h)
-        except Exception:
-            pass
+            inseridos += int(created)
+            atualizados += int(not created)
 
-        return JsonResponse({"sucesso": True, "ja_importado": False, "inseridos": len(objs), "ignorados": ignorados})
+        return JsonResponse({"sucesso": True, "inseridos": inseridos, "atualizados": atualizados, "pulados": pulados})
 
     except Exception as e:
-        return JsonResponse({"erro": str(e)}, status=500)
+        return JsonResponse({"erro": str(e)}, status=400)

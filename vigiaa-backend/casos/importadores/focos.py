@@ -5,8 +5,24 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.contrib.gis.geos import Point
 
-from casos.models import Foco, Importacao
-from casos.importadores._utils import sha256_arquivo, col, to_date, to_int, to_str
+from casos.models import FocoTemp
+from casos.importadores._utils import col, to_date, to_int, to_str, hash_row
+
+
+def _norm(v):
+    return str(v or "").strip().lower().replace("\u00a0", " ")
+
+
+def _find_header_idx(df_raw):
+    for i in range(len(df_raw)):
+        row = [_norm(x) for x in df_raw.iloc[i].tolist()]
+        if (("nº foco" in row or "n° foco" in row or "no foco" in row) and
+            "regional" in row and
+            ("município" in row or "municipio" in row) and
+            "rua/número" in row and
+            "latitude" in row and "longitude" in row):
+            return i
+    return None
 
 
 @require_POST
@@ -17,111 +33,118 @@ def upload_focos(request):
     if not arquivo:
         return JsonResponse({"erro": "Arquivo não enviado"}, status=400)
 
-    h = sha256_arquivo(arquivo)
-    try:
-        if Importacao.objects.filter(tipo="focos", hash=h).exists():
-            return JsonResponse({"sucesso": True, "ja_importado": True, "inseridos": 0, "ignorados": 0})
-    except Exception:
-        pass
-
     try:
         df_raw = pd.read_excel(arquivo, header=None)
-
-        header_idx = None
-        for i in range(min(len(df_raw), 50)):
-            row = [str(x).strip().upper().replace("\u00a0", " ") for x in df_raw.iloc[i].tolist() if pd.notna(x)]
-            s = set(row)
-            ok_nfoco = ("Nº FOCO" in s) or ("NO FOCO" in s) or ("N° FOCO" in s) or ("N FOCO" in s)
-            ok_loc = "LOCALIDADE" in s
-            ok_data = ("DATA DA COLETA" in s) or ("DATA COLETA" in s)
-            ok_latlon = ("LATITUDE" in s) and ("LONGITUDE" in s)
-            if ok_nfoco and ok_loc and ok_data and ok_latlon:
-                header_idx = i
-                break
-
+        header_idx = _find_header_idx(df_raw)
         if header_idx is None:
-            return JsonResponse({"erro": "Cabeçalho não encontrado", "amostra_topo": df_raw.head(12).fillna("").values.tolist()}, status=400)
+            return JsonResponse({"erro": "Cabeçalho não encontrado"}, status=400)
 
         df = pd.read_excel(arquivo, header=header_idx)
-        df.columns = (
-            df.columns.astype(str)
-            .str.strip()
-            .str.replace("\u00a0", " ", regex=False)
-            .str.upper()
-        )
+        df.columns = df.columns.astype(str).str.strip().str.replace("\u00a0", " ", regex=False)
 
-        c_nfoco = col(df, "Nº FOCO", "NO FOCO", "N° FOCO", "N FOCO")
-        c_localidade = col(df, "LOCALIDADE")
-        c_imovel = col(df, "IMÓVEL", "IMOVEL")
-        c_deposito = col(df, "DEPÓSITO", "DEPOSITO")
-        c_tipo = col(df, "TIPO DE ATIVIDADE", "TIPO ATIVIDADE")
-        c_data = col(df, "DATA DA COLETA", "DATA COLETA")
-        c_lat = col(df, "LATITUDE")
-        c_lon = col(df, "LONGITUDE")
+        c_nfoco = col(df, "Nº Foco", "N° Foco", "No Foco", "N Foco")
+        c_regional = col(df, "Regional", "REGIONAL")
+        c_municipio = col(df, "Município", "Municipio", "MUNICÍPIO", "MUNICIPIO")
+        c_localidade = col(df, "Localidade", "LOCALIDADE")
 
-        obrig = [c_nfoco, c_localidade, c_imovel, c_deposito, c_tipo, c_data, c_lat, c_lon]
-        if any(c is None for c in obrig):
-            return JsonResponse({"erro": "Colunas obrigatórias não encontradas", "lidas": df.columns.tolist()}, status=400)
+        c_rua_num = col(df, "Rua/número", "Rua/numero", "RUA/NÚMERO", "RUA/NUMERO")
+        c_comp = col(df, "Complemento", "COMPLEMENTO")
+        c_quart = col(df, "Quarteirão", "Quarteirao", "QUARTEIRÃO", "QUARTEIRAO")
 
-        existentes = set(Foco.objects.values_list("n_foco", flat=True))
-        vistos = set()
+        c_imovel = col(df, "Imóvel", "IMÓVEL", "Imovel", "IMOVEL")
+        c_deposito = col(df, "Depósito", "DEPÓSITO", "Deposito", "DEPOSITO")
+        c_tipo = col(df, "Tipo de Atividade", "TIPO DE ATIVIDADE")
 
-        objs = []
-        ignorados = 0
+        c_data_coleta = col(df, "Data da Coleta", "DATA DA COLETA")
+        c_data_entrada = col(df, "Data de Entrada", "DATA DE ENTRADA")
+        c_data_exame = col(df, "Data do Exame", "DATA DO EXAME")
 
-        c_ae_aq = col(df, "A_AEGYPTI_FORM_AQUATICAS", "A. AEGYPTI FORM AQUÁTICAS", "A AEGYPTI FORM AQUÁTICAS")
-        c_ae_ad = col(df, "A_AEGYPTI_FORM_ADULTAS", "A. AEGYPTI FORM ADULTAS", "A AEGYPTI FORM ADULTAS")
-        c_al_aq = col(df, "A_ALBOPICTUS_FORM_AQUATICAS", "A. ALBOPICTUS FORM AQUÁTICAS", "A ALBOPICTUS FORM AQUÁTICAS")
-        c_al_ad = col(df, "A_ALBOPICTUS_FORM_ADULTAS", "A. ALBOPICTUS FORM ADULTAS", "A ALBOPICTUS FORM ADULTAS")
-        c_ovo = col(df, "OVO_A_AEGYPTI", "OVO A. AEGYPTI", "OVO A AEGYPTI")
+        c_aa_aq = col(df, "A. aegypti formas aquáticas", "A. AEGYPTI FORMAS AQUÁTICAS")
+        c_aa_ad = col(df, "A. aegypti formas adultas", "A. AEGYPTI FORMAS ADULTAS")
+        c_al_aq = col(df, "A. albopictus formas aquáticas", "A. ALBOPICTUS FORMAS AQUÁTICAS")
+        c_al_ad = col(df, "A. albopictus formas adultas", "A. ALBOPICTUS FORMAS ADULTAS")
+        c_ovo = col(df, "Ovo A. aegypti", "OVO A. AEGYPTI", "Ovo A. Aegypti")
+
+        c_lat = col(df, "Latitude", "LATITUDE")
+        c_lon = col(df, "Longitude", "LONGITUDE")
+
+        inseridos = atualizados = pulados = 0
 
         for _, r in df.iterrows():
-            n_foco = to_str(r.get(c_nfoco), default=None)
-            if not n_foco:
-                ignorados += 1
+            latv = r.get(c_lat)
+            lonv = r.get(c_lon)
+            if pd.isna(latv) or pd.isna(lonv):
+                pulados += 1
                 continue
 
-            if n_foco in existentes or n_foco in vistos:
-                ignorados += 1
+            try:
+                latv = float(latv)
+                lonv = float(lonv)
+                geom = Point(lonv, latv, srid=4674)
+            except:
+                pulados += 1
                 continue
 
-            lat = r.get(c_lat)
-            lon = r.get(c_lon)
-            if pd.isna(lat) or pd.isna(lon):
-                ignorados += 1
-                continue
+            n_foco = to_str(r.get(c_nfoco))
+            regional = to_str(r.get(c_regional))
+            municipio = to_str(r.get(c_municipio))
+            localidade = to_str(r.get(c_localidade))
+            rua_numero = to_str(r.get(c_rua_num))
+            complemento = to_str(r.get(c_comp))
+            quarteirao = to_str(r.get(c_quart))
 
-            data_coleta = to_date(r.get(c_data))
-            if data_coleta is None:
-                ignorados += 1
-                continue
+            imovel = to_str(r.get(c_imovel))
+            deposito = to_str(r.get(c_deposito))
+            tipo_atividade = to_str(r.get(c_tipo))
 
-            objs.append(
-                Foco(
-                    n_foco=n_foco,
-                    localidade=to_str(r.get(c_localidade), default=""),
-                    imovel=to_str(r.get(c_imovel), default=""),
-                    deposito=to_str(r.get(c_deposito), default=""),
-                    tipo_atividade=to_str(r.get(c_tipo), default=""),
-                    data_coleta=data_coleta,
-                    a_aegypti_form_aquaticas=to_int(r.get(c_ae_aq), 0),
-                    a_aegypti_form_adultas=to_int(r.get(c_ae_ad), 0),
-                    a_albopictus_form_aquaticas=to_int(r.get(c_al_aq), 0),
-                    a_albopictus_form_adultas=to_int(r.get(c_al_ad), 0),
-                    ovo_a_aegypti=to_int(r.get(c_ovo), 0),
-                    geometry=Point(float(lon), float(lat), srid=4674),
-                )
+            data_coleta = to_date(r.get(c_data_coleta))
+            data_entrada = to_date(r.get(c_data_entrada))
+            data_exame = to_date(r.get(c_data_exame))
+
+            h = hash_row(
+                "FOCO_TEMP",
+                n_foco,
+                regional,
+                municipio,
+                localidade,
+                rua_numero,
+                data_coleta or "",
+                data_entrada or "",
+                round(lonv, 6),
+                round(latv, 6),
             )
-            vistos.add(n_foco)
 
-        Foco.objects.bulk_create(objs, batch_size=1000)
+            obj, created = FocoTemp.objects.update_or_create(
+                hash_registro=h,
+                defaults=dict(
+                    n_foco=(n_foco[:30] if n_foco else h[:30]),
+                    regional=regional or "-",
+                    municipio=municipio or "-",
+                    localidade=localidade or "-",
+                    rua_numero=rua_numero or "-",
+                    complemento=complemento or "",
+                    quarteirao=quarteirao or "",
+                    imovel=imovel or "",
+                    deposito=deposito or "",
+                    tipo_atividade=tipo_atividade or "",
+                    data_coleta=data_coleta,
+                    data_entrada=data_entrada,
+                    data_exame=data_exame,
+                    a_aegypti_form_aquaticas=to_int(r.get(c_aa_aq)),
+                    a_aegypti_form_adultas=to_int(r.get(c_aa_ad)),
+                    a_albopictus_form_aquaticas=to_int(r.get(c_al_aq)),
+                    a_albopictus_form_adultas=to_int(r.get(c_al_ad)),
+                    ovo_a_aegypti=to_int(r.get(c_ovo)),
+                    latitude=latv,
+                    longitude=lonv,
+                    geometry=geom,
+                ),
+            )
 
-        try:
-            Importacao.objects.create(tipo="focos", nome_arquivo=getattr(arquivo, "name", "focos"), hash=h)
-        except Exception:
-            pass
+            inseridos += int(created)
+            atualizados += int(not created)
 
-        return JsonResponse({"sucesso": True, "ja_importado": False, "inseridos": len(objs), "ignorados": ignorados})
+        return JsonResponse({"sucesso": True, "inseridos": inseridos, "atualizados": atualizados, "pulados": pulados})
 
     except Exception as e:
-        return JsonResponse({"erro": str(e)}, status=500)
+        return JsonResponse({"erro": str(e)}, status=400)

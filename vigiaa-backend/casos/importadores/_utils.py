@@ -2,19 +2,8 @@ import hashlib
 import pandas as pd
 
 
-def sha256_arquivo(file) -> str:
-    h = hashlib.sha256()
-    for chunk in file.chunks():
-        h.update(chunk)
-    return h.hexdigest()
-
-
 def col(df, *names):
-    cols = {}
-    for c in df.columns:
-        key = str(c).strip().upper().replace("\u00a0", " ")
-        cols[key] = c
-
+    cols = {str(c).strip().upper().replace("\u00a0", " "): c for c in df.columns}
     for n in names:
         key = str(n).strip().upper().replace("\u00a0", " ")
         if key in cols:
@@ -22,26 +11,44 @@ def col(df, *names):
     return None
 
 
-def to_str(v, default=""):
-    if pd.isna(v):
-        return default
-    return str(v).strip()
+def to_str(v):
+    if v is None:
+        return ""
+    if isinstance(v, float) and pd.isna(v):
+        return ""
+    s = str(v).strip()
+    if s.lower() in ["nan", "none"]:
+        return ""
+    return s
 
 
-def to_int(v, default=0):
-    if pd.isna(v):
-        return default
+def to_int(v):
+    if v is None:
+        return None
+    if isinstance(v, float) and pd.isna(v):
+        return None
     try:
-        return int(v)
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "":
+                return None
+        return int(float(v))
     except:
-        try:
-            return int(float(v))
-        except:
-            return default
+        return None
 
 
 def to_date(v):
-    d = pd.to_datetime(v, errors="coerce")
-    if pd.isna(d):
+    if v is None:
         return None
-    return d.date()
+    try:
+        d = pd.to_datetime(v, errors="coerce")
+        if pd.isna(d):
+            return None
+        return d.date()
+    except:
+        return None
+
+
+def hash_row(*parts):
+    payload = "|".join("" if p is None else str(p) for p in parts)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
