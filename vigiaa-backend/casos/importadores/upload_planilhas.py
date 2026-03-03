@@ -1,13 +1,19 @@
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.http import HttpResponseForbidden
 from casos.importadores.focos import upload_focos
 from casos.importadores.armadilhas import upload_armadilhas
 from casos.importadores.pontos import upload_pontos_estrategicos
 from casos.importadores.positivos import upload_casos_positivos
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
 
-@csrf_exempt
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+
 def upload_planilhas(request):
     if request.method != "POST":
         return JsonResponse({"erro": "Método inválido"}, status=405)

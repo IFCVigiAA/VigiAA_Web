@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-(3hd0_fup6$8lnn(&&#5o!&7sot9%5r!lozsxukl(r_4))h67f
 DEBUG = True
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
-CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000", "http://localhost:5173"]
+
 
 # Application definition
 
@@ -40,17 +40,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "corsheaders",
     "casos",    
-    
+    "rest_framework",    
 ]
 
-CSRF_COOKIE_SAMESITE = "Lax"
+
 SESSION_COOKIE_SAMESITE = "Lax"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
 ]
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:5173",
-]
+
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -59,7 +57,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -108,8 +105,9 @@ DATABASES = {
     
 }
 REST_FRAMEWORK = {
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
-    "PAGE_SIZE": 1000,
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ),
 }
 
 # Password validation

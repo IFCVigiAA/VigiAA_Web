@@ -3,7 +3,7 @@ from io import StringIO
 
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
-from django.views.decorators.csrf import csrf_protect
+
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.management import call_command
 
@@ -20,9 +20,7 @@ def _extrair_processados(texto: str):
     return None
 
 
-@require_POST
-@csrf_protect
-@staff_member_required
+
 def sincronizar_oficial_api(request):
     out = StringIO()
     err = StringIO()

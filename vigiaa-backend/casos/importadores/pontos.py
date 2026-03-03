@@ -1,17 +1,15 @@
 import pandas as pd
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.contrib.gis.geos import Point
-
 from casos.models import PontoEstrategicoTemp
 from casos.importadores._utils import col, to_str, hash_row
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 
-
-@require_POST
-@csrf_protect
-@staff_member_required
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 def upload_pontos_estrategicos(request):
     arquivo = request.FILES.get("pontos")
     if not arquivo:

@@ -5,17 +5,18 @@ from casos.importadores.armadilhas import upload_armadilhas
 from casos.importadores.pontos import upload_pontos_estrategicos
 from casos.importadores.positivos import upload_casos_positivos
 from casos.sincronizar import sincronizar_oficial_api
-from .views_csrf import csrf
+
 from .views import me
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path("me/", me, name="me"),
-    path("csrf/", csrf),
     path("upload-planilhas/", upload_planilhas, name="upload_planilhas"),
     path("upload/focos/", upload_focos, name="upload_focos"),
     path("upload/armadilhas/", upload_armadilhas, name="upload_armadilhas"),
     path("upload/pontos/", upload_pontos_estrategicos, name="upload_pontos"),
     path("upload/positivos/", upload_casos_positivos, name="upload_positivos"),
-
+    path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
+    path("logout/", auth_views.LogoutView.as_view(next_page="/api/casos/login/"), name="logout"),
     path("sincronizar/", sincronizar_oficial_api, name="sincronizar_oficial"),
 ]

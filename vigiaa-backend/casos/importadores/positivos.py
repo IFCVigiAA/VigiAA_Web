@@ -1,8 +1,9 @@
 import pandas as pd
 import geocoder
-
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_protect
+
 from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_POST
 from django.db import connection
@@ -42,6 +43,7 @@ COORDS_FIXAS = {
 }
 
 LIMITES_GEO = (-27.10, -26.95, -48.75, -48.60)
+
 
 
 def col(df, *nomes):
@@ -159,10 +161,9 @@ def _upsert(table: str, row: dict):
         inserted = cur.fetchone()[0]
         return bool(inserted)
 
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
 
-@require_POST
-@csrf_protect
-@staff_member_required
 def upload_casos_positivos(request):
     arquivo = request.FILES.get("positivos") or request.FILES.get("casos")
     if not arquivo:
