@@ -292,7 +292,7 @@ def upload_casos_positivos(request):
                 geo_falha += 1
 
             if latf is None or lonf is None:
-                continue
+                latf, lonf = -27.022986, -48.652135
 
             row_gl = {
                 "hash_registro": h,

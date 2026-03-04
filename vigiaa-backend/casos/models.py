@@ -25,9 +25,7 @@ class CasoPositivo(models.Model):
     prim_visita = models.CharField(max_length=50, null=True, blank=True)
     situacao = models.CharField(max_length=255, null=True, blank=True)
     geometry = models.PointField(srid=4674)
-
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
     class Meta:
         db_table = "casos_positivos"
         constraints = [
@@ -49,17 +47,13 @@ class Foco(models.Model):
     deposito = models.CharField(max_length=100)
     tipo_atividade = models.CharField(max_length=50)
     data_coleta = models.DateField()
-
     a_aegypti_form_aquaticas = models.IntegerField()
     a_aegypti_form_adultas = models.IntegerField()
     a_albopictus_form_aquaticas = models.IntegerField()
     a_albopictus_form_adultas = models.IntegerField()
     ovo_a_aegypti = models.IntegerField()
-
     geometry = models.PointField(srid=4674)
-
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
     class Meta:
         db_table = "focos_aedes"
         constraints = [
@@ -82,9 +76,7 @@ class PontoEstrategico(models.Model):
     quarteiroes = models.CharField(max_length=50)
     complemento = models.CharField(max_length=100)
     geometry = models.PointField(srid=4674)
-
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
     class Meta:
         db_table = "pontos_estrategicos"
         constraints = [
@@ -109,9 +101,7 @@ class Armadilha(models.Model):
     tipo_imovel = models.CharField(max_length=50)
     tipo_armadilha = models.CharField(max_length=50)
     geometry = models.PointField(srid=4674)
-
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
     class Meta:
         db_table = "relat_arm"
         constraints = [
@@ -149,7 +139,6 @@ class CasoPositivoTemp(models.Model):
     agentes = models.CharField(max_length=100, null=True, blank=True)
     prim_visita = models.CharField(max_length=50, null=True, blank=True)
     situacao = models.CharField(max_length=255, null=True, blank=True)
-
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
 
@@ -173,7 +162,6 @@ class CasoPositivoTempGL(models.Model):
     agentes = models.CharField(max_length=100, null=True, blank=True)
     prim_visita = models.CharField(max_length=50, null=True, blank=True)
     situacao = models.CharField(max_length=255, null=True, blank=True)
-
     geometry = models.PointField(srid=4674)
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
 
@@ -183,64 +171,31 @@ class CasoPositivoTempGL(models.Model):
 
 
 class FocoTemp(models.Model):
-    # colunas que já existem no focos_aedes_temp (print que você mandou mostra Regional/Municipio etc)
     n_foco = models.CharField(max_length=30, null=True, blank=True)
     regional = models.CharField(max_length=100, null=True, blank=True)
     municipio = models.CharField(max_length=100, null=True, blank=True)
     localidade = models.CharField(max_length=100, null=True, blank=True)
-
     rua_numero = models.CharField(max_length=200, null=True, blank=True)
     complemento = models.CharField(max_length=255, null=True, blank=True)
     quarteirao = models.CharField(max_length=50, null=True, blank=True)
-
     imovel = models.CharField(max_length=50, null=True, blank=True)
     deposito = models.CharField(max_length=100, null=True, blank=True)
     tipo_atividade = models.CharField(max_length=50, null=True, blank=True)
-
     data_coleta = models.DateField(null=True, blank=True)
     data_entrada = models.DateField(null=True, blank=True)
     data_exame = models.DateField(null=True, blank=True)
-
     a_aegypti_form_aquaticas = models.IntegerField(null=True, blank=True)
     a_aegypti_form_adultas = models.IntegerField(null=True, blank=True)
     a_albopictus_form_aquaticas = models.IntegerField(null=True, blank=True)
     a_albopictus_form_adultas = models.IntegerField(null=True, blank=True)
     ovo_a_aegypti = models.IntegerField(null=True, blank=True)
-
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-
-    # se a tabela temp tiver geometry NOT NULL, você PRECISA ter esse campo no model e preencher
     geometry = models.PointField(srid=4674, null=True, blank=True)
-
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
     class Meta:
         db_table = "focos_aedes_temp"
         managed = False
-
-
-class FocoTempGL(models.Model):
-    n_foco = models.CharField(max_length=30, null=True, blank=True)
-    localidade = models.CharField(max_length=100, null=True, blank=True)
-    imovel = models.CharField(max_length=50, null=True, blank=True)
-    deposito = models.CharField(max_length=100, null=True, blank=True)
-    tipo_atividade = models.CharField(max_length=50, null=True, blank=True)
-    data_coleta = models.DateField(null=True, blank=True)
-
-    a_aegypti_form_aquaticas = models.IntegerField(null=True, blank=True)
-    a_aegypti_form_adultas = models.IntegerField(null=True, blank=True)
-    a_albopictus_form_aquaticas = models.IntegerField(null=True, blank=True)
-    a_albopictus_form_adultas = models.IntegerField(null=True, blank=True)
-    ovo_a_aegypti = models.IntegerField(null=True, blank=True)
-
-    geometry = models.PointField(srid=4674)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
-    class Meta:
-        db_table = "focos_aedes_temp_gl"
-        managed = False
-
 
 class PontoEstrategicoTemp(models.Model):
     numero = models.CharField(max_length=50, null=True, blank=True)
@@ -249,34 +204,14 @@ class PontoEstrategicoTemp(models.Model):
     endereco = models.CharField(max_length=150, null=True, blank=True)
     quarteiroes = models.CharField(max_length=50, null=True, blank=True)
     complemento = models.CharField(max_length=100, null=True, blank=True)
-
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-
-    # teu erro prova que pontos_estrategicos_temp tem geometry NOT NULL
     geometry = models.PointField(srid=4674, null=True, blank=True)
-
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
     class Meta:
         db_table = "pontos_estrategicos_temp"
         managed = False
 
-
-class PontoEstrategicoTempGL(models.Model):
-    numero = models.CharField(max_length=50, null=True, blank=True)
-    municipio = models.CharField(max_length=100, null=True, blank=True)
-    localidade = models.CharField(max_length=100, null=True, blank=True)
-    endereco = models.CharField(max_length=150, null=True, blank=True)
-    quarteiroes = models.CharField(max_length=50, null=True, blank=True)
-    complemento = models.CharField(max_length=100, null=True, blank=True)
-
-    geometry = models.PointField(srid=4674)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
-    class Meta:
-        db_table = "pontos_estrategicos_temp_gl"
-        managed = False
 
 
 class ArmadilhaTemp(models.Model):
@@ -288,31 +223,11 @@ class ArmadilhaTemp(models.Model):
     quarteiroes = models.CharField(max_length=50, null=True, blank=True)
     tipo_imovel = models.CharField(max_length=50, null=True, blank=True)
     tipo_armadilha = models.CharField(max_length=50, null=True, blank=True)
-
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
     geometry = models.PointField(srid=4674, null=True, blank=True)
-
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
     class Meta:
         db_table = "relat_arm_temp"
         managed = False
 
-
-class ArmadilhaTempGL(models.Model):
-    numero = models.CharField(max_length=50, null=True, blank=True)
-    municipio = models.CharField(max_length=100, null=True, blank=True)
-    localidade = models.CharField(max_length=100, null=True, blank=True)
-    endereco = models.CharField(max_length=150, null=True, blank=True)
-    complemento = models.CharField(max_length=255, null=True, blank=True)
-    quarteiroes = models.CharField(max_length=50, null=True, blank=True)
-    tipo_imovel = models.CharField(max_length=50, null=True, blank=True)
-    tipo_armadilha = models.CharField(max_length=50, null=True, blank=True)
-
-    geometry = models.PointField(srid=4674)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
-    class Meta:
-        db_table = "relat_arm_temp_gl"
-        managed = False
