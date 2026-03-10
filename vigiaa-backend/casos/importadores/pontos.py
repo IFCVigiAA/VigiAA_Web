@@ -1,22 +1,24 @@
 import pandas as pd
 from django.http import JsonResponse
-from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.http import require_POST
 from django.contrib.gis.geos import Point
-from casos.models import PontoEstrategicoTemp
+from casos.models import PontoEstrategicoTemp, Processamento
 from casos.importadores._utils import col, to_str, hash_row
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def upload_pontos_estrategicos(request):
+
     arquivo = request.FILES.get("pontos")
+    job_id = request.POST.get("job_id")
+
     if not arquivo:
         return JsonResponse({"erro": "Arquivo não enviado"}, status=400)
 
     try:
-        # no teu print o header começa na linha 4 (index 3)
+
         df = pd.read_excel(arquivo, header=3)
         df.columns = df.columns.astype(str).str.strip().str.replace("\u00a0", " ", regex=False)
 
@@ -31,9 +33,13 @@ def upload_pontos_estrategicos(request):
 
         inseridos = atualizados = pulados = 0
 
-        for _, r in df.iterrows():
+        total = len(df)
+
+        for i, (_, r) in enumerate(df.iterrows()):
+
             latv = r.get(c_lat)
             lonv = r.get(c_lon)
+
             if pd.isna(latv) or pd.isna(lonv):
                 pulados += 1
                 continue
@@ -80,7 +86,27 @@ def upload_pontos_estrategicos(request):
             inseridos += int(created)
             atualizados += int(not created)
 
-        return JsonResponse({"sucesso": True, "inseridos": inseridos, "atualizados": atualizados, "pulados": pulados})
+            if job_id and i % 20 == 0:
+                progresso = int((i / total) * 100)
+
+                Processamento.objects.filter(id=job_id).update(
+                    progresso=progresso,
+                    mensagem=f"Processando pontos {i}/{total}"
+                )
+
+        if job_id:
+            Processamento.objects.filter(id=job_id).update(
+                progresso=100,
+                status="finalizado",
+                mensagem="Upload de pontos finalizado"
+            )
+
+        return JsonResponse({
+            "sucesso": True,
+            "inseridos": inseridos,
+            "atualizados": atualizados,
+            "pulados": pulados
+        })
 
     except Exception as e:
         return JsonResponse({"erro": str(e)}, status=400)

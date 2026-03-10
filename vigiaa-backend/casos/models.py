@@ -124,7 +124,12 @@ class Importacao(models.Model):
 
     def __str__(self):
         return f"{self.tipo} - {self.nome_arquivo}"
-
+        
+class Processamento(models.Model):
+    status = models.CharField(max_length=50, default="iniciando")
+    progresso = models.IntegerField(default=0)
+    mensagem = models.TextField(blank=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
 
 class CasoPositivoTemp(models.Model):
     local_atendimento = models.CharField(max_length=100, null=True, blank=True)

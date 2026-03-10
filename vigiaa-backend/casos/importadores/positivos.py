@@ -3,11 +3,8 @@ import geocoder
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from django.http import JsonResponse
-
-from django.contrib.admin.views.decorators import staff_member_required
-from django.views.decorators.http import require_POST
 from django.db import connection
-
+from casos.models import Processamento
 
 CORRECOES_ENDERECO = {
     "ALANO SIMAS FILHO": "ALCINO SIMAS FILHO",
@@ -45,7 +42,6 @@ COORDS_FIXAS = {
 LIMITES_GEO = (-27.10, -26.95, -48.75, -48.60)
 
 
-
 def col(df, *nomes):
     cols = {str(c).strip().upper(): c for c in df.columns}
     for n in nomes:
@@ -58,8 +54,7 @@ def col(df, *nomes):
 def _to_str(v):
     if v is None or (isinstance(v, float) and pd.isna(v)):
         return ""
-    s = str(v).strip()
-    return s
+    return str(v).strip()
 
 
 def _to_int(v):
@@ -84,8 +79,8 @@ def _to_date(v):
 
 
 def _hash_row(*parts):
-    base = "|".join([str(p) for p in parts]).lower()
     import hashlib
+    base = "|".join([str(p) for p in parts]).lower()
     return hashlib.sha256(base.encode("utf-8")).hexdigest()
 
 
@@ -111,10 +106,11 @@ def _geocodificar_endereco(endereco, bairro):
             return lat, lon, "MANUAL"
 
     query = f"{rua}, {bairro or ''}, CAMBORIÚ, SC, BRASIL"
+
     try:
         g = geocoder.arcgis(query)
         if g.ok and g.latlng:
-            lat, lon = g.latlng[0], g.latlng[1]
+            lat, lon = g.latlng
             if _dentro_bbox(lat, lon):
                 return lat, lon, "API"
             return None, None, "FORA_LIMITE"
@@ -126,15 +122,13 @@ def _geocodificar_endereco(endereco, bairro):
 
 def _get_table_info(table_name: str):
     with connection.cursor() as cur:
-        cur.execute(
-            """
+        cur.execute("""
             SELECT column_name, is_nullable
             FROM information_schema.columns
             WHERE table_schema = 'public' AND table_name = %s
-            """,
-            [table_name],
-        )
+        """, [table_name])
         rows = cur.fetchall()
+
     cols = {name for name, _ in rows}
     not_null = {name for name, nullable in rows if nullable == "NO"}
     return cols, not_null
@@ -144,7 +138,6 @@ def _upsert(table: str, row: dict):
     cols = list(row.keys())
     placeholders = ", ".join(["%s"] * len(cols))
     collist = ", ".join([f'"{c}"' for c in cols])
-
     update_cols = [c for c in cols if c != "hash_registro"]
     set_clause = ", ".join([f'"{c}" = EXCLUDED."{c}"' for c in update_cols])
 
@@ -155,16 +148,19 @@ def _upsert(table: str, row: dict):
         DO UPDATE SET {set_clause}
         RETURNING (xmax = 0) AS inserted;
     """
+
     values = [row[c] for c in cols]
+
     with connection.cursor() as cur:
         cur.execute(sql, values)
         inserted = cur.fetchone()[0]
         return bool(inserted)
 
+
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
-
 def upload_casos_positivos(request):
+    job_id = request.POST.get("job_id")
     arquivo = request.FILES.get("positivos") or request.FILES.get("casos")
     if not arquivo:
         return JsonResponse({"erro": "Arquivo não enviado"}, status=400)
@@ -177,12 +173,10 @@ def upload_casos_positivos(request):
         c_inicio = col(df, "INICIO SINTOMAS", "INÍCIO SINTOMAS")
         c_notif = col(df, "NOTIFICACAO", "NOTIFICAÇÃO")
         c_sinan = col(df, "SINAN")
-
         c_nome = col(df, "NOME")
         c_end = col(df, "ENDERECO", "ENDEREÇO")
         c_bairro = col(df, "BAIRRO")
         c_mae = col(df, "NOME DA MAE", "NOME DA MÃE")
-
         c_nasc = col(df, "DATA DE NASCIMENTO", "DATA NASC", "DATA_NASC")
         c_obs = col(df, "OBSERVACOES", "OBSERVAÇÕES")
         c_result = col(df, "RESULTADO")
@@ -190,6 +184,13 @@ def upload_casos_positivos(request):
         c_agentes = col(df, "AGENTE(S)", "AGENTES")
         c_prim = col(df, "1ª VISITA", "1A VISITA", "PRIM_VISITA")
         c_sit = col(df, "SITUACAO", "SITUAÇÃO")
+
+        # ========= CORREÇÃO DATA INICIO =========
+        if c_inicio:
+            df[c_inicio] = pd.to_datetime(df[c_inicio], errors="coerce")
+            df[c_inicio] = df[c_inicio].where(df[c_inicio].dt.year >= 2000)
+            df[c_inicio] = df[c_inicio].ffill()
+        # ========================================
 
         table_temp = "casos_positivos_temp"
         table_gl = "casos_positivos_temp_gl"
@@ -199,24 +200,21 @@ def upload_casos_positivos(request):
 
         inseridos_temp = atualizados_temp = 0
         inseridos_gl = atualizados_gl = 0
-        pulados = 0
-        pulados_sem_nome = 0
-
+        pulados = pulados_sem_nome = 0
         geo_api = geo_manual = geo_falha = geo_sem_end = geo_fora = 0
 
         total_linhas = int(len(df))
 
-        for _, r in df.iterrows():
+        for i, (_, r) in enumerate(df.iterrows()):
+
             sinan = _to_int(r.get(c_sinan)) if c_sinan else None
             notif = _to_date(r.get(c_notif)) if c_notif else None
             inicio = _to_date(r.get(c_inicio)) if c_inicio else None
             local = _to_str(r.get(c_local)) if c_local else ""
-
             nome = _to_str(r.get(c_nome)) if c_nome else ""
             endereco = _to_str(r.get(c_end)) if c_end else ""
             bairro = _to_str(r.get(c_bairro)) if c_bairro else ""
             nome_mae = _to_str(r.get(c_mae)) if c_mae else ""
-
             nasc = _to_date(r.get(c_nasc)) if c_nasc else None
             obs = _to_str(r.get(c_obs)) if c_obs else ""
             resultado = _to_str(r.get(c_result)) if c_result else ""
@@ -265,12 +263,7 @@ def upload_casos_positivos(request):
             }
             row_temp = {k: v for k, v in row_temp.items() if k in cols_temp}
 
-            ok = True
-            for k in not_null_temp:
-                if k in row_temp and (row_temp[k] is None or row_temp[k] == ""):
-                    ok = False
-                    break
-            if not ok:
+            if any(k in not_null_temp and (v is None or v == "") for k, v in row_temp.items()):
                 pulados += 1
                 continue
 
@@ -280,72 +273,54 @@ def upload_casos_positivos(request):
 
             latf, lonf, status_geo = _geocodificar_endereco(endereco, bairro)
 
-            if status_geo == "API":
-                geo_api += 1
-            elif status_geo == "MANUAL":
-                geo_manual += 1
-            elif status_geo == "SEM_ENDERECO":
-                geo_sem_end += 1
-            elif status_geo == "FORA_LIMITE":
-                geo_fora += 1
-            else:
-                geo_falha += 1
+            if status_geo == "API": geo_api += 1
+            elif status_geo == "MANUAL": geo_manual += 1
+            elif status_geo == "SEM_ENDERECO": geo_sem_end += 1
+            elif status_geo == "FORA_LIMITE": geo_fora += 1
+            else: geo_falha += 1
 
             if latf is None or lonf is None:
                 latf, lonf = -27.022986, -48.652135
 
-            row_gl = {
-                "hash_registro": h,
-                "local_atendimento": local or None,
-                "inicio_sintomas": inicio,
-                "notificacao": notif,
-                "sinan": sinan,
-                "bairro": bairro or None,
-                "data_nasc": nasc,
-                "observacoes": obs or None,
-                "resultado": resultado or None,
-                "aplicacao": aplicacao or None,
-                "agentes": agentes or None,
-                "prim_visita": prim or None,
-                "situacao": situacao or None,
-                "nome": nome,
-                "endereco": endereco or None,
-                "nome_mae": nome_mae or None,
-                "geometry": f"SRID=4674;POINT({lonf} {latf})",
-            }
+            row_gl = row_temp.copy()
+            row_gl["geometry"] = f"SRID=4674;POINT({lonf} {latf})"
             row_gl = {k: v for k, v in row_gl.items() if k in cols_gl}
 
-            ok_gl = True
-            for k in not_null_gl:
-                if k in row_gl and (row_gl[k] is None or row_gl[k] == ""):
-                    ok_gl = False
-                    break
-            if not ok_gl:
+            if any(k in not_null_gl and (v is None or v == "") for k, v in row_gl.items()):
                 continue
 
             created_gl = _upsert(table_gl, row_gl)
             inseridos_gl += int(created_gl)
             atualizados_gl += int(not created_gl)
+            if job_id and i % 20 == 0:
+                progresso = int((i / total_linhas) * 100)
+                Processamento.objects.filter(id=job_id).update(
+                    progresso=progresso,
+                    mensagem=f"Processando positivos {i}/{total_linhas}"
+            )
 
-        return JsonResponse(
-            {
-                "sucesso": True,
-                "dataset": "casos_positivos",
-                "total_linhas": total_linhas,
-                "temp": {"inseridos": inseridos_temp, "atualizados": atualizados_temp},
-                "temp_gl": {"inseridos": inseridos_gl, "atualizados": atualizados_gl},
-                "pulados": pulados,
-                "pulados_sem_nome": pulados_sem_nome,
-                "geocoding": {
-                    "api": geo_api,
-                    "manual": geo_manual,
-                    "sem_endereco": geo_sem_end,
-                    "fora_limite": geo_fora,
-                    "falha": geo_falha,
-                },
-                "resumo": f"TEMP: {inseridos_temp} ins, {atualizados_temp} att | GL: {inseridos_gl} ins, {atualizados_gl} att | sem_nome: {pulados_sem_nome}",
-            }
+        if job_id:
+            Processamento.objects.filter(id=job_id).update(
+                progresso=100,
+                status="finalizado",
+                mensagem="Upload de casos positivos finalizado"
         )
+        return JsonResponse({
+            "sucesso": True,
+            "dataset": "casos_positivos",
+            "total_linhas": total_linhas,
+            "temp": {"inseridos": inseridos_temp, "atualizados": atualizados_temp},
+            "temp_gl": {"inseridos": inseridos_gl, "atualizados": atualizados_gl},
+            "pulados": pulados,
+            "pulados_sem_nome": pulados_sem_nome,
+            "geocoding": {
+                "api": geo_api,
+                "manual": geo_manual,
+                "sem_endereco": geo_sem_end,
+                "fora_limite": geo_fora,
+                "falha": geo_falha,
+            },
+        })
 
     except Exception as e:
         return JsonResponse({"erro": str(e)}, status=400)

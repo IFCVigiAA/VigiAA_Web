@@ -5,9 +5,9 @@ from casos.importadores.armadilhas import upload_armadilhas
 from casos.importadores.pontos import upload_pontos_estrategicos
 from casos.importadores.positivos import upload_casos_positivos
 from casos.sincronizar import sincronizar_oficial_api
-
 from .views import me
 from django.contrib.auth import views as auth_views
+from .views import status_processamento
 
 urlpatterns = [
     path("me/", me, name="me"),
@@ -19,4 +19,5 @@ urlpatterns = [
     path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(next_page="/api/casos/login/"), name="logout"),
     path("sincronizar/", sincronizar_oficial_api, name="sincronizar_oficial"),
+    path("status-processamento/<int:job_id>/", status_processamento),
 ]
