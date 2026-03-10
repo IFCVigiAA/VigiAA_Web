@@ -11,6 +11,8 @@ import Casos from "../pages/cadastro_casos";
 import UploadPlanilhas from "../pages/Upload_planilhas";
 import Login from "../pages/Login";
 
+
+
 function App() {
    // const basePath = import.meta.env.BASE_URL;
   return (
@@ -25,7 +27,6 @@ function App() {
       <Route path="/casos" element={<Casos />} />
       <Route path="/UploadPlanilhas" element={<UploadPlanilhas />} />
       <Route path="/Login" element={<Login />} />
-
     </Routes>
    </Router>
   )

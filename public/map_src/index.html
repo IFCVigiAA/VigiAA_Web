@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Dinâmico - Leaflet & GeoServer</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+    <link rel="stylesheet" href="style.css"></head>
+<body>
+    <div class="filter-container" id="main-filter-container">
+        <div id="group-filter-casos" class="filter-group" style="display: none;">
+            <span class="filter-title">Casos Positivos</span>
+            <div class="filter-row">
+                <select id="filter-ano-casos"><option value="">Ano</option></select>
+                <select id="filter-se-casos" disabled><option value="">SE*</option></select>
+            </div>
+        </div>
+
+        <div id="group-filter-focos" class="filter-group" style="display: none;">
+            <span class="filter-title">Focos Aedes</span>
+            <div class="filter-row">
+                <select id="filter-ano-focos"><option value="">Ano</option></select>
+                <select id="filter-se-focos" disabled><option value="">SE*</option></select>
+            </div>
+        </div>
+    </div>
+
+    <div id="mapid"></div>
+
+    <div class="map-legend" style=" display: none;" id="declividade-legend">
+        <b>Declividade (m)</b><br>
+        <i style="background:#238b45;"></i> 0 - 100<br>
+        <i style="background:#41ab5d;"></i> 100 - 200<br>
+        <i style="background:#74c476;"></i> 200 - 300<br>
+        <i style="background:#a1d99b;"></i> 300 - 400<br>
+        <i style="background:#ECF74A;"></i> 400 - 500<br>
+        <i style="background:#F54927;"></i> 500 - 600<br>
+        <i style="background:#FF0000;"></i> 600 - 700<br>
+        <i style="background:#b30000;"></i> 700 - 800<br>
+        <i style="background:#cccccc;"></i> &gt; 800<br>
+        <div style="clear:both;"></div>
+    </div>
+    <div class="map-legend" style=" display: none;" id="demografia_ofc-legend">
+        <b>Densidade Demográfica</b><br>
+        <div>(Setores Censitários)</div><br>
+        <i style="background:#238b45;"></i> 164 - 1985<br>
+        <i style="background:#41ab5d;"></i> 2010 - 3550<br>
+        <i style="background:#74c476;"></i> 3618 - 5329<br>
+        <i style="background:#a1d99b;"></i> 5331 - 6804<br>
+        <i style="background:#ECF74A;"></i> 7203 - 8609<br>
+        <i style="background:#F54927;"></i> 8142 - 10258<br>
+        <i style="background:#FF0000;"></i> 10431 - 12879<br>
+        <i style="background:#b30000;"></i> 13219 - 16165<br>
+        <div style="clear:both;"></div>
+    </div>
+    <div class="map-legend" style=" display: none;" id="demografia-legend">
+        <b>Demografia 2022 (%)</b><br>
+        <i style="background:#fce5cd;"></i> &le; 16,75<br>
+        <i style="background:#f9cb9c;"></i> 16,75 - 33,40<br>
+        <i style="background:#f6b26b;"></i> 33,40 - 50,05<br>
+        <i style="background:#e69138;"></i> 50,05 - 66,70<br>
+        <i style="background:#cc0000;"></i> 66,70 - 83,35<br>
+        <i style="background:#990000;"></i> &gt; 83,35<br>
+        <div style="clear:both;"></div>
+    </div>
+    <div class="map-legend" style=" display: none;" id="heatmap-legend">
+        <b>Mapa de Calor</b><br>
+        <p style="margin: 5px 0;">Áreas mais escuras indicam maior concentração de pontos.</p>
+        <div style="width: 100%; height: 20px; background: linear-gradient(to right, blue, cyan, lime, yellow, red); border-radius: 4px;"></div>
+        <div style="display: flex; justify-content: space-between; font-size: 12px; margin-top: 5px;">
+            <span>Baixa concentração</span>
+            <span>Alta concentração</span>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script src="map-config.js"></script>
+    <script src="map-main.js"></script>
+</body>
+</html>
