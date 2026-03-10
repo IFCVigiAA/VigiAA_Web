@@ -7,6 +7,7 @@
 
 /* Card branco, parecido com as áreas claras do site */
 .vigiaa-card {
+  margin-top: 5vh;
   width: min(820px, 100%);
   background: #ffffff;
   border: 2px solid #2ea66a;

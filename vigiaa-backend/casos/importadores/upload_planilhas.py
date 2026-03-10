@@ -1,5 +1,4 @@
 from django.http import JsonResponse
-
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponseForbidden
 from casos.importadores.focos import upload_focos

@@ -55,19 +55,14 @@ const NavBar = () => {
 
         <NavLink to="/Participantes" className={({ isActive }) => isActive ? 'active' : ''} onClick={() => setShowMenu(false)}>
           Participantes
-        </NavLink>
-
-        {/* 🔒 Só aparece se for staff */}
-        {!carregando && isStaff && (
+        </NavLink>       
           <NavLink
-            to="/uploadplanilhas"
+            to="/Login"
             className={({ isActive }) => isActive ? 'active' : ''}
             onClick={() => setShowMenu(false)}
           >
             Upload dados
           </NavLink>
-        )}
-
         <button className="projetosBtn" onClick={toggleModal}>
           Projetos
         </button>

@@ -1,6 +1,6 @@
 import { useMemo, useState, useRef } from 'react'
 import './Upload_planilhas.css'
-
+import NavBar from '../components/NavBar';
 const API_BASE = 'http://127.0.0.1:8000'
 
 const endpoints = {
@@ -271,9 +271,10 @@ export default function UploadPlanilhas() {
   }
 
   return (
-
+    <>
+    <NavBar />
     <div className="vigiaa-upload">
-
+      
       <div className="vigiaa-card">
 
         <div className="vigiaa-card__header">
@@ -370,7 +371,7 @@ export default function UploadPlanilhas() {
       </div>
 
     </div>
-
+    </>
   )
 
 }
