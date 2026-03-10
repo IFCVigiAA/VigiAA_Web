@@ -36,7 +36,7 @@ export default function Login() {
   return (
     <div className="login-container">
       <form className="login-box" onSubmit={handleLogin}>
-        <h2>Login Administrativo</h2>
+        <h2>Login Vigiaa</h2>
 
         <input
           type="text"

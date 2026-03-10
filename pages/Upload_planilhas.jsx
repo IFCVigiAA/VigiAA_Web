@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useRef } from 'react'
 import './Upload_planilhas.css'
 
 const API_BASE = 'http://127.0.0.1:8000'
@@ -19,19 +19,8 @@ const uploadKeyByTipo = {
   pontos: 'pontos',
 }
 
-function formatResultado(tipo, r) {
-  if (!r?.ok) return `${tipo}: (${r?.status ?? 0}) ${r?.erro ?? 'Erro'}`
-
-  const d = r.data || {}
-  if (typeof d.resumo === 'string' && d.resumo.trim()) return `${tipo}: ${d.resumo}`
-
-  const ins = d.inseridos
-  if (ins != null) return `${tipo}: ${ins} inseridos`
-
-  return `${tipo}: ok`
-}
-
 export default function UploadPlanilhas() {
+
   const [arquivos, setArquivos] = useState({
     casos: null,
     pontos: null,
@@ -41,6 +30,11 @@ export default function UploadPlanilhas() {
 
   const [enviando, setEnviando] = useState(false)
   const [sincronizando, setSincronizando] = useState(false)
+  const [progresso, setProgresso] = useState(0)
+  const [log, setLog] = useState('')
+
+  const ultimaMensagem = useRef('')
+  const fakeBar = useRef(null)
 
   const pendentes = useMemo(
     () => Object.entries(arquivos).filter(([_, file]) => !!file),
@@ -58,153 +52,325 @@ export default function UploadPlanilhas() {
     return { Authorization: `Bearer ${token}` }
   }
 
-  async function postArquivo(tipo, arquivo) {
-    const url = API_BASE + endpoints[tipo]
-    const formData = new FormData()
-    const key = uploadKeyByTipo[tipo] ?? 'arquivo'
-    formData.append(key, arquivo)
+  function iniciarFake() {
 
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: {
-        ...getAuthHeader(),
-      },
-      body: formData,
+    let valor = 0
+
+    fakeBar.current = setInterval(() => {
+
+      valor += Math.random() * 5
+
+      if (valor > 90) valor = 90
+
+      setProgresso(Math.floor(valor))
+
+    }, 400)
+
+  }
+
+  function finalizarFake() {
+
+    if (fakeBar.current) {
+      clearInterval(fakeBar.current)
+      fakeBar.current = null
+    }
+
+    setProgresso(100)
+
+    setTimeout(() => {
+      setProgresso(0)
+    }, 700)
+
+  }
+
+  function uploadArquivo(url, formData) {
+
+    return new Promise((resolve) => {
+
+      const xhr = new XMLHttpRequest()
+
+      xhr.open('POST', url)
+
+      const headers = getAuthHeader()
+
+      Object.keys(headers).forEach(k =>
+        xhr.setRequestHeader(k, headers[k])
+      )
+
+      xhr.onload = () => {
+
+        try {
+
+          const json = JSON.parse(xhr.responseText)
+
+          resolve({ ok: xhr.status < 400, data: json })
+
+        } catch {
+
+          resolve({ ok: false })
+
+        }
+
+      }
+
+      xhr.send(formData)
+
     })
 
-    const contentType = res.headers.get('content-type') || ''
-    const bodyText = await res.text()
-    const isJson = contentType.includes('application/json')
+  }
 
-    if (!res.ok) {
-      let erro = bodyText || 'Erro'
-      if (isJson) {
-        try {
-          const j = JSON.parse(bodyText)
-          erro = j.detail || j.erro || JSON.stringify(j)
-        } catch {}
+  async function enviar({ syncAfter } = { syncAfter: false }) {
+
+    setEnviando(true)
+    setLog('')
+    setProgresso(0)
+
+    iniciarFake()
+
+    try {
+
+      if (pendentes.length === 0) {
+        setLog('Selecione pelo menos 1 planilha.')
+        return
       }
-      return { ok: false, status: res.status, erro }
+
+      for (const [tipo, file] of pendentes) {
+
+        const url = API_BASE + endpoints[tipo]
+
+        const formData = new FormData()
+
+        formData.append(uploadKeyByTipo[tipo], file)
+
+        setLog(prev => prev + `Enviando ${tipo}...\n`)
+
+        const r = await uploadArquivo(url, formData)
+
+        if (r.ok) {
+
+          const inseridos = r.data?.inseridos ?? 0
+
+          setLog(prev => prev + `✔ ${tipo}: ${inseridos} inseridos\n\n`)
+
+        } else {
+
+          setLog(prev => prev + `✖ ${tipo}: erro\n\n`)
+
+        }
+
+      }
+
+      finalizarFake()
+
+      if (syncAfter) {
+        await sincronizar()
+      }
+
+    } finally {
+
+      setEnviando(false)
+
     }
 
-    if (isJson) {
-      try {
-        const j = JSON.parse(bodyText)
-        return { ok: true, status: res.status, data: j }
-      } catch {
-        return { ok: true, status: res.status, data: {} }
-      }
-    }
-
-    return { ok: true, status: res.status, data: {} }
   }
 
   async function sincronizar() {
+    if (sincronizando) return
     setSincronizando(true)
-    try {
-      const url = API_BASE + syncEndpoint
+    setProgresso(0)
 
-      const res = await fetch(url, {
+    setLog(prev => prev + '\nIniciando sincronização...\n')
+
+    ultimaMensagem.current = ''
+
+    try {
+
+      const res = await fetch(API_BASE + syncEndpoint, {
+
         method: 'POST',
+
         headers: {
           'Content-Type': 'application/json',
           ...getAuthHeader(),
         },
-        body: JSON.stringify({}),
+
       })
 
       const data = await res.json()
 
-      if (!res.ok) {
-        alert(`Falha ao sincronizar: ${data.detail || 'Erro'}`)
-        return
-      }
+      const jobId = data.job_id
 
-      alert(`Sincronização OK:\n${data.resumo || 'Concluído'}`)
-    } finally {
+      const interval = setInterval(async () => {
+
+        try {
+
+          const statusRes = await fetch(
+            `${API_BASE}/api/casos/status-processamento/${jobId}/`,
+            { headers: getAuthHeader() }
+          )
+
+          const statusData = await statusRes.json()
+
+          if (statusData.progresso !== undefined) {
+            setProgresso(statusData.progresso)
+          }
+
+          if (
+            statusData.mensagem &&
+            statusData.mensagem !== ultimaMensagem.current
+          ) {
+
+            setLog(prev => prev + statusData.mensagem + '\n')
+
+            ultimaMensagem.current = statusData.mensagem
+
+          }
+
+          if (statusData.status === 'concluido') {
+
+            clearInterval(interval)
+
+            setProgresso(100)
+
+            setLog(prev => prev + '\n✔ Sincronização concluída\n')
+
+            setSincronizando(false)
+
+          }
+
+          if (statusData.status === 'erro') {
+
+            clearInterval(interval)
+
+            setLog(prev => prev + '\n✖ Erro na sincronização\n')
+
+            setSincronizando(false)
+
+          }
+
+        } catch {
+
+          clearInterval(interval)
+
+          setLog(prev => prev + '\n✖ Erro ao consultar status\n')
+
+          setSincronizando(false)
+
+        }
+
+      }, 2000)
+
+    } catch {
+
+      setLog(prev => prev + '\n✖ Erro ao iniciar sincronização\n')
+
       setSincronizando(false)
+
     }
-  }
 
-  async function enviar({ syncAfter } = { syncAfter: false }) {
-    setEnviando(true)
-    try {
-      if (pendentes.length === 0) {
-        alert('Selecione pelo menos 1 planilha.')
-        return
-      }
-
-      const resultados = []
-
-      for (const [tipo, file] of pendentes) {
-        const r = await postArquivo(tipo, file)
-        resultados.push({ tipo, ...r })
-      }
-
-      const falhas = resultados.filter(r => !r.ok)
-      const okays = resultados.filter(r => r.ok)
-
-      const msgOk = okays.map(r => formatResultado(r.tipo, r)).join('\n')
-      const msgFail = falhas.map(r => formatResultado(r.tipo, r)).join('\n')
-
-      if (falhas.length === 0) {
-        alert(`Importado com sucesso:\n${msgOk || '-'}`)
-        if (syncAfter) await sincronizar()
-      } else {
-        alert(`Alguns falharam:\n\nOK:\n${msgOk || '-'}\n\nFalhas:\n${msgFail || '-'}`)
-      }
-    } finally {
-      setEnviando(false)
-    }
   }
 
   return (
+
     <div className="vigiaa-upload">
+
       <div className="vigiaa-card">
+
         <div className="vigiaa-card__header">
+
           <div>
+
             <h2 className="vigiaa-title">Upload de dados</h2>
-            <p className="vigiaa-subtitle">Envie as planilhas e rode o sincronizador sem sair da tela.</p>
+
+            <p className="vigiaa-subtitle">
+              Envie as planilhas e acompanhe o progresso.
+            </p>
+
           </div>
-          <span className="vigiaa-badge">{pendentes.length} selecionada(s)</span>
+
+          <span className="vigiaa-badge">
+            {pendentes.length} selecionada(s)
+          </span>
+
         </div>
 
         <div className="vigiaa-fields">
+
           <label className="vigiaa-field">
             <span>Casos positivos</span>
-            <input type="file" name="casos" onChange={handleChange} accept=".xlsx,.xls" />
+            <input type="file" name="casos" onChange={handleChange} />
           </label>
 
           <label className="vigiaa-field">
             <span>Pontos estratégicos</span>
-            <input type="file" name="pontos" onChange={handleChange} accept=".xlsx,.xls" />
+            <input type="file" name="pontos" onChange={handleChange} />
           </label>
 
           <label className="vigiaa-field">
             <span>Focos</span>
-            <input type="file" name="focos" onChange={handleChange} accept=".xlsx,.xls" />
+            <input type="file" name="focos" onChange={handleChange} />
           </label>
 
           <label className="vigiaa-field">
             <span>Armadilhas</span>
-            <input type="file" name="armadilhas" onChange={handleChange} accept=".xlsx,.xls" />
+            <input type="file" name="armadilhas" onChange={handleChange} />
           </label>
+
         </div>
 
         <div className="vigiaa-actions">
-          <button className="vigiaa-btn vigiaa-btn--primary" onClick={() => enviar({ syncAfter: false })} disabled={enviando || sincronizando}>
+
+          <button
+            className="vigiaa-btn vigiaa-btn--primary"
+            onClick={() => enviar({ syncAfter: false })}
+            disabled={enviando || sincronizando}
+          >
             {enviando ? 'Processando...' : 'Processar planilhas'}
           </button>
 
-          <button className="vigiaa-btn vigiaa-btn--outline" onClick={() => enviar({ syncAfter: true })} disabled={enviando || sincronizando}>
-            {enviando ? 'Processando...' : 'Processar + sincronizar'}
+          <button
+            className="vigiaa-btn vigiaa-btn--outline"
+            onClick={() => enviar({ syncAfter: true })}
+            disabled={enviando || sincronizando}
+          >
+            Processar + sincronizar
           </button>
 
-          <button className="vigiaa-btn vigiaa-btn--ghost" onClick={sincronizar} disabled={enviando || sincronizando}>
+          <button
+            className="vigiaa-btn vigiaa-btn--ghost"
+            onClick={sincronizar}
+            disabled={enviando || sincronizando}
+          >
             {sincronizando ? 'Sincronizando...' : 'Sincronizar agora'}
           </button>
+
         </div>
+
+        {(enviando || sincronizando) && (
+
+          <div className="vigiaa-progress">
+
+            <div
+              className="vigiaa-progress__bar"
+              style={{ width: `${progresso}%` }}
+            />
+
+          </div>
+
+        )}
+
+        {log && (
+
+          <div className="vigiaa-log">
+            <pre>{log}</pre>
+          </div>
+
+        )}
+
       </div>
+
     </div>
+
   )
+
 }
