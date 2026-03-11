@@ -272,9 +272,9 @@ export default function UploadPlanilhas() {
 
   return (
     <>
-    <NavBar />
+    
     <div className="vigiaa-upload">
-      
+      <NavBar />
       <div className="vigiaa-card">
 
         <div className="vigiaa-card__header">
