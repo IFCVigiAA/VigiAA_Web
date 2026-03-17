@@ -1,197 +1,111 @@
-from django.core.management.base import BaseCommand
-from django.db import connections, models
-from django.contrib.gis.db import models as gis_models
-from casos.models import (
-    CasoPositivoTempGL,
-    FocoTemp,
-    PontoEstrategicoTemp,
-    ArmadilhaTemp,
-)
-import os
+import re
+import threading
+from io import StringIO
+from django.http import JsonResponse
+from django.core.management import call_command
+from django.db import connection
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from casos.models import LogSincronizacao
 
 
-def _db_columns(using: str, table: str) -> set[str]:
-    with connections[using].cursor() as cur:
-        cur.execute(
-            """
-            SELECT column_name
-            FROM information_schema.columns
-            WHERE table_schema='public' AND table_name=%s
-            """,
-            [table],
-        )
-        return {r[0] for r in cur.fetchall()}
+def _extrair_processados(texto):
 
+    if not texto:
+        return []
 
-def _is_geom_field(f) -> bool:
-    return isinstance(f, gis_models.GeometryField)
-
-
-def _geom_to_ewkb(v):
-    if v is None:
-        return None
-    try:
-        return bytes(v.ewkb)
-    except Exception:
-        return None
-
-
-def _sync_sql_upsert(
-    Model: type[models.Model],
-    dst_table: str,
-    dst_using="oficial",
-    src_using="default",
-):
-    """
-    Sincroniza dados do banco TEMP (default)
-    para o banco OFICIAL (oficial).
-
-    Faz INSERT ou UPDATE baseado em hash_registro.
-    """
-
-    dst_cols = _db_columns(dst_using, dst_table)
-    if not dst_cols:
-        return 0, 0
-
-    model_fields = [
-        f for f in Model._meta.local_concrete_fields if not f.primary_key
-    ]
-    fields = [f for f in model_fields if f.column in dst_cols]
-
-    if not fields:
-        return 0, 0
-
-    has_hash = "hash_registro" in dst_cols and any(
-        f.column == "hash_registro" for f in fields
+    numeros = re.findall(
+        r'processad(?:o|os)\s*[:=]?\s*(\d+)',
+        texto,
+        flags=re.IGNORECASE
     )
 
-    cols_sql = ", ".join(f'"{f.column}"' for f in fields)
+    return [int(n) for n in numeros]
 
-    placeholders = []
-    for f in fields:
-        if _is_geom_field(f):
-            placeholders.append("ST_GeomFromEWKB(%s)")
-        else:
-            placeholders.append("%s")
 
-    placeholders_sql = ", ".join(placeholders)
+def _upsert(table: str, row: dict):
 
-    update_sql = ""
-    if has_hash:
-        update_fields = [f for f in fields if f.column != "hash_registro"]
-        set_clause = ", ".join(
-            f'"{f.column}" = EXCLUDED."{f.column}"'
-            for f in update_fields
-        )
-        update_sql = f' ON CONFLICT ("hash_registro") DO UPDATE SET {set_clause}'
+    cols = list(row.keys())
+    placeholders = ", ".join(["%s"] * len(cols))
+    collist = ", ".join([f'"{c}"' for c in cols])
+    update_cols = [c for c in cols if c != "hash_registro"]
+    set_clause = ", ".join([f'"{c}" = EXCLUDED."{c}"' for c in update_cols])
 
     sql = f"""
-        INSERT INTO "{dst_table}" ({cols_sql})
-        VALUES ({placeholders_sql})
-        {update_sql}
-        RETURNING (xmax = 0) AS inserted;
+        INSERT INTO "{table}" ({collist})
+        VALUES ({placeholders})
+        ON CONFLICT ("hash_registro")
+        DO UPDATE SET {set_clause}
     """
 
-    inseridos = 0
-    atualizados = 0
+    values = [row[c] for c in cols]
 
-    with connections[dst_using].cursor() as cur:
-        for obj in Model.objects.using(src_using).iterator(chunk_size=2000):
-
-            vals = []
-            for f in fields:
-                v = getattr(obj, f.attname)
-                if _is_geom_field(f):
-                    vals.append(_geom_to_ewkb(v))
-                else:
-                    vals.append(v)
-
-            cur.execute(sql, vals)
-            inserted = cur.fetchone()[0]
-
-            if inserted:
-                inseridos += 1
-            else:
-                atualizados += 1
-
-    return inseridos, atualizados
+    with connection.cursor() as cur:
+        cur.execute(sql, values)
 
 
-class Command(BaseCommand):
-    help = "Sincroniza dados do DB temporário (default) para o DB oficial (oficial)."
+def rodar_sincronizacao(job_id):
 
-    def handle(self, *args, **options):
-        from django.conf import settings
+    proc = LogSincronizacao.objects.get(id=job_id)
 
-        self.stdout.write("\n=======================================")
-        self.stdout.write("INICIANDO SINCRONIZAÇÃO OFICIAL")
-        self.stdout.write("=======================================\n")
+    out = StringIO()
+    err = StringIO()
 
-        db = settings.DATABASES["default"]
-        self.stdout.write(
-            f"DB TEMP: {db.get('ENGINE')} | {db.get('NAME')} | {db.get('HOST')}\n"
-        )
+    try:
 
-        total_inseridos = 0
-        total_atualizados = 0
+        proc.progresso = 10
+        proc.mensagem = "Iniciando sincronização"
+        proc.save()
 
-        # =========================
-        # CASOS POSITIVOS
-        # =========================
-        self.stdout.write("→ Sincronizando casos_positivos...")
-        ins, upd = _sync_sql_upsert(
-            CasoPositivoTempGL,
-            dst_table="casos_positivos",
-        )
-        self.stdout.write(f"   Inseridos: {ins}")
-        self.stdout.write(f"   Atualizados: {upd}\n")
-        total_inseridos += ins
-        total_atualizados += upd
+        call_command("sincronizar_oficial", stdout=out, stderr=err)
 
-        # =========================
-        # FOCOS AEDES
-        # =========================
-        self.stdout.write("→ Sincronizando focos_aedes...")
-        ins, upd = _sync_sql_upsert(
-            FocoTemp,
-            dst_table="focos_aedes",
-        )
-        self.stdout.write(f"   Inseridos: {ins}")
-        self.stdout.write(f"   Atualizados: {upd}\n")
-        total_inseridos += ins
-        total_atualizados += upd
+        proc.progresso = 90
+        proc.mensagem = "Finalizando sincronização"
+        proc.save()
 
-        # =========================
-        # PONTOS ESTRATÉGICOS
-        # =========================
-        self.stdout.write("→ Sincronizando pontos_estrategicos...")
-        ins, upd = _sync_sql_upsert(
-            PontoEstrategicoTemp,
-            dst_table="pontos_estrategicos",
-        )
-        self.stdout.write(f"   Inseridos: {ins}")
-        self.stdout.write(f"   Atualizados: {upd}\n")
-        total_inseridos += ins
-        total_atualizados += upd
+        stdout = out.getvalue()
+        stderr = err.getvalue()
 
-        # =========================
-        # ARMADILHAS
-        # =========================
-        self.stdout.write("→ Sincronizando relat_arm...")
-        ins, upd = _sync_sql_upsert(
-            ArmadilhaTemp,
-            dst_table="relat_arm",
-        )
-        self.stdout.write(f"   Inseridos: {ins}")
-        self.stdout.write(f"   Atualizados: {upd}\n")
-        total_inseridos += ins
-        total_atualizados += upd
+        processados_stdout = _extrair_processados(stdout)
+        processados_stderr = _extrair_processados(stderr)
 
-        self.stdout.write("=======================================")
-        self.stdout.write("SINCRONIZAÇÃO FINALIZADA")
-        self.stdout.write(f"TOTAL INSERIDOS: {total_inseridos}")
-        self.stdout.write(f"TOTAL ATUALIZADOS: {total_atualizados}")
-        self.stdout.write(
-            f"TOTAL GERAL PROCESSADO: {total_inseridos + total_atualizados}"
-        )
-        self.stdout.write("=======================================\n")
+        processados = processados_stdout or processados_stderr
+        total = sum(processados) if processados else 0
+
+        proc.status = "concluido"
+        proc.progresso = 100
+        proc.mensagem = f"Sincronização concluída ({total} registros processados)"
+        proc.save()
+
+    except Exception as e:
+
+        proc.status = "erro"
+        proc.progresso = 100
+        proc.mensagem = str(e)
+        proc.save()
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def sincronizar_oficial_api(request):
+
+    proc = LogSincronizacao.objects.create(
+        tipo="sincronizacao",
+        nome_arquivo="sincronizacao_oficial",
+        hash="",
+        status="processando",
+        progresso=0,
+        mensagem="Preparando sincronização"
+    )
+
+    thread = threading.Thread(
+        target=rodar_sincronizacao,
+        args=(proc.id,)
+    )
+
+    thread.start()
+
+    return JsonResponse({
+        "sucesso": True,
+        "job_id": proc.id
+    })

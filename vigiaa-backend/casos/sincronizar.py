@@ -5,7 +5,7 @@ from django.http import JsonResponse
 from django.core.management import call_command
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-from casos.models import Processamento
+from casos.models import LogSincronizacao
 
 
 def _extrair_processados(texto):
@@ -24,7 +24,7 @@ def _extrair_processados(texto):
 
 def rodar_sincronizacao(job_id):
 
-    proc = Processamento.objects.get(id=job_id)
+    proc = LogSincronizacao.objects.get(id=job_id)
 
     out = StringIO()
     err = StringIO()
@@ -67,7 +67,10 @@ def rodar_sincronizacao(job_id):
 @permission_classes([IsAuthenticated])
 def sincronizar_oficial_api(request):
 
-    proc = Processamento.objects.create(
+    proc = LogSincronizacao.objects.create(
+        tipo="sincronizacao",
+        nome_arquivo="sincronizacao_manual",
+        hash="manual",
         status="processando",
         progresso=0,
         mensagem="Preparando sincronização"

@@ -12,6 +12,9 @@ class Caso(models.Model):
 
 
 class CasoPositivo(models.Model):
+    nome = models.CharField(max_length=255, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
+    nome_mae = models.CharField(max_length=255, null=True, blank=True)
     local_atendimento = models.CharField(max_length=100, null=True, blank=True)
     inicio_sintomas = models.DateField(null=True, blank=True)
     notificacao = models.DateField(null=True, blank=True)
@@ -116,20 +119,22 @@ class Armadilha(models.Model):
         return f"Armadilha {self.numero} - {self.tipo_armadilha}"
 
 
-class Importacao(models.Model):
+class LogSincronizacao(models.Model):
     tipo = models.CharField(max_length=50)
     nome_arquivo = models.CharField(max_length=255)
     hash = models.CharField(max_length=64)
-    criado_em = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.tipo} - {self.nome_arquivo}"
-        
-class Processamento(models.Model):
     status = models.CharField(max_length=50, default="iniciando")
     progresso = models.IntegerField(default=0)
     mensagem = models.TextField(blank=True)
+
     criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = "logs_sincronizacao"
+
+    def __str__(self):
+        return f"{self.tipo} - {self.nome_arquivo}"
 
 class CasoPositivoTemp(models.Model):
     local_atendimento = models.CharField(max_length=100, null=True, blank=True)
@@ -224,7 +229,7 @@ class ArmadilhaTemp(models.Model):
     municipio = models.CharField(max_length=100, null=True, blank=True)
     localidade = models.CharField(max_length=100, null=True, blank=True)
     endereco = models.CharField(max_length=150, null=True, blank=True)
-    complemento = models.CharField(max_length=255, null=True, blank=True)
+    complemento = models.CharField(max_length=225, null=True, blank=True)
     quarteiroes = models.CharField(max_length=50, null=True, blank=True)
     tipo_imovel = models.CharField(max_length=50, null=True, blank=True)
     tipo_armadilha = models.CharField(max_length=50, null=True, blank=True)
