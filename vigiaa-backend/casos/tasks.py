@@ -16,6 +16,7 @@ from .models import (
 # --- 1. AUXILIARES DE TRATAMENTO ---
 
 def corrigir_datas_mistas(serie):
+    """Trata datas que vem como número serial do Excel ou Texto."""
     numeros_excel = pd.to_numeric(serie, errors='coerce')
     datas_dos_numeros = pd.to_datetime(numeros_excel, unit='D', origin='1899-12-30')
     textos_puros = serie.where(numeros_excel.isna(), pd.NaT)
@@ -29,6 +30,7 @@ def _normalize(s):
     return " ".join(s.replace("\xa0", " ").split())
 
 def col(df, *nomes):
+    """Acha o nome real da coluna no DataFrame ignorando acentos."""
     cols_mapeadas = {_normalize(c): c for c in df.columns}
     for n in nomes:
         key = _normalize(n)
@@ -36,6 +38,7 @@ def col(df, *nomes):
     return None
 
 def _geocodificar_endereco(endereco, bairro):
+    """Retorna Lat/Lon. Padrão: Centro de Camboriú."""
     def_lat, def_lon = -27.022986, -48.652135
     if not endereco: return def_lat, def_lon
     try:
@@ -45,7 +48,7 @@ def _geocodificar_endereco(endereco, bairro):
     except: pass
     return def_lat, def_lon
 
-# --- 2. TASK POSITIVOS ---
+# --- 2. TASK POSITIVOS (ORDEM EXATA DO EXCEL) ---
 
 @shared_task(bind=True)
 def task_processar_positivos(self, job_id, arquivo_path):
@@ -53,6 +56,7 @@ def task_processar_positivos(self, job_id, arquivo_path):
         log = LogSincronizacao.objects.get(id=job_id)
         df = pd.read_excel(arquivo_path)
         
+        # Mapeamento de TODAS as colunas
         c_inicio = col(df, "INÍCIO SINTOMAS", "INICIO SINTOMAS")
         c_nome = col(df, "NOME")
         c_sinan = col(df, "SINAN")
@@ -70,25 +74,28 @@ def task_processar_positivos(self, job_id, arquivo_path):
         c_prim = col(df, "1ª VISITA", "1A VISITA")
         c_obs2 = col(df, "UNNAMED: 15", "UNNAMED:15", "OBSERVACAO2")
 
+        # Tratamento de Datas
         for c in [c_inicio, c_nasc, c_notif]:
             if c: df[c] = corrigir_datas_mistas(df[c])
         
+        # Preenchimento de datas vazias (ffill) mantendo a ordem do Excel
         if c_inicio:
-            datas_validas = df[c_inicio].dropna()
-            ponto_partida = datas_validas.iloc[0] if not datas_validas.empty else pd.to_datetime("2026-01-01")
-            df[c_inicio] = df[c_inicio].fillna(ponto_partida)
-            df = df.sort_values(by=c_inicio, ascending=True).reset_index(drop=True)
+            # Preenche células vazias com a data da linha de cima (lógica natural do Excel)
             df[c_inicio] = df[c_inicio].ffill()
 
+        # Proteção contra nomes nulos e duplicados na planilha
         df = df.dropna(subset=[c_nome]) if c_nome else df
         df['temp_hash'] = df.apply(lambda r: hashlib.sha256(
             f"POS|{str(r.get(c_sinan))}|{str(r.get(c_nome))}|{str(r.get(c_nasc))}".encode()
         ).hexdigest(), axis=1)
+        
+        # Remove duplicatas exatas, mantendo a primeira ocorrência
         df = df.drop_duplicates(subset=['temp_hash'])
 
         params_temp = []
         params_gl = []
 
+        # O iterrows agora vai respeitar a ordem física que restou no DataFrame
         for _, r in df.iterrows():
             nome_v = str(r.get(c_nome) or "").strip().upper()
             if not nome_v or nome_v == 'NAN': continue
@@ -125,6 +132,7 @@ def task_processar_positivos(self, job_id, arquivo_path):
                 f"POINT({lon} {lat})"
             ))
 
+        # --- INSERÇÃO SQL ---
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute('DELETE FROM casos_positivos_temp')
