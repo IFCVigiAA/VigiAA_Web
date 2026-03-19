@@ -7,9 +7,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from casos.models import LogSincronizacao
 
-
 def _extrair_processados(texto):
-
     if not texto:
         return []
 
@@ -21,20 +19,18 @@ def _extrair_processados(texto):
 
     return [int(n) for n in numeros]
 
-
 def rodar_sincronizacao(job_id):
-
     proc = LogSincronizacao.objects.get(id=job_id)
 
     out = StringIO()
     err = StringIO()
 
     try:
-
         proc.progresso = 10
         proc.mensagem = "Iniciando sincronização"
         proc.save()
 
+        # Chama o arquivo 'sincronizar_oficial.py' lá da pasta management/commands
         call_command("sincronizar_oficial", stdout=out, stderr=err)
 
         proc.progresso = 90
@@ -56,17 +52,14 @@ def rodar_sincronizacao(job_id):
         proc.save()
 
     except Exception as e:
-
         proc.status = "erro"
         proc.progresso = 100
         proc.mensagem = str(e)
         proc.save()
 
-
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def sincronizar_oficial_api(request):
-
     proc = LogSincronizacao.objects.create(
         tipo="sincronizacao",
         nome_arquivo="sincronizacao_manual",

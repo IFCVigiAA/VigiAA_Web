@@ -1,111 +1,140 @@
-import re
-import threading
-from io import StringIO
-from django.http import JsonResponse
-from django.core.management import call_command
-from django.db import connection
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAuthenticated
-from casos.models import LogSincronizacao
+from django.core.management.base import BaseCommand
+from django.db import connections
 
+class Command(BaseCommand):
+    help = 'Sincroniza TEMP -> OFICIAL (bancos separados)'
 
-def _extrair_processados(texto):
+    def handle(self, *args, **kwargs):
+        self.stdout.write("Iniciando sincronização TEMP -> OFC...")
 
-    if not texto:
-        return []
+        try:
+            with connections['default'].cursor() as cursor_temp, \
+                 connections['oficial'].cursor() as cursor_ofc:
 
-    numeros = re.findall(
-        r'processad(?:o|os)\s*[:=]?\s*(\d+)',
-        texto,
-        flags=re.IGNORECASE
-    )
+                # DEBUG bancos
+                cursor_temp.execute("SELECT current_database()")
+                db_temp = cursor_temp.fetchone()[0]
 
-    return [int(n) for n in numeros]
+                cursor_ofc.execute("SELECT current_database()")
+                db_ofc = cursor_ofc.fetchone()[0]
 
+                self.stdout.write(f"📥 Lendo de: {db_temp}")
+                self.stdout.write(f"📤 Gravando em: {db_ofc}")
 
-def _upsert(table: str, row: dict):
+                # =========================
+                # 1. CASOS POSITIVOS
+                # =========================
+                cursor_temp.execute("""
+                    SELECT hash_registro, local_atendimento, inicio_sintomas, notificacao, sinan, 
+                           bairro, data_nasc, observacoes, resultado, aplicacao, agentes, prim_visita, situacao, geometry
+                    FROM casos_positivos_temp_gl
+                    WHERE geometry IS NOT NULL AND ST_IsValid(geometry)
+                """)
+                dados = cursor_temp.fetchall()
 
-    cols = list(row.keys())
-    placeholders = ", ".join(["%s"] * len(cols))
-    collist = ", ".join([f'"{c}"' for c in cols])
-    update_cols = [c for c in cols if c != "hash_registro"]
-    set_clause = ", ".join([f'"{c}" = EXCLUDED."{c}"' for c in update_cols])
+                if dados:
+                    hashes = [d[0] for d in dados]
 
-    sql = f"""
-        INSERT INTO "{table}" ({collist})
-        VALUES ({placeholders})
-        ON CONFLICT ("hash_registro")
-        DO UPDATE SET {set_clause}
-    """
+                    cursor_ofc.execute("""
+                        DELETE FROM casos_positivos 
+                        WHERE hash_registro = ANY(%s)
+                    """, [hashes])
 
-    values = [row[c] for c in cols]
+                    insert_sql = """
+                        INSERT INTO casos_positivos 
+                        (hash_registro, local_atendimento, inicio_sintomas, notificacao, sinan, 
+                         bairro, data_nasc, observacoes, resultado, aplicacao, agentes, prim_visita, situacao, geometry)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
 
-    with connection.cursor() as cur:
-        cur.execute(sql, values)
+                    cursor_ofc.executemany(insert_sql, dados)
 
+                    self.stdout.write(f"✅ Casos inseridos: {len(dados)}")
 
-def rodar_sincronizacao(job_id):
+                # =========================
+                # 2. FOCOS
+                # =========================
+                cursor_temp.execute("""
+                    SELECT hash_registro, n_foco, localidade, imovel, deposito, tipo_atividade, data_coleta, 
+                           a_aegypti_form_aquaticas, a_aegypti_form_adultas, a_albopictus_form_aquaticas, 
+                           a_albopictus_form_adultas, ovo_a_aegypti, geometry
+                    FROM focos_aedes_temp
+                """)
+                dados = cursor_temp.fetchall()
 
-    proc = LogSincronizacao.objects.get(id=job_id)
+                if dados:
+                    hashes = [d[0] for d in dados]
 
-    out = StringIO()
-    err = StringIO()
+                    cursor_ofc.execute("""
+                        DELETE FROM focos_aedes 
+                        WHERE hash_registro = ANY(%s)
+                    """, [hashes])
 
-    try:
+                    insert_sql = """
+                        INSERT INTO focos_aedes 
+                        (hash_registro, n_foco, localidade, imovel, deposito, tipo_atividade, data_coleta, 
+                         a_aegypti_form_aquaticas, a_aegypti_form_adultas, a_albopictus_form_aquaticas, 
+                         a_albopictus_form_adultas, ovo_a_aegypti, geometry)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
 
-        proc.progresso = 10
-        proc.mensagem = "Iniciando sincronização"
-        proc.save()
+                    cursor_ofc.executemany(insert_sql, dados)
+                    self.stdout.write(f"Focos inseridos: {len(dados)}")
 
-        call_command("sincronizar_oficial", stdout=out, stderr=err)
+                # =========================
+                # 3. PONTOS (CORRIGIDO)
+                # =========================
+                cursor_temp.execute("""
+                    SELECT hash_registro, numero, localidade, endereco, complemento, geometry
+                    FROM pontos_estrategicos_temp
+                """)
+                dados = cursor_temp.fetchall()
 
-        proc.progresso = 90
-        proc.mensagem = "Finalizando sincronização"
-        proc.save()
+                if dados:
+                    hashes = [d[0] for d in dados]
 
-        stdout = out.getvalue()
-        stderr = err.getvalue()
+                    cursor_ofc.execute("""
+                        DELETE FROM pontos_estrategicos 
+                        WHERE hash_registro = ANY(%s)
+                    """, [hashes])
 
-        processados_stdout = _extrair_processados(stdout)
-        processados_stderr = _extrair_processados(stderr)
+                    insert_sql = """
+                        INSERT INTO pontos_estrategicos 
+                        (hash_registro, numero, localidade, endereco, complemento, geometry)
+                        VALUES (%s, %s, %s, %s, %s, %s)
+                    """
 
-        processados = processados_stdout or processados_stderr
-        total = sum(processados) if processados else 0
+                    cursor_ofc.executemany(insert_sql, dados)
+                    self.stdout.write(f"Pontos inseridos: {len(dados)}")
 
-        proc.status = "concluido"
-        proc.progresso = 100
-        proc.mensagem = f"Sincronização concluída ({total} registros processados)"
-        proc.save()
+                # =========================
+                # 4. ARMADILHAS (CORRIGIDO)
+                # =========================
+                cursor_temp.execute("""
+                    SELECT hash_registro, numero, localidade, complemento, tipo_imovel, tipo_armadilha, geometry
+                    FROM relat_arm_temp
+                """)
+                dados = cursor_temp.fetchall()
 
-    except Exception as e:
+                if dados:
+                    hashes = [d[0] for d in dados]
 
-        proc.status = "erro"
-        proc.progresso = 100
-        proc.mensagem = str(e)
-        proc.save()
+                    cursor_ofc.execute("""
+                        DELETE FROM relat_arm 
+                        WHERE hash_registro = ANY(%s)
+                    """, [hashes])
 
+                    insert_sql = """
+                        INSERT INTO relat_arm 
+                        (hash_registro, numero, localidade, complemento, tipo_imovel, tipo_armadilha, geometry)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """
 
-@api_view(["POST"])
-@permission_classes([IsAuthenticated])
-def sincronizar_oficial_api(request):
+                    cursor_ofc.executemany(insert_sql, dados)
+                    self.stdout.write(f"Armadilhas inseridas: {len(dados)}")
 
-    proc = LogSincronizacao.objects.create(
-        tipo="sincronizacao",
-        nome_arquivo="sincronizacao_oficial",
-        hash="",
-        status="processando",
-        progresso=0,
-        mensagem="Preparando sincronização"
-    )
+            self.stdout.write(self.style.SUCCESS("✅ SINCRONIZAÇÃO REAL CONCLUÍDA"))
 
-    thread = threading.Thread(
-        target=rodar_sincronizacao,
-        args=(proc.id,)
-    )
-
-    thread.start()
-
-    return JsonResponse({
-        "sucesso": True,
-        "job_id": proc.id
-    })
+        except Exception as e:
+            self.stdout.write(self.style.ERROR(f"Erro: {str(e)}"))
+            raise e
