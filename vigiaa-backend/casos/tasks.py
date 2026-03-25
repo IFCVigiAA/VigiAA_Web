@@ -13,190 +13,317 @@ from .models import (
     ArmadilhaTemp, CasoPositivoTemp, CasoPositivoTempGL
 )
 
-# --- 1. REGRAS DE NEGÓCIO E CORREÇÕES ---
-CORRECOES_ENDERECO = {
-    "ALANO SIMAS FILHO": "ALCINO SIMAS FILHO",
-    "JUSTINA DE SOUZA PEREIRA": "JUSTINA DE SOUZA PENA",
-    "SANTA ALEXANDRE": "SANTO ALEXANDRE",
-    "JOÃO BARTOLOMEU": "SÃO BARTOLOMEU",
-    "GEREZEM": "MONTE GEREZÉM",
-    "JOSE BERNARDES PASSOS": "JOSÉ BERNARDES PASSOS",
-    "JOSÉ BERNADES DOS PASSOS": "JOSÉ BERNARDES PASSOS",
-    "SANTO EXPEDIDO": "RUA SANTO EXPEDITO",
-    "SÃO BRAS, 180": "SÃO BRÁS",
-    "SÃO BRAS": "SÃO BRÁS",
-    "RIO SENA":"RUA RIO SENNA",
-    "LEANDRO BERTOLDI - ": "RUA LEANDRO BERTOLDI",
-    "RUA LEANDRO BERTOLDISN": "RUA LEANDRO BERTOLDI",
-    "RUA FRANCISCO GARCIA , 961 CENTRO": "RUA FRANCISCO GARCIA, 961",
-    "RUA JOÃO MORAES, 4590": "RUA JOÃO MORAES",
-    "RUA TEREZA EVANGELISTA GONÇALVES, 360, TABULEIRO": "RUA TEREZA EVANGELISTA GONÇALVES, TABULEIRO",
-    "RUA IJUI": "RUA RIO IJUÍ",
-    "RUA SANTA CECILIA, 504": "RUA SANTA CECÍLIA",    
-    "RUA SAMARINO, 414, SANTA REGINA, CAMBORIU": "RUA SAN MARINO, 414, SANTA REGINA, CAMBORIU"
-}
+# --- NORMALIZAÇÃO ---
+def _normalize(s):
+    if not s: return ""
+    s = str(s).strip().upper()
+    s = unicodedata.normalize("NFKD", s).encode("ASCII", "ignore").decode("ASCII")
+    return " ".join(s.split())
 
-COORDS_FIXAS = {
-    "RUA SÃO BRÁS": (-27.0246740, -48.6405868),
-    "JOSÉ BERNARDES PASSOS": (-27.0307410, -48.6461234),
-    "FINLANDIA": (-27.0367205, -48.6751566),
-    "RUA RIO SOLIMOES": (-27.0323908, -48.6451871),
-    "BR 101 KM 532 MARGINAL, TABULEIRO, CAMBORIÚ":(-26.999199,-48.647584),
-    "RODOVIA BR 101": (-26.999199,-48.647584),
-    "RUA MONTE ALEGRE": (-27.001054,-48.661927),
-    "RUA JURI SILVA": (-27.0307275,-48.6497894)
-}
+# 🔥 COL AGORA MUITO MAIS INTELIGENTE
+def col(df, *nomes):
+    cols_norm = {_normalize(c): c for c in df.columns}
 
-# --- 2. UTILS ---
-def _get_str(r, col_name, max_len=100, default="ND"):
+    for n in nomes:
+        n_norm = _normalize(n)
+
+        # match exato
+        if n_norm in cols_norm:
+            return cols_norm[n_norm]
+
+        # match parcial forte
+        for c_norm, c_real in cols_norm.items():
+            if n_norm in c_norm or c_norm in n_norm:
+                return c_real
+
+    return None
+
+# 🔥 MELHORADO: não mascarar erro silencioso
+def _get_val(r, col_name, default="ND"):
+    if not col_name:
+        return default
+
     val = r.get(col_name)
-    if pd.isna(val) or val is None: return default
-    return str(val).strip()[:max_len]
+
+    if pd.isna(val):
+        return default
+
+    val = str(val).strip()
+
+    if not val or val.upper() in ["NAN", "NONE"]:
+        return default
+
+    return val
 
 def _get_int(r, col_name):
+    if not col_name:
+        return 0
     val = r.get(col_name)
-    if pd.isna(val) or val is None: return 0
-    try: return int(float(val))
-    except: return 0
+    if pd.isna(val):
+        return 0
+    try:
+        return int(float(val))
+    except:
+        return 0
 
-# --- 3. TASKS ---
+def fix_date(val):
+    if pd.isna(val) or val is pd.NaT:
+        return None
+    try:
+        return pd.to_datetime(val).date()
+    except:
+        return None
 
+def corrigir_datas_mistas(serie):
+    numeros_excel = pd.to_numeric(serie, errors='coerce')
+    datas_dos_numeros = pd.to_datetime(numeros_excel, unit='D', origin='1899-12-30')
+    textos_puros = serie.where(numeros_excel.isna(), pd.NaT)
+    datas_dos_textos = pd.to_datetime(textos_puros, errors='coerce', dayfirst=True)
+    return datas_dos_textos.fillna(datas_dos_numeros)
+
+# --- GEO ---
+def _geo_limpa(endereco, bairro):
+    try:
+        query = f"{endereco}, {bairro}, CAMBORIÚ, SC, BRASIL"
+        g = geocoder.arcgis(query, timeout=5)
+        if g.ok and g.latlng:
+            return g.latlng
+    except:
+        pass
+    return (-27.022986, -48.652135)
+
+# ---------------- POSITIVOS ----------------
 @shared_task(bind=True)
 def task_processar_positivos(self, job_id, arquivo_path):
     try:
         log = LogSincronizacao.objects.get(id=job_id)
         df = pd.read_excel(arquivo_path)
-        log.status = "finalizado"; log.save()
-    except Exception as e:
-        LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
 
-@shared_task(bind=True)
-def task_processar_focos(self, job_id, arquivo_path):
-    try:
-        log = LogSincronizacao.objects.get(id=job_id)
-        
-        # LER SEM CABEÇALHO PARA ESCANEAR ONDE ESTÁ A TABELA
-        df_raw = pd.read_excel(arquivo_path, header=None)
-        
-        skip_index = None
-        for i, row in df_raw.iterrows():
-            # Procura por "Nº FOCO" ou "N FOCO" em qualquer lugar da linha
-            row_str = " ".join([str(x).upper() for x in row.values if pd.notna(x)])
-            if "Nº FOCO" in row_str or "N FOCO" in row_str:
-                skip_index = i
-                break
-        
-        if skip_index is None:
-            raise Exception("Não encontrei o cabeçalho 'Nº Foco' na planilha.")
+        c_nome = col(df, "NOME")
+        c_end = col(df, "ENDEREÇO", "ENDERECO")
+        c_bairro = col(df, "BAIRRO")
+        c_ini = col(df, "INÍCIO SINTOMAS")
+        c_nasc = col(df, "DATA DE NASCIMENTO")
+        c_sinan = col(df, "SINAN")
 
-        # Recarrega o DataFrame a partir da linha correta
-        df = pd.read_excel(arquivo_path, skiprows=skip_index)
-        
-        # Limpar nomes das colunas
-        df.columns = [str(c).strip().upper() for c in df.columns]
+        if c_ini: df[c_ini] = corrigir_datas_mistas(df[c_ini]).ffill()
+        if c_nasc: df[c_nasc] = corrigir_datas_mistas(df[c_nasc])
 
-        objs = []
+        df = df.dropna(subset=[c_nome]) if c_nome else df
+
+        params_temp = []
+        params_gl = []
+
         for _, r in df.iterrows():
-            nf_val = r.get('Nº FOCO') or r.get('N FOCO')
-            
-            # Se a linha não tem número de foco, ignora (fim da tabela ou linha vazia)
-            if pd.isna(nf_val) or str(nf_val).strip() == "":
-                continue
-            
-            lat = r.get('LATITUDE')
-            lon = r.get('LONGITUDE')
-            
-            # Se não tem coordenada, usa Camboriú central como fallback para não perder o registro
-            try:
-                lat_f = float(lat) if pd.notna(lat) else -27.022986
-                lon_f = float(lon) if pd.notna(lon) else -48.652135
-            except:
-                lat_f, lon_f = -27.022986, -48.652135
+            nome = _get_val(r, c_nome, "NÃO INFORMADO")
+            endereco = _get_val(r, c_end, "NÃO INFORMADO")
+            bairro = _get_val(r, c_bairro, "ND")
 
-            h = hashlib.sha256(f"FOCO|{nf_val}|{lat_f}|{lon_f}".encode()).hexdigest()
-            
-            objs.append(FocoTemp(
-                hash_registro=h,
-                n_foco=str(nf_val)[:30],
-                regional=_get_str(r, 'REGIONAL', 100),
-                municipio=_get_str(r, 'MUNICÍPIO', 100),
-                localidade=_get_str(r, 'LOCALIDADE', 100),
-                rua_numero=_get_str(r, 'RUA/NÚMERO', 200),
-                complemento=_get_str(r, 'COMPLEMENTO', 255),
-                quarteirao=_get_str(r, 'QUARTEIRÃO', 50),
-                imovel=_get_str(r, 'IMÓVEL', 50),
-                deposito=_get_str(r, 'DEPÓSITO', 100),
-                tipo_atividade=_get_str(r, 'TIPO DE ATIVIDADE', 50),
-                data_coleta=pd.to_datetime(r.get('DATA DA COLETA'), errors='coerce'),
-                data_entrada=pd.to_datetime(r.get('DATA DE ENTRADA'), errors='coerce'),
-                data_exame=pd.to_datetime(r.get('DATA DO EXAME'), errors='coerce'),
-                a_aegypti_form_aquaticas=_get_int(r, 'A. AEGYPTI FORMAS AQUÁTICAS'),
-                a_aegypti_form_adultas=_get_int(r, 'A. AEGYPTI FORMAS ADULTAS'),
-                a_albopictus_form_aquaticas=_get_int(r, 'A. ALBOPICTUS FORMAS AQUÁTICAS'),
-                a_albopictus_form_adultas=_get_int(r, 'A. ALBOPICTUS FORMAS ADULTAS'),
-                ovo_a_aegypti=_get_int(r, 'OVO A. AEGYPTI'),
-                latitude=lat_f,
-                longitude=lon_f,
-                geometry=Point(lon_f, lat_f, srid=4674)
-            ))
+            lat, lon = _geo_limpa(endereco, bairro)
+
+            h = hashlib.sha256(f"{nome}|{_get_val(r, c_nasc)}|{_get_val(r, c_ini)}".encode()).hexdigest()
+
+            base = (
+                h, nome, endereco,
+                _get_val(r, col(df, "LOCAL DE ATENDIMENTO")),
+                fix_date(r.get(c_ini)),
+                fix_date(r.get(col(df, "NOTIFICAÇÃO"))),
+                _get_int(r, c_sinan) or None,
+                bairro,
+                fix_date(r.get(c_nasc)),
+                _get_val(r, col(df, "OBSERVAÇÕES"), ""),
+                _get_val(r, col(df, "RESULTADO"), ""),
+                _get_val(r, col(df, "SITUAÇÃO"), "")
+            )
+
+            params_temp.append(base)
+            params_gl.append(base + (f"POINT({lon} {lat})",))
 
         with transaction.atomic():
-            FocoTemp.objects.all().delete()
-            if objs:
-                FocoTemp.objects.bulk_create(objs, ignore_conflicts=True)
-            
+            with connection.cursor() as cursor:
+                cursor.execute("DELETE FROM casos_positivos_temp")
+                cursor.execute("DELETE FROM casos_positivos_temp_gl")
+
+                cursor.executemany("""
+                    INSERT INTO casos_positivos_temp 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+                """, params_temp)
+
+                cursor.executemany("""
+                    INSERT INTO casos_positivos_temp_gl 
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,ST_GeomFromText(%s,4674))
+                """, params_gl)
+
         log.status = "finalizado"
         log.progresso = 100
-        log.mensagem = f"Sucesso: {len(objs)} focos processados."
         log.save()
 
     except Exception as e:
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
         if os.path.exists(arquivo_path):
-            try: os.remove(arquivo_path)
-            except: pass
+            os.remove(arquivo_path)
 
+# ---------------- FOCOS ----------------
+@shared_task(bind=True)
+def task_processar_focos(self, job_id, arquivo_path):
+    try:
+        log = LogSincronizacao.objects.get(id=job_id)
+
+        df_raw = pd.read_excel(arquivo_path, header=None)
+        skip = 0
+
+        for i, row in df_raw.iterrows():
+            if any("FOCO" in _normalize(str(x)) for x in row.values):
+                skip = i
+                break
+
+        df = pd.read_excel(arquivo_path, skiprows=skip)
+
+        c_nf = col(df, "N FOCO", "Nº FOCO")
+        c_lat = col(df, "LATITUDE")
+        c_lon = col(df, "LONGITUDE")
+
+        objs = []
+
+        for _, r in df.iterrows():
+            nf = _get_val(r, c_nf, None)
+            if not nf:
+                continue
+
+            lat, lon = r.get(c_lat), r.get(c_lon)
+            if pd.isna(lat):
+                continue
+
+            objs.append(FocoTemp(
+                hash_registro=hashlib.sha256(f"FOCO|{nf}|{lat}".encode()).hexdigest(),
+                n_foco=nf,
+                municipio="CAMBORIÚ",
+                localidade=_get_val(r, col(df, "LOCALIDADE")),
+                rua_numero=_get_val(r, col(df, "RUA/NÚMERO", "RUA/NUMERO")),
+                geometry=Point(float(lon), float(lat), srid=4674),
+                latitude=float(lat),
+                longitude=float(lon)
+            ))
+
+        with transaction.atomic():
+            FocoTemp.objects.all().delete()
+            if objs:
+                FocoTemp.objects.bulk_create(objs, ignore_conflicts=True)
+
+        log.status = "finalizado"
+        log.progresso = 100
+        log.save()
+
+    except Exception as e:
+        LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
+    finally:
+        if os.path.exists(arquivo_path):
+            os.remove(arquivo_path)
+
+# ---------------- PONTOS ----------------
 @shared_task(bind=True)
 def task_processar_pontos(self, job_id, arquivo_path):
     try:
         log = LogSincronizacao.objects.get(id=job_id)
+
         df = pd.read_excel(arquivo_path, header=3)
-        df.columns = [str(c).strip().upper() for c in df.columns]
+
+        # 🔥 CORREÇÃO PRINCIPAL
+        df.columns = [_normalize(c) for c in df.columns]
+
+        c_num = col(df, "NUMERO")
+        c_mun = col(df, "MUNICIPIO")
+        c_loc = col(df, "LOCALIDADE")
+        c_end = col(df, "ENDERECO")
+        c_qua = col(df, "QUARTEIROES")
+        c_com = col(df, "COMPLEMENTO")
+        c_lat = col(df, "LATITUDE")
+        c_lon = col(df, "LONGITUDE")
+
         objs = []
+
         for _, r in df.iterrows():
-            lat, lon = r.get('LATITUDE'), r.get('LONGITUDE')
-            if pd.isna(lat): continue
-            num = r.get('NUMERO') or r.get('NÚMERO')
-            h = hashlib.sha256(f"PONTO|{num}|{lat}".encode()).hexdigest()
-            objs.append(PontoEstrategicoTemp(hash_registro=h, numero=str(num), localidade=_get_str(r, 'LOCALIDADE'), endereco=_get_str(r, 'ENDERECO'), complemento=_get_str(r, 'COMPLEMENTO'), geometry=Point(float(lon), float(lat), srid=4674), latitude=float(lat), longitude=float(lon)))
+            lat, lon = r.get(c_lat), r.get(c_lon)
+            if pd.isna(lat) or pd.isna(lon):
+                continue
+
+            numero = _get_val(r, c_num, "S/N")
+
+            objs.append(PontoEstrategicoTemp(
+                hash_registro=hashlib.sha256(f"PONTO|{numero}|{lat}".encode()).hexdigest(),
+                numero=numero,
+                municipio=_get_val(r, c_mun, "CAMBORIÚ"),
+                localidade=_get_val(r, c_loc),
+                endereco=_get_val(r, c_end),
+                quarteiroes=_get_val(r, c_qua),
+                complemento=_get_val(r, c_com),
+                geometry=Point(float(lon), float(lat), srid=4674),
+                latitude=float(lat),
+                longitude=float(lon)
+            ))
+
         with transaction.atomic():
             PontoEstrategicoTemp.objects.all().delete()
-            PontoEstrategicoTemp.objects.bulk_create(objs, ignore_conflicts=True)
-        log.status, log.progresso = "finalizado", 100; log.save()
+            if objs:
+                PontoEstrategicoTemp.objects.bulk_create(objs, ignore_conflicts=True)
+
+        log.status = "finalizado"
+        log.progresso = 100
+        log.save()
+
     except Exception as e:
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
-        if os.path.exists(arquivo_path): os.remove(arquivo_path)
+        if os.path.exists(arquivo_path):
+            os.remove(arquivo_path)
 
+# ---------------- ARMADILHAS ----------------
 @shared_task(bind=True)
 def task_processar_armadilhas(self, job_id, arquivo_path):
     try:
         log = LogSincronizacao.objects.get(id=job_id)
+
         df = pd.read_excel(arquivo_path, header=3)
-        df.columns = [str(c).strip().upper() for c in df.columns]
+
+        c_num = col(df, "NUMERO", "NÚMERO")
+        c_lat = col(df, "LATITUDE")
+        c_lon = col(df, "LONGITUDE")
+
         objs = []
+
         for _, r in df.iterrows():
-            lat, lon = r.get('LATITUDE'), r.get('LONGITUDE')
-            if pd.isna(lat): continue
-            num = r.get('NUMERO') or r.get('NÚMERO')
-            h = hashlib.sha256(f"ARM|{num}|{lon}".encode()).hexdigest()
-            objs.append(ArmadilhaTemp(hash_registro=h, numero=str(num), localidade=_get_str(r, 'LOCALIDADE'), complemento=_get_str(r, 'COMPLEMENTO'), tipo_imovel=_get_str(r, 'TIPO IMOVEL'), tipo_armadilha=_get_str(r, 'TIPO ARMADILHA'), geometry=Point(float(lon), float(lat), srid=4674), latitude=float(lat), longitude=float(lon)))
+            lat, lon = r.get(c_lat), r.get(c_lon)
+            if pd.isna(lat):
+                continue
+
+            num = _get_val(r, c_num, "S/N")
+
+            objs.append(ArmadilhaTemp(
+                hash_registro=hashlib.sha256(f"ARM|{num}|{lat}".encode()).hexdigest(),
+                numero=num,
+                municipio=_get_val(r, col(df, "MUNICIPIO")),
+                localidade=_get_val(r, col(df, "LOCALIDADE")),
+                endereco=_get_val(r, col(df, "ENDERECO")),
+                complemento=_get_val(r, col(df, "COMPLEMENTO")),
+                quarteiroes=_get_val(r, col(df, "QUARTEIROES")),
+                tipo_imovel=_get_val(r, col(df, "TIPO IMOVEL")),
+                tipo_armadilha=_get_val(r, col(df, "TIPO ARMADILHA")),
+                geometry=Point(float(lon), float(lat), srid=4674),
+                latitude=float(lat),
+                longitude=float(lon)
+            ))
+
         with transaction.atomic():
             ArmadilhaTemp.objects.all().delete()
             ArmadilhaTemp.objects.bulk_create(objs, ignore_conflicts=True)
-        log.status, log.progresso = "finalizado", 100; log.save()
+
+        log.status = "finalizado"
+        log.progresso = 100
+        log.save()
+
     except Exception as e:
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
-        if os.path.exists(arquivo_path): os.remove(arquivo_path)
+        if os.path.exists(arquivo_path):
+            os.remove(arquivo_path)
