@@ -248,26 +248,27 @@ def task_processar_positivos(self, job_id, arquivo_path):
 
         with transaction.atomic():
             with connection.cursor() as cursor:
-                cursor.execute('DELETE FROM casos_positivos_temp')
-                cursor.execute('DELETE FROM casos_positivos_temp_gl')
 
-                cursor.executemany("""
-                    INSERT INTO casos_positivos_temp
+                
+                sql = """
+                    INSERT INTO {tabela}
                     (hash_registro, nome, endereco, sinan, inicio_sintomas, notificacao, data_nasc,
                      bairro, local_atendimento, situacao, nome_mae, observacoes, resultado,
-                     aplicacao, agentes, prim_visita, observacao2)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    ON CONFLICT (hash_registro) DO NOTHING
-                """, params_temp)
-
-                cursor.executemany("""
-                    INSERT INTO casos_positivos_temp_gl
-                    (hash_registro, nome, endereco, sinan, inicio_sintomas, notificacao, data_nasc,
-                     bairro, local_atendimento, situacao, nome_mae, observacoes, resultado,
-                     aplicacao, agentes, prim_visita, observacao2, geometry)
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,ST_GeomFromText(%s,4674))
-                    ON CONFLICT (hash_registro) DO NOTHING
-                """, params_gl)
+                     aplicacao, agentes, prim_visita, observacao2 {extra_col})
+                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s {extra_val})
+                    ON CONFLICT (hash_registro) DO UPDATE SET
+                        situacao = EXCLUDED.situacao,
+                        resultado = EXCLUDED.resultado,
+                        observacoes = EXCLUDED.observacoes,
+                        endereco = EXCLUDED.endereco,
+                        bairro = EXCLUDED.bairro,
+                        prim_visita = EXCLUDED.prim_visita,
+                        observacao2 = EXCLUDED.observacao2
+                """
+                # O DO UPDATE garante que se o registro já existir (pelo hash), ele atualiza os dados.
+                # Se não existir, ele cria um novo.
+                cursor.executemany(sql.format(tabela="casos_positivos_temp", extra_col="", extra_val=""), params_temp)
+                cursor.executemany(sql.format(tabela="casos_positivos_temp_gl", extra_col=", geometry", extra_val=", ST_GeomFromText(%s,4674)"), params_gl)
 
         log.status, log.progresso = "finalizado", 100
         log.save()
@@ -422,8 +423,8 @@ def task_processar_focos(self, job_id, arquivo_path):
         logger.warning(f"[FOCOS DEBUG] prontos={len(objs)} | pulados={pulados}")
 
         with transaction.atomic():
-            FocoTemp.objects.all().delete()
-            FocoTemp.objects.bulk_create(objs)
+        #    FocoTemp.objects.all().delete()
+            FocoTemp.objects.bulk_create(objs, ignore_conflicts=True)
 
         logger.warning(f"[FOCOS DEBUG] inseridos={len(objs)}")
         log.status = "finalizado"
@@ -480,8 +481,8 @@ def task_processar_pontos(self, job_id, arquivo_path):
             ))
 
         with transaction.atomic():
-            PontoEstrategicoTemp.objects.all().delete()
-            PontoEstrategicoTemp.objects.bulk_create(objs)
+        #   PontoEstrategicoTemp.objects.all().delete()
+            PontoEstrategicoTemp.objects.bulk_create(objs, ignore_conflicts=True)
 
         log.status = "finalizado"
         log.save()
@@ -541,8 +542,8 @@ def task_processar_armadilhas(self, job_id, arquivo_path):
             ))
 
         with transaction.atomic():
-            ArmadilhaTemp.objects.all().delete()
-            ArmadilhaTemp.objects.bulk_create(objs)
+        #    ArmadilhaTemp.objects.all().delete()
+            Armadilha.objects.bulk_create(objs, ignore_conflicts=True)
 
         log.status = "finalizado"
         log.save()

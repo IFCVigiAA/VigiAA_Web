@@ -8,13 +8,12 @@ class Command(BaseCommand):
         self.stdout.write("Iniciando sincronização entre bancos...")
 
         try:
-            # Usando transação atômica no banco oficial para garantir consistência
             with connections['default'].cursor() as cursor_temp, \
                  transaction.atomic(using='oficial'):
                 
                 with connections['oficial'].cursor() as cursor_ofc:
 
-                    # 1. CASOS POSITIVOS (ADICIONADO: aplicacao, agentes, prim_visita)
+                    # 1. CASOS POSITIVOS 
                     cursor_temp.execute("""
                         SELECT hash_registro, local_atendimento, inicio_sintomas, notificacao, sinan, 
                                bairro, data_nasc, observacoes, resultado, situacao, geometry,
@@ -25,7 +24,7 @@ class Command(BaseCommand):
                     
                     if dados_pos:
                         hashes = [d[0] for d in dados_pos]
-                        # Limpa os registros antigos no oficial para evitar erro de duplicidade
+    
                         cursor_ofc.execute("DELETE FROM casos_positivos WHERE hash_registro = ANY(%s)", [hashes])
                         
                         sql_pos = """
