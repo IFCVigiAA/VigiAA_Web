@@ -42,7 +42,7 @@ const densDemoSetCensStyle = function (feature) {
 };
 
 const declividadePlStyle = function (feature) {
-    const classe = feature.properties.CLASSE;
+    const classe = feature.properties.Altura;
     let fillColor;
     switch (classe) {
         case '0 - 100m': fillColor = '#238b45'; break; case '100 - 200m': fillColor = '#41ab5d'; break;

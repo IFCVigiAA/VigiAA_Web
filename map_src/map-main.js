@@ -112,13 +112,13 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
 
 // Funções de carga estática (chamadas apenas uma vez na inicialização)
 function loadBairrosOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ofc', 'Bairros - Oficial (Estático)', bairrosStyleWFS, ['nome']); }
-function loadSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_camb', 'Setores Censitários (Estático)', setCensStyleWFS, ['NM_BAIRRO']); }
-function loadDensDemoSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_demo_camb_classes', 'Densidade Demográfica (SC)', densDemoSetCensStyle, ['DENSIDADE_DEMOGRAFICA_SETOR_HAB_KM2']); }
+function loadSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_camb', 'Setores Censitários (Estático)', setCensStyleWFS, ['Nome do Bairro']); }
+function loadDensDemoSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_demo_camb_classes', 'Densidade Demográfica (SC)', densDemoSetCensStyle, ['Densidade Demografica por KM2']); }
 // ... Outras funções estáticas (BairrosOfc, Camboriu, CurvaNivel, DeclividadePoligono) ...
-function loadBairrosOfcOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE (Estático)', bairrosOfcStyleWFS, ['NM_BAIRRO']); }
-function loadCamboriuOnce() { return fetchWFSData('vigiaa_ofc:vw_mun_camb', 'Camboriú (Estático)', camboriuStyleWFS, ['NM_MUN']); }
-function loadCurvaNivelOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_li', 'Curva de Nível (Estático)', curvasNivelStyleWFS, ['CLASSE']); } 
-function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_union', 'Declividade (Polígonos)', declividadePlStyle, ['CLASSE', 'AREA_METROS']); }
+function loadBairrosOfcOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE (Estático)', bairrosOfcStyleWFS, ['Nome']); }
+function loadCamboriuOnce() { return fetchWFSData('vigiaa_ofc:vw_mun_camb', 'Camboriú (Estático)', camboriuStyleWFS, ['']); }
+function loadCurvaNivelOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_li', 'Curva de Nível (Estático)', curvasNivelStyleWFS, ['Altura']); } 
+function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_union', 'Declividade (Polígonos)', declividadePlStyle, ['Altura']); }
 
 // Funções de atualização dinâmica (chamadas na inicialização e no filtro/intervalo)
 function updateFocosAedes() {
@@ -370,7 +370,7 @@ async function updateLayerByContext(context) {
         if (isCasos) {
             updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', clusterCasosLayer, 'casos');
         } else {
-            updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Mosquitos (Áreas Críticas)', clusterFocosLayer, 'focos');
+            updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos (Áreas Críticas)', clusterFocosLayer, 'focos');
         }
 
         updateHeatmapData(context, data);
