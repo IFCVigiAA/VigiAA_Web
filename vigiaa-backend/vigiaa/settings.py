@@ -97,7 +97,7 @@ DATABASES = {
         "NAME": "vigiaa_temp",
         "USER": "postgres",
         "PASSWORD": "postgres",  
-        "HOST": "192.168.70.63",               
+        "HOST": "192.168.70.74",               
         "PORT": "5432",
     },
     "oficial": {  # banco final
@@ -105,7 +105,7 @@ DATABASES = {
         "NAME": "vigiaa_ofc",
         "USER": "postgres",
         "PASSWORD": "postgres", 
-        "HOST": "192.168.70.63",
+        "HOST": "192.168.70.74",
         "PORT": "5432",
     },
 }

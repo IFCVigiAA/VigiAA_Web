@@ -13,7 +13,7 @@ class Command(BaseCommand):
                 
                 with connections['oficial'].cursor() as cursor_ofc:
 
-                    # 1. CASOS POSITIVOS 
+                    # CASOS POSITIVOS 
                     cursor_temp.execute("""
                         SELECT hash_registro, local_atendimento, inicio_sintomas, notificacao, sinan, 
                                bairro, data_nasc, observacoes, resultado, situacao, geometry,
@@ -37,7 +37,7 @@ class Command(BaseCommand):
                         cursor_ofc.executemany(sql_pos, dados_pos)
                         self.stdout.write(f"Positivos processados: {len(dados_pos)}")
 
-                    # 2. FOCOS
+                    # FOCOS
                     cursor_temp.execute("""
                         SELECT hash_registro, n_foco, localidade, imovel, deposito, tipo_atividade, 
                                data_coleta, a_aegypti_form_aquaticas, a_aegypti_form_adultas, 
@@ -58,7 +58,7 @@ class Command(BaseCommand):
                         """, dados_foco)
                         self.stdout.write(f"Focos processados: {len(dados_foco)}")
 
-                    # 3. PONTOS ESTRATÉGICOS
+                    # PONTOS ESTRATÉGICOS
                     cursor_temp.execute("""
                         SELECT hash_registro, numero, localidade, endereco, complemento, geometry
                         FROM pontos_estrategicos_temp
@@ -74,7 +74,7 @@ class Command(BaseCommand):
                         """, dados_ponto)
                         self.stdout.write(f"Pontos processados: {len(dados_ponto)}")
 
-                    # 4. ARMADILHAS
+                    # ARMADILHAS
                     cursor_temp.execute("""
                         SELECT hash_registro, numero, localidade, complemento, tipo_imovel, tipo_armadilha, geometry
                         FROM relat_arm_temp
