@@ -154,7 +154,7 @@ def _geocodificar_endereco(endereco, bairro):
         return DEF_LAT, DEF_LON
 
     try:
-        query = f"{str(endereco).upper()}, {bairro or ''}, CAMBORIÚ, SC, BRASIL"
+        query = f"{str(endereco).upper()}, {bairro or ''}, SC, BRASIL"
         logger.info(f"Geocodificando: {query}")
         g = geocoder.arcgis(query, timeout=5)
 
@@ -398,150 +398,67 @@ def task_processar_focos(self, job_id, arquivo_path):
         erros = ErrorLogger()
 
         df_raw = pd.read_excel(arquivo_path, header=None)
+        h_idx = next((i for i, row in df_raw.iterrows() if any("N FOCO" in _normalize(str(x)) for x in row)), 2)
+        
+        df = pd.read_excel(arquivo_path, header=h_idx).dropna(how='all')
 
-        h_idx = None
-        for idx, row in df_raw.iterrows():
-            normalized_vals = [_normalize(str(x)) for x in row]
-            if any(v in ("N FOCO", "NO FOCO", "NFOCO") or "N FOCO" in v for v in normalized_vals):
-                h_idx = idx
-                break
+        DE_PARA = {
+            'Nº Foco': 'n_foco', 'Regional': 'regional', 'Município': 'municipio',
+            'Localidade': 'localidade', 'Rua/número': 'rua_numero', 'Complemento': 'complemento',
+            'Quarteirão': 'quarteirao', 'Imóvel': 'imovel', 'Depósito': 'deposito',
+            'Tipo de Atividade': 'tipo_atividade', 'Data da Coleta': 'data_coleta',
+            'Data de Entrada': 'data_entrada', 'Data do Exame': 'data_exame',
+            'A. aegypti formas aquáticas': 'a_aegypti_form_aquaticas',
+            'A. aegypti formas adultas': 'a_aegypti_form_adultas',
+            'A. albopictus formas aquáticas': 'a_albopictus_form_aquaticas',
+            'A. albopictus formas adultas': 'a_albopictus_form_adultas',
+            'Ovo A. aegypti': 'ovo_a_aegypti', 'Latitude': 'latitude', 'Longitude': 'longitude'
+        }
+        
+        df.columns = [str(c).strip() for c in df.columns]
+        mapa_final = {col(df, k): v for k, v in DE_PARA.items() if col(df, k)}
+        df.rename(columns=mapa_final, inplace=True)
 
-        if h_idx is None:
-            h_idx = 2
+        # Tratamento
+        for c in ['data_coleta', 'data_entrada', 'data_exame']:
+            if c in df.columns: df[c] = pd.to_datetime(df[c], dayfirst=True, errors='coerce').dt.date
 
-        df = pd.read_excel(arquivo_path, header=h_idx)
+        cols_int = ['a_aegypti_form_aquaticas', 'a_aegypti_form_adultas', 'a_albopictus_form_aquaticas', 'a_albopictus_form_adultas', 'ovo_a_aegypti']
+        for c in cols_int:
+            if c in df.columns: df[c] = pd.to_numeric(df[c], errors='coerce').fillna(0).astype(int)
 
-        df_limpo = df.dropna(how='all')
-        if len(df) > len(df_limpo):
-            erros.add(
-                "planilha",
-                linha="N/A",
-                erro="linhas vazias ignoradas",
-                detalhe=f"{len(df) - len(df_limpo)} linhas removidas"
-            )
-        df = df_limpo
-
-        c_nfoco    = col(df, "Nº FOCO", "N FOCO", "NO FOCO", "NFOCO")
-        c_regional = col(df, "REGIONAL")
-        c_mun      = col(df, "MUNICÍPIO", "MUNICIPIO")
-        c_local    = col(df, "LOCALIDADE")
-        c_end      = col(df, "RUA/NÚMERO", "RUA/NUMERO", "RUA NUMERO", "ENDEREÇO", "ENDERECO")
-        c_comp     = col(df, "COMPLEMENTO")
-        c_quart    = col(df, "QUARTEIRÃO", "QUARTEIRAO")
-        c_imovel   = col(df, "IMÓVEL", "IMOVEL")
-        c_deposito = col(df, "DEPÓSITO", "DEPOSITO")
-        c_tipo_atv = col(df, "TIPO DE ATIVIDADE", "TIPO ATIVIDADE")
-        c_dt_col   = col(df, "DATA DA COLETA",  "DATA COLETA")
-        c_dt_ent   = col(df, "DATA DA ENTRADA", "DATA ENTRADA")
-        c_dt_exam  = col(df, "DATA DO EXAME",   "DATA EXAME")
-        c_aeg_aq   = col(df, "A. AEGYPTI FORMAS AQUATICAS", "A AEGYPTI FORMAS AQUATICAS")
-        c_aeg_ad   = col(df, "A. AEGYPTI FORMAS ADULTAS", "A AEGYPTI FORMAS ADULTAS")
-        c_alb_aq   = col(df, "A. ALBOPICTUS FORMAS AQUATICAS", "A ALBOPICTUS FORMAS AQUATICAS")
-        c_alb_ad   = col(df, "A. ALBOPICTUS FORMAS ADULTAS", "A ALBOPICTUS FORMAS ADULTAS")
-        c_ovo      = col(df, "OVO A. AEGYPTI", "OVO A AEGYPTI")
-        c_lat      = col(df, "LATITUDE")
-        c_lon      = col(df, "LONGITUDE")
-
-        for c in [c_dt_col, c_dt_ent, c_dt_exam]:
-            if c:
-                df[c] = corrigir_datas_mistas(df[c])
-                df[c] = df[c].ffill()
-
-        def _int_safe(val):
-            try:
-                if pd.isna(val): return 0
-                return int(float(val))
-            except:
-                return 0
-
-        def _date_safe(r, c, *fallbacks):
-            for campo in (c, *fallbacks):
-                if not campo: continue
-                v = r.get(campo)
-                if v is None or (isinstance(v, float) and pd.isna(v)): continue
-                try: return pd.Timestamp(v).date()
-                except: continue
-            return None
-
-        objs = []
+        registros = []
+        campos_sql = [c for c in DE_PARA.values()] # Apenas colunas da planilha
 
         for idx, r in df.iterrows():
-            linha_excel = idx + h_idx + 2
+            lt, ln = r.get('latitude'), r.get('longitude')
+            if pd.isna(lt) or pd.isna(ln):
+                erros.add("geoprocessamento", linha=idx + h_idx + 2, erro="coordenadas ausentes")
+                continue
+            
+            # Monta lista de valores na ordem dos campos_sql
+            valores = []
+            for campo in campos_sql:
+                val = r.get(campo)
+                valores.append(None if pd.isna(val) else val)
+            registros.append(valores)
 
-            try:
-                lt = r.get(c_lat) if c_lat else None
-                ln = r.get(c_lon) if c_lon else None
+        if registros:
+            query = f"""
+                INSERT INTO focos_aedes_temp ({", ".join(campos_sql)}) 
+                VALUES ({", ".join(["%s"] * len(campos_sql))}) 
+                ON CONFLICT DO NOTHING
+            """
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.executemany(query, registros)
 
-                if pd.isna(lt) or pd.isna(ln):
-                    erros.add(
-                        "geoprocessamento",
-                        linha=linha_excel,
-                        coluna="LATITUDE/LONGITUDE",
-                        valor=f"{lt},{ln}",
-                        erro="coordenadas ausentes",
-                        detalhe=f"Foco {r.get(c_nfoco)} ignorado"
-                    )
-                    continue
-
-                h = hashlib.sha256(f"FOCO|{r.get(c_nfoco)}|{lt}|{ln}".encode()).hexdigest()
-
-                dt_col  = _date_safe(r, c_dt_col,  c_dt_ent,  c_dt_exam)
-                dt_ent  = _date_safe(r, c_dt_ent,  c_dt_col,  c_dt_exam)
-                dt_exam = _date_safe(r, c_dt_exam, c_dt_col,  c_dt_ent)
-
-                objs.append(FocoTemp(
-                    hash_registro=h,
-                    n_foco=_get_str(r, c_nfoco, 30),
-                    regional=_get_str(r, c_regional, 100),
-                    municipio=_get_str(r, c_mun, 100),
-                    localidade=_get_str(r, c_local, 100),
-                    rua_numero=_get_str(r, c_end, 200),
-                    complemento=_get_str(r, c_comp, 255, default=""),
-                    quarteirao=_get_str(r, c_quart, 50),
-                    imovel=_get_str(r, c_imovel, 50),
-                    deposito=_get_str(r, c_deposito, 100),
-                    tipo_atividade=_get_str(r, c_tipo_atv, 50),
-                    data_coleta=dt_col,
-                    data_entrada=dt_ent,
-                    data_exame=dt_exam,
-                    a_aegypti_form_aquaticas=_int_safe(r.get(c_aeg_aq)),
-                    a_aegypti_form_adultas=_int_safe(r.get(c_aeg_ad)),
-                    a_albopictus_form_aquaticas=_int_safe(r.get(c_alb_aq)),
-                    a_albopictus_form_adultas=_int_safe(r.get(c_alb_ad)),
-                    ovo_a_aegypti=_int_safe(r.get(c_ovo)),
-                    geometry=Point(float(ln), float(lt), srid=4674),
-                    latitude=float(lt),
-                    longitude=float(ln)
-                ))
-
-            except Exception as e:
-                erros.add(
-                    "sistema",
-                    linha=linha_excel,
-                    erro="erro inesperado",
-                    detalhe=str(e)
-                )
-
-        with transaction.atomic():
-            FocoTemp.objects.bulk_create(objs, ignore_conflicts=True)
-
-        log.mensagem = erros.to_json()
-        log.status = "finalizado"
+        log.mensagem, log.status = erros.to_json(), "finalizado"
         log.save()
-
     except Exception as e:
-        erros = ErrorLogger()
-        erros.add("sistema", erro="falha geral", detalhe=str(e))
-
-        LogSincronizacao.objects.filter(id=job_id).update(
-            status="erro",
-            mensagem=erros.to_json()
-        )
-
+        LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
-        if os.path.exists(arquivo_path):
-            os.remove(arquivo_path)
-
+        if os.path.exists(arquivo_path): os.remove(arquivo_path)
 
 # --- 4. TASK PONTOS ESTRATÉGICOS ---
 # Planilha: título L1, "Município: X" L2, cabeçalho L4 → header=3
@@ -552,99 +469,39 @@ def task_processar_pontos(self, job_id, arquivo_path):
     try:
         log = LogSincronizacao.objects.get(id=job_id)
         erros = ErrorLogger()
+        df_temp = pd.read_excel(arquivo_path, header=None)
+        h_idx = next((i for i, row in df_temp.iterrows() if any("Número" in str(x) for x in row)), 0)
+        df = pd.read_excel(arquivo_path, header=h_idx).dropna(how='all')
 
-        df_full = pd.read_excel(arquivo_path, header=3)
-        df = df_full.dropna(how='all')
-
-        if len(df_full) > len(df):
-            erros.add(
-                "planilha",
-                linha="N/A",
-                erro="linhas vazias ignoradas",
-                detalhe=f"{len(df_full) - len(df)} removidas"
-            )
-
-        c_num   = col(df, "NÚMERO")
-        c_mun   = col(df, "MUNICÍPIO")
-        c_local = col(df, "LOCALIDADE")
-        c_end   = col(df, "ENDEREÇO")
-        c_quart = col(df, "QUARTEIROES")
-        c_comp  = col(df, "COMPLEMENTO")
-        c_lat   = col(df, "LATITUDE")
-        c_lon   = col(df, "LONGITUDE")
-
-        # validação básica de colunas
-        obrigatorias = {
-            "NÚMERO": c_num,
-            "LATITUDE": c_lat,
-            "LONGITUDE": c_lon
+        DE_PARA = {
+            'Número': 'numero', 'Município': 'municipio', 'Localidade': 'localidade',
+            'Endereço': 'endereco', 'Quarteiroes': 'quarteiroes', 'Complemento': 'complemento',
+            'Latitude': 'latitude', 'Longitude': 'longitude'
         }
+        df.columns = [str(c).strip() for c in df.columns]
+        mapa_final = {col(df, k): v for k, v in DE_PARA.items() if col(df, k)}
+        df.rename(columns=mapa_final, inplace=True)
 
-        for nome, ref in obrigatorias.items():
-            if ref is None:
-                erros.add("planilha", coluna=nome, erro="coluna ausente")
-
-        objs = []
-
+        campos_sql = list(DE_PARA.values())
+        registros = []
         for idx, r in df.iterrows():
-            linha_excel = idx + 5
+            lt, ln = r.get('latitude'), r.get('longitude')
+            if pd.isna(lt) or pd.isna(ln): continue
+            
+            registros.append([None if pd.isna(r.get(c)) else r.get(c) for c in campos_sql])
 
-            try:
-                lt, ln = r.get(c_lat), r.get(c_lon)
+        if registros:
+            query = f"INSERT INTO pontos_estrategicos_temp ({', '.join(campos_sql)}) VALUES ({', '.join(['%s']*len(campos_sql))}) ON CONFLICT DO NOTHING"
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.executemany(query, registros)
 
-                if pd.isna(lt) or pd.isna(ln):
-                    erros.add(
-                        "geoprocessamento",
-                        linha=linha_excel,
-                        coluna="LATITUDE/LONGITUDE",
-                        valor=f"{lt},{ln}",
-                        erro="coordenadas ausentes",
-                        detalhe=f"Ponto {r.get(c_num)} ignorado"
-                    )
-                    continue
-
-                h = hashlib.sha256(f"PONTO|{r.get(c_num)}|{lt}".encode()).hexdigest()
-
-                objs.append(PontoEstrategicoTemp(
-                    hash_registro=h,
-                    numero=_get_str(r, c_num, 50),
-                    municipio=_get_str(r, c_mun, 100),
-                    localidade=_get_str(r, c_local, 100),
-                    endereco=_get_str(r, c_end, 150),
-                    quarteiroes=_get_str(r, c_quart, 50),
-                    complemento=_get_str(r, c_comp, 100),
-                    geometry=Point(float(ln), float(lt), srid=4674),
-                    latitude=float(lt),
-                    longitude=float(ln)
-                ))
-
-            except Exception as e:
-                erros.add(
-                    "sistema",
-                    linha=linha_excel,
-                    erro="erro inesperado",
-                    detalhe=str(e)
-                )
-
-        with transaction.atomic():
-            PontoEstrategicoTemp.objects.bulk_create(objs, ignore_conflicts=True)
-
-        log.mensagem = erros.to_json()
-        log.status = "finalizado"
+        log.mensagem, log.status = erros.to_json(), "finalizado"
         log.save()
-
     except Exception as e:
-        erros = ErrorLogger()
-        erros.add("sistema", erro="falha geral", detalhe=str(e))
-
-        LogSincronizacao.objects.filter(id=job_id).update(
-            status="erro",
-            mensagem=erros.to_json()
-        )
-
+        LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
-        if os.path.exists(arquivo_path):
-            os.remove(arquivo_path)
+        if os.path.exists(arquivo_path): os.remove(arquivo_path)
 
 
 # --- 5. TASK ARMADILHAS ---
@@ -657,99 +514,36 @@ def task_processar_armadilhas(self, job_id, arquivo_path):
     try:
         log = LogSincronizacao.objects.get(id=job_id)
         erros = ErrorLogger()
+        df_temp = pd.read_excel(arquivo_path, header=None)
+        h_idx = next((i for i, row in df_temp.iterrows() if any("Número" in str(x) for x in row)), 0)
+        df = pd.read_excel(arquivo_path, header=h_idx).dropna(how='all')
 
-        df_full = pd.read_excel(arquivo_path, header=3)
-        df = df_full.dropna(how='all')
-
-        if len(df_full) > len(df):
-            erros.add(
-                "planilha",
-                linha="N/A",
-                erro="linhas vazias ignoradas",
-                detalhe=f"{len(df_full) - len(df)} removidas"
-            )
-
-        c_num    = col(df, "NÚMERO")
-        c_mun    = col(df, "MUNICÍPIO")
-        c_local  = col(df, "LOCALIDADE")
-        c_end    = col(df, "ENDEREÇO")
-        c_comp   = col(df, "COMPLEMENTO")
-        c_quart  = col(df, "QUARTEIROES")
-        c_imovel = col(df, "TIPO IMÓVEL")
-        c_arm    = col(df, "TIPO ARMADILHA")
-        c_lat    = col(df, "LATITUDE")
-        c_lon    = col(df, "LONGITUDE")
-
-        obrigatorias = {
-            "NÚMERO": c_num,
-            "LATITUDE": c_lat,
-            "LONGITUDE": c_lon
+        DE_PARA = {
+            'Número': 'numero', 'Município': 'municipio', 'Localidade': 'localidade',
+            'Endereço': 'endereco', 'Complemento': 'complemento', 'Quarteiroes': 'quarteiroes',
+            'Tipo Imóvel': 'tipo_imovel', 'Tipo Armadilha': 'tipo_armadilha',
+            'Latitude': 'latitude', 'Longitude': 'longitude'
         }
+        df.columns = [str(c).strip() for c in df.columns]
+        mapa_final = {col(df, k): v for k, v in DE_PARA.items() if col(df, k)}
+        df.rename(columns=mapa_final, inplace=True)
 
-        for nome, ref in obrigatorias.items():
-            if ref is None:
-                erros.add("planilha", coluna=nome, erro="coluna ausente")
-
-        objs = []
-
+        campos_sql = list(DE_PARA.values())
+        registros = []
         for idx, r in df.iterrows():
-            linha_excel = idx + 5
+            lt, ln = r.get('latitude'), r.get('longitude')
+            if pd.isna(lt) or pd.isna(ln): continue
+            registros.append([None if pd.isna(r.get(c)) else r.get(c) for c in campos_sql])
 
-            try:
-                lt, ln = r.get(c_lat), r.get(c_lon)
+        if registros:
+            query = f"INSERT INTO relat_arm_temp ({', '.join(campos_sql)}) VALUES ({', '.join(['%s']*len(campos_sql))}) ON CONFLICT DO NOTHING"
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    cursor.executemany(query, registros)
 
-                if pd.isna(lt) or pd.isna(ln):
-                    erros.add(
-                        "geoprocessamento",
-                        linha=linha_excel,
-                        coluna="LATITUDE/LONGITUDE",
-                        valor=f"{lt},{ln}",
-                        erro="coordenadas ausentes",
-                        detalhe=f"Armadilha {r.get(c_num)} ignorada"
-                    )
-                    continue
-
-                h = hashlib.sha256(f"ARM|{r.get(c_num)}|{ln}".encode()).hexdigest()
-
-                objs.append(ArmadilhaTemp(
-                    hash_registro=h,
-                    numero=_get_str(r, c_num, 50),
-                    municipio=_get_str(r, c_mun, 100),
-                    localidade=_get_str(r, c_local, 100),
-                    endereco=_get_str(r, c_end, 150),
-                    complemento=_get_str(r, c_comp, 255, default=""),
-                    quarteiroes=_get_str(r, c_quart, 50),
-                    tipo_imovel=_get_str(r, c_imovel, 50),
-                    tipo_armadilha=_get_str(r, c_arm, 50),
-                    geometry=Point(float(ln), float(lt), srid=4674),
-                    latitude=float(lt),
-                    longitude=float(ln)
-                ))
-
-            except Exception as e:
-                erros.add(
-                    "sistema",
-                    linha=linha_excel,
-                    erro="erro inesperado",
-                    detalhe=str(e)
-                )
-
-        with transaction.atomic():
-            ArmadilhaTemp.objects.bulk_create(objs, ignore_conflicts=True)
-
-        log.mensagem = erros.to_json()
-        log.status = "finalizado"
+        log.mensagem, log.status = erros.to_json(), "finalizado"
         log.save()
-
     except Exception as e:
-        erros = ErrorLogger()
-        erros.add("sistema", erro="falha geral", detalhe=str(e))
-
-        LogSincronizacao.objects.filter(id=job_id).update(
-            status="erro",
-            mensagem=erros.to_json()
-        )
-
+        LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
-        if os.path.exists(arquivo_path):
-            os.remove(arquivo_path)
+        if os.path.exists(arquivo_path): os.remove(arquivo_path)

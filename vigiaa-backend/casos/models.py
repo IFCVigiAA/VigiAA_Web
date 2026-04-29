@@ -201,8 +201,8 @@ class FocoTemp(models.Model):
     ovo_a_aegypti = models.IntegerField(null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    geometry = models.PointField(srid=4674, null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
     class Meta:
         db_table = "focos_aedes_temp"
         managed = False
@@ -216,8 +216,8 @@ class PontoEstrategicoTemp(models.Model):
     complemento = models.CharField(max_length=100, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    geometry = models.PointField(srid=4674, null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
     class Meta:
         db_table = "pontos_estrategicos_temp"
         managed = False
@@ -235,8 +235,8 @@ class ArmadilhaTemp(models.Model):
     tipo_armadilha = models.CharField(max_length=50, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-    geometry = models.PointField(srid=4674, null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
     class Meta:
         db_table = "relat_arm_temp"
         managed = False
