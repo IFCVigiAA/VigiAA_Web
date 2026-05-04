@@ -8,6 +8,7 @@ from casos.sincronizar import sincronizar_oficial_api
 from .views import me
 from django.contrib.auth import views as auth_views
 from .views import status_processamento
+from .views import disparar_geoprocessamento
 
 urlpatterns = [
     path("me/", me, name="me"),
@@ -20,4 +21,5 @@ urlpatterns = [
     path("logout/", auth_views.LogoutView.as_view(next_page="/api/casos/login/"), name="logout"),
     path("sincronizar/", sincronizar_oficial_api, name="sincronizar_oficial"),
     path("status-processamento/<int:job_id>/", status_processamento),
+    path('geoprocessar-positivos/', disparar_geoprocessamento, name='geoprocessar_positivos'),
 ]

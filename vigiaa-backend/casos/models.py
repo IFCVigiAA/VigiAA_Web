@@ -27,8 +27,8 @@ class CasoPositivo(models.Model):
     agentes = models.CharField(max_length=100, null=True, blank=True)
     prim_visita = models.CharField(max_length=50, null=True, blank=True)
     situacao = models.CharField(max_length=255, null=True, blank=True)
-    geometry = models.PointField(srid=4674)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False) 
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
     class Meta:
         db_table = "casos_positivos"
         constraints = [
@@ -151,9 +151,11 @@ class CasoPositivoTemp(models.Model):
     situacao = models.CharField(max_length=255, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
-
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
+    status_geo = models.CharField(max_length=20, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
+    nome = models.CharField(max_length=255, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
+    nome_mae = models.CharField(max_length=255, null=True, blank=True)
     class Meta:
         db_table = "casos_positivos_temp"
         managed = False
@@ -172,9 +174,12 @@ class CasoPositivoTempGL(models.Model):
     agentes = models.CharField(max_length=100, null=True, blank=True)
     prim_visita = models.CharField(max_length=50, null=True, blank=True)
     situacao = models.CharField(max_length=255, null=True, blank=True)
-    geometry = models.PointField(srid=4674)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
-
+    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
+    nome = models.CharField(max_length=255, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
+    nome_mae = models.CharField(max_length=255, null=True, blank=True)
+    
     class Meta:
         db_table = "casos_positivos_temp_gl"
         managed = False

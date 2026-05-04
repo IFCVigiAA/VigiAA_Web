@@ -182,34 +182,26 @@ def _geocodificar_endereco(endereco, bairro):
 
 @shared_task(bind=True)
 def task_processar_positivos(self, job_id, arquivo_path):
-    def add_erro(erros, tipo, linha, coluna=None, valor=None, erro=None, detalhe=None):
-        erros.append({
-            "tipo": tipo,
-            "linha": linha,
-            "coluna": coluna,
-            "valor": str(valor)[:100] if valor is not None else None,
-            "erro": erro,
-            "detalhe": detalhe
-        })
-
+    """
+    TASK 1: UPLOAD RÁPIDO
+    Apenas lê a planilha e insere na tabela 'casos_positivos_temp'.
+    NÃO faz geoprocessamento.
+    """
     try:
         log = LogSincronizacao.objects.get(id=job_id)
-        erros_log = {"planilha": [], "geoprocessamento": []}
-
+        
+        # 1. Leitura dos dados
         df_bruto = pd.read_excel(arquivo_path)
         df = df_bruto.dropna(how='all')
-        linhas_vazias = len(df_bruto) - len(df)
-        if linhas_vazias > 0:
-            add_erro(erros_log["planilha"], "estrutura", "N/A", erro=f"{linhas_vazias} linhas em branco ignoradas")
 
-        c_inicio  = col(df, "INÍCIO SINTOMAS", "INICIO SINTOMAS")
+        # 2. Mapeamento de colunas
         c_nome    = col(df, "NOME")
-        c_sinan   = col(df, "SINAN")
         c_end     = col(df, "ENDEREÇO", "ENDERECO")
-        c_nasc    = col(df, "DATA DE NASCIMENTO")
+        c_sinan   = col(df, "SINAN")
+        c_inicio  = col(df, "INÍCIO SINTOMAS", "INICIO SINTOMAS")
         c_notif   = col(df, "NOTIFICAÇÃO", "NOTIFICACAO")
+        c_nasc    = col(df, "DATA DE NASCIMENTO")
         c_bairro  = col(df, "BAIRRO")
-        c_sit     = col(df, "SITUAÇÃO", "SITUACAO")
         c_local   = col(df, "LOCAL DE ATENDIMENTO")
         c_mae     = col(df, "NOME DA MÃE", "NOME DA MAE")
         c_obs     = col(df, "OBSERVAÇÕES", "OBSERVACOES")
@@ -217,174 +209,143 @@ def task_processar_positivos(self, job_id, arquivo_path):
         c_aplic   = col(df, "APLICAÇÃO", "APLICACAO")
         c_agentes = col(df, "AGENTE(S)", "AGENTES")
         c_prim    = col(df, "1ª VISITA", "1A VISITA")
-        c_obs2    = col(df, "UNNAMED: 15", "UNNAMED:15", "OBSERVACAO2")
+        c_sit     = col(df, "SITUAÇÃO", "SITUACAO")
+        c_obs2    = col(df, "UNNAMED: 15", "OBSERVACAO2")
 
-        # validação de colunas obrigatórias
-        obrigatorias = {"NOME": c_nome, "SINAN": c_sinan, "ENDEREÇO": c_end}
-        for nome, ref in obrigatorias.items():
-            if ref is None:
-                add_erro(erros_log["planilha"], "estrutura", None, nome, None, "coluna ausente")
-
+        # 3. Tratamento de datas
         for c in [c_inicio, c_nasc, c_notif]:
             if c:
                 df[c] = corrigir_datas_mistas(df[c])
 
-        if c_inicio:
-            datas_validas = df[c_inicio].dropna()
-            ponto_partida = datas_validas.iloc[0] if not datas_validas.empty else pd.to_datetime("2026-01-01")
-            df[c_inicio] = df[c_inicio].fillna(ponto_partida)
-            df[c_inicio] = df[c_inicio].ffill()
-
-        df['temp_hash'] = df.apply(lambda r: hashlib.sha256(
-            f"POS|{str(r.get(c_sinan))}|{str(r.get(c_nome))}|{str(r.get(c_nasc))}".encode()
-        ).hexdigest(), axis=1)
-        df = df.drop_duplicates(subset=['temp_hash'])
-
-        # Coordenadas default para comparação
-        DEF_LAT, DEF_LON = -27.022986, -48.652135
-
         params_temp = []
-        params_gl   = []
-
         for idx, r in df.iterrows():
-            linha_excel = idx + 2
+            nome_v = _get_str(r, c_nome, 100).upper()
+            if not nome_v or nome_v == 'NAN':
+                continue
 
-            try:
-                nome_v = str(r.get(c_nome) or "").strip().upper()
-                if not nome_v or nome_v == 'NAN':
-                    add_erro(erros_log["planilha"], "preenchimento", linha_excel, "NOME", r.get(c_nome), "campo obrigatório vazio")
-                    continue
+            # Montando a tupla para a tabela temp (DADOS PUROS)
+            dados = (
+                _get_str(r, c_local, 100).upper(),
+                r.get(c_inicio).date() if pd.notna(r.get(c_inicio)) else None,
+                r.get(c_notif).date() if pd.notna(r.get(c_notif)) else None,
+                int(float(r.get(c_sinan))) if pd.notna(r.get(c_sinan)) else None,
+                nome_v,
+                _get_str(r, c_end, 255).upper(),
+                _get_str(r, c_bairro, 50).upper(),
+                _get_str(r, c_mae, 100).upper(),
+                r.get(c_nasc).date() if pd.notna(r.get(c_nasc)) else None,
+                _get_str(r, c_obs, 255),
+                _get_str(r, c_res, 50).upper(),
+                _get_str(r, c_aplic, 50),
+                _get_str(r, c_agentes, 100),
+                _formatar_data_visita(r.get(c_prim)),
+                _get_str(r, c_sit, 255),
+                _get_str(r, c_obs2, 255)
+            )
+            params_temp.append(dados)
 
-                sinan_raw = r.get(c_sinan)
-                try:
-                    sinan_int = int(float(sinan_raw)) if sinan_raw and str(sinan_raw) != 'nan' else None
-                except:
-                    add_erro(erros_log["planilha"], "preenchimento", linha_excel, "SINAN", sinan_raw, "valor inválido", "não é número")
-                    sinan_int = None
-
-                end_v = str(r.get(c_end) or "").strip().upper()
-                if not end_v:
-                    add_erro(erros_log["planilha"], "preenchimento", linha_excel, "ENDEREÇO", r.get(c_end), "campo vazio")
-
-                try:
-                    dt_ini = r.get(c_inicio).date() if pd.notna(r.get(c_inicio)) else None
-                except:
-                    add_erro(erros_log["planilha"], "preenchimento", linha_excel, "INÍCIO SINTOMAS", r.get(c_inicio), "data inválida")
-                    dt_ini = None
-
-                try:
-                    dt_nasc = r.get(c_nasc).date() if pd.notna(r.get(c_nasc)) else None
-                except:
-                    add_erro(erros_log["planilha"], "preenchimento", linha_excel, "DATA NASCIMENTO", r.get(c_nasc), "data inválida")
-                    dt_nasc = None
-
-                try:
-                    dt_notif = r.get(c_notif).date() if pd.notna(r.get(c_notif)) else None
-                except:
-                    add_erro(erros_log["planilha"], "preenchimento", linha_excel, "NOTIFICAÇÃO", r.get(c_notif), "data inválida")
-                    dt_notif = None
-
-                bairro_v  = str(r.get(c_bairro))[:50]   if pd.notna(r.get(c_bairro))  else None
-                local_v   = str(r.get(c_local))[:100]   if pd.notna(r.get(c_local))   else None
-                sit_v     = str(r.get(c_sit))[:255]     if pd.notna(r.get(c_sit))     else None
-                mae_v     = str(r.get(c_mae))[:255]     if pd.notna(r.get(c_mae))     else None
-                obs_v     = str(r.get(c_obs))[:255]     if pd.notna(r.get(c_obs))     else None
-                res_v     = str(r.get(c_res))[:50]      if pd.notna(r.get(c_res))     else None
-                aplic_v   = str(r.get(c_aplic))[:50]    if pd.notna(r.get(c_aplic))   else None
-                agentes_v = str(r.get(c_agentes))[:100] if pd.notna(r.get(c_agentes)) else None
-
-                prim_v = _formatar_data_visita(r.get(c_prim))
-                obs2_v = str(r.get(c_obs2))[:255] if pd.notna(r.get(c_obs2)) else None
-
-                h = r['temp_hash']
-
-                # --- GEOCODIFICAÇÃO com log de falha ---
-                lat, lon = _geocodificar_endereco(end_v, bairro_v)
-
-                if lat == DEF_LAT and lon == DEF_LON:
-                    add_erro(
-                        erros_log["geoprocessamento"],
-                        "geocodificacao",
-                        linha_excel,
-                        "ENDEREÇO",
-                        end_v,
-                        erro="geocodificação falhou",
-                        detalhe="usando coordenada default do município"
-                    )
-
-                params_temp.append((
-                    h, nome_v, end_v, sinan_int, dt_ini, dt_notif, dt_nasc, bairro_v,
-                    local_v, sit_v, mae_v, obs_v, res_v, aplic_v, agentes_v, prim_v, obs2_v
-                ))
-
-                params_gl.append((
-                    h, nome_v, end_v, sinan_int, dt_ini, dt_notif, dt_nasc, bairro_v,
-                    local_v, sit_v, mae_v, obs_v, res_v, aplic_v, agentes_v, prim_v, obs2_v,
-                    f"POINT({lon} {lat})"
-                ))
-
-            except Exception as e:
-                add_erro(erros_log["planilha"], "sistema", linha_excel, erro="erro inesperado", detalhe=str(e))
-
-        with transaction.atomic():
-            with connection.cursor() as cursor:
-                # FIX: geometry adicionada ao ON CONFLICT DO UPDATE para registros
-                # que já existiam no banco receberem a geometria correta ao reprocessar.
-                sql = """
-                    INSERT INTO {tabela}
-                    (hash_registro, nome, endereco, sinan, inicio_sintomas, notificacao, data_nasc,
-                     bairro, local_atendimento, situacao, nome_mae, observacoes, resultado,
-                     aplicacao, agentes, prim_visita, observacao2 {extra_col})
-                    VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s {extra_val})
-                    ON CONFLICT (hash_registro) DO UPDATE SET
-                        situacao    = EXCLUDED.situacao,
-                        resultado   = EXCLUDED.resultado,
-                        observacoes = EXCLUDED.observacoes,
-                        endereco    = EXCLUDED.endereco,
-                        bairro      = EXCLUDED.bairro,
-                        prim_visita = EXCLUDED.prim_visita,
-                        observacao2 = EXCLUDED.observacao2
-                        {extra_update}
-                """
-                cursor.executemany(
-                    sql.format(
-                        tabela="casos_positivos_temp",
-                        extra_col="",
-                        extra_val="",
-                        extra_update=""
-                    ),
-                    params_temp
-                )
-                cursor.executemany(
-                    sql.format(
-                        tabela="casos_positivos_temp_gl",
-                        extra_col=", geometry",
-                        extra_val=", ST_GeomFromText(%s, 4674)",
-                        extra_update=", geometry = EXCLUDED.geometry"  # FIX: atualiza geometria no conflito
-                    ),
-                    params_gl
-                )
-
-        log.mensagem = json.dumps({
-            "resumo": {
-                "total_erros": len(erros_log["planilha"]) + len(erros_log["geoprocessamento"]),
-                "planilha": len(erros_log["planilha"]),
-                "geoprocessamento": len(erros_log["geoprocessamento"])
-            },
-            "erros": erros_log
-        }, ensure_ascii=False, indent=2)
+        # 4. Inserção em lote no banco
+        if params_temp:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    sql = """
+                        INSERT INTO casos_positivos_temp 
+                        (local_atendimento, inicio_sintomas, notificacao, sinan, nome, 
+                         endereco, bairro, nome_mae, data_nasc, observacoes, resultado, 
+                         aplicacao, agentes, prim_visita, situacao, observacao2)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        ON CONFLICT DO NOTHING
+                    """
+                    cursor.executemany(sql, params_temp)
 
         log.status = "finalizado"
+        log.progresso = 100
         log.save()
 
     except Exception as e:
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
-
     finally:
         if os.path.exists(arquivo_path):
             try: os.remove(arquivo_path)
             except: pass
 
+@shared_task(bind=True)
+def task_geoprocessar_pendentes(self, job_id):
+    """
+    TASK 2: GEOPROCESSAMENTO (Botão Gerar Mapa)
+    Lê os dados que já estão na 'casos_positivos_temp', 
+    consulta o ArcGIS e insere na 'casos_positivos_temp_gl'.
+    """
+    try:
+        log = LogSincronizacao.objects.get(id=job_id)
+        log.mensagem = "Iniciando consulta ao ArcGIS..."
+        log.save()
+        
+        with connection.cursor() as cursor:
+            # Seleciona todos da temp para geoprocessar
+            cursor.execute("""
+                SELECT t.* 
+                FROM casos_positivos_temp t
+                LEFT JOIN casos_positivos_temp_gl gl ON t.hash_registro = gl.hash_registro
+                WHERE gl.hash_registro IS NULL
+            """)
+            colunas = [col[0] for col in cursor.description]
+            registros = [dict(zip(colunas, row)) for row in cursor.fetchall()]
+
+        if not registros:
+            log.status = "finalizado"
+            log.mensagem = "Nenhum dado na tabela temporária para geoprocessar."
+            log.save()
+            return
+
+        total = len(registros)
+        params_gl = []
+        
+        for idx, r in enumerate(registros):
+            try:
+                # CONSULTA REAL AO ARCGIS
+                lat, lon = _geocodificar_endereco(r['endereco'], r['bairro'])
+                
+                # Monta os dados com a GEOMETRY para a tabela _gl
+                dados = (
+                    r['local_atendimento'], r['inicio_sintomas'], r['notificacao'],
+                    r['sinan'], r['nome'], r['endereco'], r['bairro'],
+                    r['nome_mae'], r['data_nasc'], r['observacoes'],
+                    r['resultado'], r['aplicacao'], r['agentes'],
+                    r['prim_visita'], r['situacao'], r['observacao2'],
+                    f"POINT({lon} {lat})" # Geometria WKT
+                )
+                params_gl.append(dados)
+            except:
+                continue # Se um falhar, continua para o próximo
+            
+            # Atualiza progresso no log para o frontend mostrar
+            if idx % 10 == 0 or idx == total - 1:
+                log.progresso = int((idx / total) * 100)
+                log.mensagem = f"Processando: {idx + 1} de {total} endereços..."
+                log.save()
+
+        # Inserção na tabela oficial de geoprocessamento (_gl)
+        if params_gl:
+            with transaction.atomic():
+                with connection.cursor() as cursor:
+                    sql_gl = """
+                        INSERT INTO casos_positivos_temp_gl
+                        (local_atendimento, inicio_sintomas, notificacao, sinan, nome, 
+                         endereco, bairro, nome_mae, data_nasc, observacoes, resultado, 
+                         aplicacao, agentes, prim_visita, situacao, observacao2, geometry)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, ST_GeomFromText(%s, 4674))
+                        ON CONFLICT DO NOTHING
+                    """
+                    cursor.executemany(sql_gl, params_gl)
+
+        log.status = "finalizado"
+        log.progresso = 100
+        log.mensagem = f"Sucesso! {len(params_gl)} pontos gerados no mapa."
+        log.save()
+
+    except Exception as e:
+        LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
 
 # --- 3. TASK FOCOS ---
 # Planilha: 2-3 linhas de título, depois cabeçalho com "Nº Foco", depois dados.

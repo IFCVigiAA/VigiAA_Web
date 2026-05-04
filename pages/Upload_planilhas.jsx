@@ -9,6 +9,7 @@ const endpoints = {
   armadilhas: '/api/casos/upload/armadilhas/',
   pontos: '/api/casos/upload/pontos/',
   casos: '/api/casos/upload/positivos/',
+  geoprocessar: '/api/casos/geoprocessar-positivos/',
 }
 
 const syncEndpoint = '/api/casos/sincronizar/'
@@ -30,6 +31,7 @@ export default function UploadPlanilhas() {
 
   const [enviando, setEnviando] = useState(false)
   const [sincronizando, setSincronizando] = useState(false)
+  const [geoprocessando, setGeoprocessando] = useState(false)
   const [progresso, setProgresso] = useState(0)
   const [log, setLog] = useState('')
 
@@ -69,7 +71,6 @@ export default function UploadPlanilhas() {
     })
   }
 
-  // Monitora o progresso real de um Job ID específico
   async function monitorarJob(jobId, tipo) {
     return new Promise((resolve) => {
       const interval = setInterval(async () => {
@@ -127,10 +128,9 @@ export default function UploadPlanilhas() {
 
         if (r.ok && r.data.job_id) {
           setLog(prev => prev + `✔ ${tipo} recebido! Iniciando processamento...\n`)
-          // Espera o processamento deste arquivo terminar antes de ir para o próximo
           await monitorarJob(r.data.job_id, tipo)
         } else {
-          setLog(prev => prev + `✖ ${tipo}: Falha ao enviar arquivo.\n\n`)
+          setLog(prev => prev + `✖ ${tipo} Falha ao enviar arquivo.\n\n`)
         }
       }
 
@@ -141,6 +141,35 @@ export default function UploadPlanilhas() {
       setLog(prev => prev + `✖ Erro crítico no envio.\n`)
     } finally {
       setEnviando(false)
+      setProgresso(100)
+      setTimeout(() => setProgresso(0), 2000)
+    }
+  }
+
+  async function geoprocessar() {
+    if (geoprocessando) return
+    setGeoprocessando(true)
+    setProgresso(0)
+    setLog(prev => prev + '\nIniciando geoprocessamento dos endereços...\n')
+
+    try {
+      const res = await fetch(API_BASE + endpoints.geoprocessar, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeader(),
+        },
+      })
+      const data = await res.json()
+      if (data.job_id) {
+        await monitorarJob(data.job_id, 'Mapa')
+      } else {
+        setLog(prev => prev + `✔ ${data.message || 'Solicitação enviada!'}\n`)
+      }
+    } catch {
+      setLog(prev => prev + '\n✖ Erro ao iniciar geoprocessamento\n')
+    } finally {
+      setGeoprocessando(false)
       setProgresso(100)
       setTimeout(() => setProgresso(0), 2000)
     }
@@ -207,27 +236,37 @@ export default function UploadPlanilhas() {
           <button
             className="vigiaa-btn vigiaa-btn--primary"
             onClick={() => enviar({ syncAfter: false })}
-            disabled={enviando || sincronizando}
+            disabled={enviando || sincronizando || geoprocessando}
           >
             {enviando ? 'Processando...' : 'Processar planilhas'}
           </button>
+
+          <button
+            className="vigiaa-btn vigiaa-btn--map"
+            onClick={geoprocessar}
+            disabled={enviando || sincronizando || geoprocessando}
+          >
+            {geoprocessando ? 'Geocodificando...' : 'Geoprocessar pontos'}
+          </button>
+
           <button
             className="vigiaa-btn vigiaa-btn--outline"
             onClick={() => enviar({ syncAfter: true })}
-            disabled={enviando || sincronizando}
+            disabled={enviando || sincronizando || geoprocessando}
           >
             Processar + sincronizar
           </button>
+
           <button
             className="vigiaa-btn vigiaa-btn--ghost"
             onClick={sincronizar}
-            disabled={enviando || sincronizando}
+            disabled={enviando || sincronizando || geoprocessando}
           >
             {sincronizando ? 'Sincronizando...' : 'Sincronizar agora'}
           </button>
         </div>
 
-        {(enviando || sincronizando) && (
+        {(enviando || sincronizando || geoprocessando) && (
           <div className="vigiaa-progress">
             <div className="vigiaa-progress__bar" style={{ width: `${progresso}%` }} />
           </div>

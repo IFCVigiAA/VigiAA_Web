@@ -4,13 +4,13 @@ from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-
 from .models import LogSincronizacao
 from .tasks import (
     task_processar_positivos, 
     task_processar_pontos, 
     task_processar_focos, 
-    task_processar_armadilhas
+    task_processar_armadilhas,
+    task_geoprocessar_pendentes
 )
 
 # --- FUNÇÃO AUXILIAR PARA SALVAR ARQUIVO ---
@@ -62,7 +62,6 @@ def upload_casos_positivos(request):
     job = LogSincronizacao.objects.create(tipo="positivos", nome_arquivo=arquivo.name, status="na_fila")
     caminho = _salvar_arquivo_temporario(job.id, arquivo)
     
-    # Chama a Task do Celery
     task_processar_positivos.delay(job.id, caminho)
     
     return JsonResponse({"sucesso": True, "job_id": job.id})
@@ -108,3 +107,28 @@ def upload_armadilhas(request):
     task_processar_armadilhas.delay(job.id, caminho)
     
     return JsonResponse({"sucesso": True, "job_id": job.id})
+
+# --- VIEW DE GEOPROCESSAMENTO CORRIGIDA ---
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def disparar_geoprocessamento(request):
+    """
+    Cria um registro de log e dispara a task de geoprocessamento passando o job_id.
+    """
+    # Criamos o registro de log primeiro para ter o ID
+    job = LogSincronizacao.objects.create(
+        tipo="geoprocessamento", 
+        nome_arquivo="N/A", 
+        status="processando",
+        mensagem="Iniciando geoprocessamento dos endereços..."
+    )
+    
+    # Agora passamos o ID do log para a task (resolvendo o TypeError)
+    task_geoprocessar_pendentes.delay(job.id)
+    
+    return JsonResponse({
+        "status": "sucesso", 
+        "message": "Geoprocessamento iniciado em segundo plano!",
+        "job_id": job.id  # O React usa 'job_id' para monitorar
+    })
