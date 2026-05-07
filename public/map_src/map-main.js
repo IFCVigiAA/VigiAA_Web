@@ -8,6 +8,9 @@ const heatmapLegend = document.getElementById('heatmap-legend');
 const LAYER_CLUSTERS_CASOS = 'vw_clusters_casos'; // Nome da VIEW no PostGIS
 const LAYER_CLUSTERS_FOCOS = 'vw_clusters_focos';    // Nome da outra VIEW
 
+let playbackInterval = { casos: null, focos: null };
+let isPlaying = { casos: false, focos: false };
+
 // Variáveis de estado do filtro (inicializadas em map-main)
 let selectedYear = '';
 let selectedSE = '';
@@ -58,7 +61,7 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
         fullLayerName = `${WORKSPACE}:${layerName}`;
     }
 
-    var wfsUrl = `http://192.168.70.63:8080/geoserver/wfs?`;
+    var wfsUrl = `http://192.168.70.74:8080/geoserver/wfs?`;
     
     var params = {
         service: 'WFS', version: version, request: 'GetFeature', typeName: fullLayerName,
@@ -112,26 +115,25 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
 
 // Funções de carga estática (chamadas apenas uma vez na inicialização)
 function loadBairrosOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ofc', 'Bairros - Oficial (Estático)', bairrosStyleWFS, ['nome']); }
-function loadSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_camb', 'Setores Censitários (Estático)', setCensStyleWFS, ['NM_BAIRRO']); }
-function loadDensDemoSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_demo_camb_classes', 'Densidade Demográfica (SC)', densDemoSetCensStyle, ['DENSIDADE_DEMOGRAFICA_SETOR_HAB_KM2']); }
-// ... Outras funções estáticas (BairrosOfc, Camboriu, CurvaNivel, DeclividadePoligono) ...
-function loadBairrosOfcOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE (Estático)', bairrosOfcStyleWFS, ['NM_BAIRRO']); }
-function loadCamboriuOnce() { return fetchWFSData('vigiaa_ofc:vw_mun_camb', 'Camboriú (Estático)', camboriuStyleWFS, ['NM_MUN']); }
-function loadCurvaNivelOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_li', 'Curva de Nível (Estático)', curvasNivelStyleWFS, ['CLASSE']); } 
-function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_union', 'Declividade (Polígonos)', declividadePlStyle, ['CLASSE', 'AREA_METROS']); }
+function loadSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_camb', 'Setores Censitários (Estático)', setCensStyleWFS, ['Nome do Bairro']); }
+function loadDensDemoSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_demo_camb_classes', 'Densidade Demográfica (SC)', densDemoSetCensStyle, ['Densidade Demografica por KM2']); }
+function loadBairrosOfcOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE (Estático)', bairrosOfcStyleWFS, ['Nome']); }
+function loadCamboriuOnce() { return fetchWFSData('vigiaa_ofc:vw_mun_camb', 'Camboriú (Estático)', camboriuStyleWFS, ['']); }
+function loadCurvaNivelOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_li', 'Curva de Nível (Estático)', curvasNivelStyleWFS, ['Altura']); } 
+function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_union', 'Declividade (Polígonos)', declividadePlStyle, ['Altura']); }
 
 // Funções de atualização dinâmica (chamadas na inicialização e no filtro/intervalo)
 function updateFocosAedes() {
     const filter = buildCqlFilter(selectedYear, selectedSE);
-    return fetchWFSData(LAYER_FOCOS_SE, 'Focos Aedes (Dinâmico)', focosStyleWFS, ['id', 'n_foco', 'a_aegypti_form_aquaticas', 'a_aegypti_form_adultas', 'a_albopictus_form_aquaticas', 'a_albopictus_form_adultas', 'ovo_a_aegypti'], '2.0.0', true, filter).then(newLayer => {
+    return fetchWFSData(LAYER_FOCOS_SE, 'Focos Aedes (Pontos)', focosStyleWFS, ['id', 'n_foco', 'a_aegypti_form_aquaticas', 'a_aegypti_form_adultas', 'a_albopictus_form_aquaticas', 'a_albopictus_form_adultas', 'ovo_a_aegypti'], '2.0.0', true, filter).then(newLayer => {
         if (newLayer) { 
-            refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes (Dinâmico)'); 
+            refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes (Pontos)'); 
             focosWFSLayer = newLayer; 
         }
         return focosWFSLayer;
     });
 }
-// ... Outras funções dinâmicas (updatePontosEstrat, updateArmadilhas) ...
+
 function updatePontosEstrat() {
     return fetchWFSData('vigiaa_ofc:pontos_estrategicos', 'Pontos Estratégicos (Dinâmico)', peStyleWFS, ['id', 'numero'], '2.0.0', true).then(newLayer => {
         if (newLayer) { refreshLayerInControl(peWFSLayer, newLayer, 'Pontos Estratégicos (Dinâmico)'); peWFSLayer = newLayer; }
@@ -174,7 +176,7 @@ function updateHeatmapSwitch() {
         cql_filter: filter
     };
     
-    const fullUrl = `http://192.168.70.63:8080/geoserver/wfs?` + new URLSearchParams(params).toString();
+    const fullUrl = `http://192.168.70.74:8080/geoserver/wfs?` + new URLSearchParams(params).toString();
 
     return fetch(fullUrl)
         .then(response => response.json())
@@ -370,7 +372,7 @@ async function updateLayerByContext(context) {
         if (isCasos) {
             updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', clusterCasosLayer, 'casos');
         } else {
-            updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Mosquitos (Áreas Críticas)', clusterFocosLayer, 'focos');
+            updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos (Áreas Críticas)', clusterFocosLayer, 'focos');
         }
 
         updateHeatmapData(context, data);
@@ -464,6 +466,23 @@ function updateMapLayers() {
 
 // --- FUNÇÃO DE INICIALIZAÇÃO (window.onload) ---
 window.onload = function() {
+    document.querySelectorAll('[id="btn-play"]').forEach(btn => {
+    btn.addEventListener('click', function() {
+        // Descobre se o botão clicado pertence ao grupo de casos ou focos
+        const context = this.closest('.filter-group').id.includes('casos') ? 'casos' : 'focos';
+        togglePlayback(context, this);
+        });
+    });
+
+    async function togglePlayback(context, btnElement) {
+        // Agora ele verifica apenas se O CONTEXTO ATUAL está tocando
+        if (isPlaying[context]) {
+            stopPlayback(context, btnElement);
+        } else {
+            startPlayback(context, btnElement);
+        }
+    }
+
     // 1. Inicializa o Mapa
     map = L.map('mapid').setView([-27.0258, -48.6549], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -480,7 +499,7 @@ window.onload = function() {
         updateCasosPositivosPoints(), //updateHeatmapSwitch(),updateCasosHeatmap(),
         loadImageLayers(), loadDeclividadePoligonoOnce(), loadDensDemoSetCensOnce(),
         updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', null, 'casos'),
-        updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Mosquitos (Áreas Críticas)', null, 'focos')
+        updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos (Áreas Críticas)', null, 'focos')
     ]).then(results => {
         // Atribui os resultados às variáveis globais e as adiciona ao overlayMaps
         [
@@ -533,7 +552,7 @@ window.onload = function() {
 
                 // LISTA DE CAMADAS QUE RESETAM O FILTRO
                 // Se clicar em qualquer outra (como Heatmap), o filtro permanece como está
-                const resetLayers = ['Casos Positivos (Pontos)', 'Focos Aedes (Dinâmico)'];
+                const resetLayers = ['Casos Positivos (Pontos)', 'Focos Aedes (Pontos)'];
 
             }, true);
 
@@ -570,13 +589,15 @@ window.onload = function() {
                 document.getElementById('group-filter-casos').style.display = 'block';
                 layersControl.classList.add('leaflet-control-layers-pushed');
                 populateSpecificYears('casos', LAYER_CASOS, 'filter-ano-casos');
+
             }
             
-            if (e.name === 'Focos Aedes (Dinâmico)') {
+            if (e.name === 'Focos Aedes (Pontos)') {
                 mainContainer.style.display = 'flex';
                 document.getElementById('group-filter-focos').style.display = 'block';
                 layersControl.classList.add('leaflet-control-layers-pushed');
                 populateSpecificYears('focos', LAYER_FOCOS_SE, 'filter-ano-focos');
+
             }
 
             if (e.name.includes('Mapa de Calor')) { heatmapLegend.style.display = 'block'; }
@@ -594,7 +615,7 @@ window.onload = function() {
             // Identifica qual contexto estamos removendo
             let contextToRemove = null;
             if (e.name === 'Casos Positivos (Pontos)') contextToRemove = 'casos';
-            if (e.name === 'Focos Aedes (Dinâmico)') contextToRemove = 'focos';
+            if (e.name === 'Focos Aedes (Pontos)') contextToRemove = 'focos';
 
             // 1. Limpa APENAS os seletores do contexto que saiu do mapa
             if (contextToRemove) {
@@ -662,7 +683,65 @@ setInterval(() => {
         clusterCasosLayer = updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', clusterCasosLayer, 'casos').then(layer => {clusterCasosLayer = layer;});
     }
     if (map.hasLayer(clusterFocosLayer)) {
-        clusterFocosLayer = updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Mosquitos (Áreas Críticas)', clusterFocosLayer, 'focos');
+        clusterFocosLayer = updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos (Áreas Críticas)', clusterFocosLayer, 'focos');
     }
 }, 300000); // 5 minutos
 };
+
+async function startPlayback(context, btnElement) {
+    const isCasos = context === 'casos';
+    const table = isCasos ? LAYER_CASOS : LAYER_FOCOS_SE;
+    
+    const selectAno = document.getElementById(isCasos ? 'filter-ano-casos' : 'filter-ano-focos');
+    const selectSE = document.getElementById(isCasos ? 'filter-se-casos' : 'filter-se-focos');
+    
+    const yearVal = selectAno.value;
+
+    if (!yearVal) {
+        alert("Selecione um ano primeiro para ver a evolução temporal.");
+        return;
+    }
+
+    const seData = await fetchGeoServerFilterData(table, `ano_se=${yearVal}`, 'se_num');
+    const distinctSE = [...new Set(seData.map(item => item.se_num))].sort((a, b) => a - b);
+
+    if (distinctSE.length === 0) {
+        alert("Nenhuma semana encontrada para este ano.");
+        return;
+    }
+
+    // ALTERAÇÃO AQUI: isPlaying específico do contexto
+    isPlaying[context] = true;
+    btnElement.innerText = " ⏸ Pausar";
+    
+    let currentIndex = 0;
+    if (selectSE.value) {
+        currentIndex = distinctSE.indexOf(parseInt(selectSE.value));
+        if (currentIndex === -1) currentIndex = 0;
+    }
+
+    // ALTERAÇÃO AQUI: Salva o intervalo no contexto específico
+    playbackInterval[context] = setInterval(async () => {
+        if (currentIndex >= distinctSE.length) {
+            currentIndex = 0; 
+        }
+
+        const currentSE = distinctSE[currentIndex];
+        selectSE.value = currentSE;
+        
+        await updateLayerByContext(context);
+        
+        currentIndex++;
+    }, 1200); 
+}
+
+function stopPlayback(context, btnElement) {
+    // Para apenas o contexto selecionado
+    isPlaying[context] = false;
+    clearInterval(playbackInterval[context]);
+    
+    // Altera o texto de volta apenas do botão clicado
+    if (btnElement) {
+        btnElement.innerText = "▶ Reproduzir Evolução";
+    }
+}

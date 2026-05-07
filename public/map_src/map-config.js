@@ -1,5 +1,5 @@
 // --- 1. Variáveis de Configuração Global ---
-const GEOSERVER_WFS_URL = 'http://192.168.70.63:8080/geoserver/wfs';
+const GEOSERVER_WFS_URL = 'http://192.168.70.74:8080/geoserver/wfs';
 const WORKSPACE = 'vigiaa_ofc';
 const LAYER_CASOS = 'vw_casosposi_se';
 const LAYER_FOCOS_SE = 'vw_focos_aedes_se';
@@ -42,7 +42,7 @@ const densDemoSetCensStyle = function (feature) {
 };
 
 const declividadePlStyle = function (feature) {
-    const classe = feature.properties.CLASSE;
+    const classe = feature.properties.Altura;
     let fillColor;
     switch (classe) {
         case '0 - 100m': fillColor = '#238b45'; break; case '100 - 200m': fillColor = '#41ab5d'; break;
