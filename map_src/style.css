@@ -116,7 +116,7 @@ html, body {
     right: 10px; /* Aumente para não sobrepor o botão de fechar do Leaflet */
     z-index: 1100;
     background-color: white;
-    padding: 10px;
+    padding: 4px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     width: 200px; /* Largura fixa para evitar o "quadrado pequeno" */
@@ -124,8 +124,12 @@ html, body {
 }
 
 .leaflet-top.leaflet-right .leaflet-control-layers {
-    margin-top: 10px; /* Valor base */
-    transition: margin-top 0.3s ease; /* Transição suave */
+    margin-top: 10px !important; /* Garante que fique no topo ao iniciar */
+    transition: margin-top 0.3s ease-in-out;
+}
+
+.leaflet-top.leaflet-right .leaflet-control-layers.leaflet-control-layers-pushed {
+    margin-top: 240px !important; /* Ajuste esse valor conforme a altura real das suas caixas */
 }
 
 /* Classe auxiliar que aplicaremos via JS para descer o menu */
@@ -187,7 +191,10 @@ html, body {
     }
 
     .leaflet-top.leaflet-right .leaflet-control-layers {
-        margin-top: 130px; /* Ajuste este valor (50px, 60px, etc.) para o deslocamento desejado */
-        position: relative;
+        margin-top: 10px !important;
+    }
+    
+    .leaflet-top.leaflet-right .leaflet-control-layers.leaflet-control-layers-pushed {
+        margin-top: 180px !important; /* Um pouco menor no celular */
     }
 }
