@@ -1,0 +1,67 @@
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
+
+.login-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(to bottom right, #0d1b2a, #123524);
+  font-family: 'Libre Baskerville', serif;
+}
+
+.login-box {
+  background: white;
+  padding: 50px 40px;
+  width: 380px;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border-top: 5px solid #1f9e61;
+}
+
+.login-box h2 {
+  text-align: center;
+  color: #123524;
+  font-size: 26px;
+  margin-bottom: 10px;
+}
+
+.login-box input {
+  padding: 12px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+  font-family: 'Libre Baskerville', serif;
+  transition: all 0.3s ease;
+}
+
+.login-box input:focus {
+  outline: none;
+  border: 1px solid #1f9e61;
+  box-shadow: 0 0 0 2px rgba(31, 158, 97, 0.2);
+}
+
+.login-box button {
+  background-color: #1f9e61;
+  color: black;
+  height: 45px;
+  border-radius: 5px;
+  border: none;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.login-box button:hover {
+  background-color: #123524;
+  color: white;
+}
+
+.error {
+  color: #cc0000;
+  font-size: 14px;
+  text-align: center;
+}
