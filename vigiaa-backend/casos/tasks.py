@@ -434,6 +434,12 @@ def task_processar_pontos(self, job_id, arquivo_path):
         h_idx = next((i for i, row in df_temp.iterrows() if any("Número" in str(x) for x in row)), 0)
         df = pd.read_excel(arquivo_path, header=h_idx).dropna(how='all')
 
+        # --- VALIDAÇÃO DE SEGURANÇA ---
+        colunas_limpas = [str(c).strip() for c in df.columns]
+        # Se contiver colunas de armadilhas, bloqueia o processamento de pontos
+        if "Tipo Imóvel" in colunas_limpas or "Tipo Armadilha" in colunas_limpas:
+            raise ValueError("Arquivo inválido! O arquivo enviado não possui as colunas estruturais de Pontos Estratégicos.")
+
         DE_PARA = {
             'Número': 'numero', 'Município': 'municipio', 'Localidade': 'localidade',
             'Endereço': 'endereco', 'Quarteiroes': 'quarteiroes', 'Complemento': 'complemento',
@@ -465,11 +471,6 @@ def task_processar_pontos(self, job_id, arquivo_path):
         if os.path.exists(arquivo_path): os.remove(arquivo_path)
 
 
-# --- 5. TASK ARMADILHAS ---
-# Planilha: título L1, "Município: X" L2, cabeçalho L4 → header=3
-# Colunas: Número, Município, Localidade, Endereço, Complemento, Quarteiroes,
-#          Tipo Imóvel, Tipo Armadilha, Latitude, Longitude
-
 @shared_task(bind=True)
 def task_processar_armadilhas(self, job_id, arquivo_path):
     try:
@@ -478,6 +479,11 @@ def task_processar_armadilhas(self, job_id, arquivo_path):
         df_temp = pd.read_excel(arquivo_path, header=None)
         h_idx = next((i for i, row in df_temp.iterrows() if any("Número" in str(x) for x in row)), 0)
         df = pd.read_excel(arquivo_path, header=h_idx).dropna(how='all')
+
+        # --- VALIDAÇÃO DE SEGURANÇA ---
+        colunas_limpas = [str(c).strip() for c in df.columns]
+        if "Tipo Imóvel" not in colunas_limpas or "Tipo Armadilha" not in colunas_limpas:
+            raise ValueError("Arquivo inválido! O arquivo enviado não possui as colunas estruturais de Armadilhas.")
 
         DE_PARA = {
             'Número': 'numero', 'Município': 'municipio', 'Localidade': 'localidade',
