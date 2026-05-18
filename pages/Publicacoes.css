@@ -9,37 +9,76 @@
   margin-top: 10vh;
   text-align: center;
   font-size: 2em;
-  margin-bottom: 30px;
+  margin-bottom: 50px;
 }
 
+/* Estrutura das Seções (FICE / MICTI) */
+.secao-categoria {
+  margin-bottom: 60px;
+}
+
+.titulo-categoria {
+  font-size: 1.8em;
+  color: #0f3d2a; /* Tom de verde escuro alinhado com a identidade do projeto */
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Divisória estilizada com efeito desbotado para a direita */
+.divisoria-categoria {
+  border: 0;
+  height: 2px;
+  background: #0f4824;
+  margin-top: 0;
+  margin-bottom: 25px;
+  margin-right: 15px;
+}
+
+.sem-publicacoes {
+  font-style: italic;
+  color: #777;
+  padding: 15px 0;
+}
+
+/* Lista de Artigos */
 .lista-artigos {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .item-artigo {
-  border-bottom: 1px solid #ccc;
-  padding: 20px 0;
+  border-bottom: 1px solid #a2a2a2; /* Linha divisória sutil entre os artigos */
+  padding: 25px 0;
   display: flex;
   flex-direction: column;
 }
 
+.item-artigo:last-child {
+  border-bottom: none; /* Remove a linha do último item para não chocar com o fim da seção */
+}
+
 .titulo-artigo {
-  font-size: 1.3em;
+  font-size: 1.25em;
   margin: 0;
+  color: #111;
+  line-height: 1.4;
 }
 
 .autores-artigo,
 .data-artigo {
   margin: 5px 0;
   color: #555;
+  font-size: 0.95em;
 }
 
 .link-artigo {
   display: inline-block;
-  margin-top: 10px;
+  margin-top: 12px;
   color: #007bff;
   text-decoration: none;
+  align-self: flex-start;
 }
 
 .link-artigo:hover {
@@ -47,9 +86,11 @@
 }
 
 .tag-premiado {
-  margin: 5px 0;
-  font-size: 0.9em;
-  display: inline-block;
+  margin: 8px 0;
+  font-size: 0.85em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   color: #292929; 
   font-weight: bold;
   text-transform: uppercase;
