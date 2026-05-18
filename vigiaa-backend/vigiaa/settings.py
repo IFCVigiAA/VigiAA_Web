@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -48,6 +48,8 @@ INSTALLED_APPS = [
 SESSION_COOKIE_SAMESITE = "Lax"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://192.168.70.74:5173"
 ]
 
 
@@ -162,3 +164,15 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Caminho para as bibliotecas do GDAL
+GDAL_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll' # Verifique o número da DLL exata dentro da sua pasta bin! Pode ser gdal310.dll, gdal308.dll, etc.
+
+# Caminho para o GEOS (também necessário para o GeoDjango)
+GEOS_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll'
+
+# Adicionando a pasta bin ao PATH do sistema apenas durante a execução do Django
+os.environ['PATH'] = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W;' + os.environ.get('PATH', '')
+
+# Força o Celery a rodar as tarefas na hora, sem precisar de um servidor Redis rodando
+CELERY_TASK_ALWAYS_EAGER = True

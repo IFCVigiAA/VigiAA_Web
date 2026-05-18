@@ -1,200 +1,149 @@
-/* 1. Reset e Fix de Tela Cheia */
-html, body {
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100%; /* Use 100% para evitar rolagem extra em mobile */
-    overflow: hidden; /* **ESSENCIAL** para remover a rolagem da página */
+/* ==========================================================================
+   0. PAINEL DE CONTROLE DAS DISTÂNCIAS (VARIÁVEIS)
+   ========================================================================== */
+:root {
+    /* Distância dos elementos até a "parede" (borda) da tela. 
+       No celular será 10px, no PC cresce até no máximo 20px. */
+    --parede: clamp(10px, 2vw, 20px);
+
+    /* Distância (respiro) entre um item e outro (ex: entre caixas de filtro) */
+    --espaco-itens: 8px;
+
+    /* Tamanho do deslocamento quando o menu do mapa precisa descer */
+    --empurrao-menu: 210px; 
 }
 
-/* 2. Container do Mapa (Ocupando 100% da tela) */
+/* 1. Reset e Fix de Tela Cheia */
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden; 
+}
+
+/* 2. Container do Mapa */
 #mapid { 
-    height: 100%; /* Mantenha 100% para se basear no body fixo */
-    width: 100%;
+    height: 100%; width: 100%;
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     z-index: 0;
 }
 
-.leaflet-top.leaflet-right .leaflet-control-layers {
-    margin-top: 80px; /* Ajuste este valor (50px, 60px, etc.) para o deslocamento desejado */
-    position: relative;
-}
-
-/* 3. Estilos Base das Legendas (POSIÇÃO VERTICAL SERÁ CONTROLADA PELO JS) */
+/* ==========================================================================
+   3. LEGENDAS E FILTROS (USANDO AS VARIÁVEIS DE PAREDE)
+   ========================================================================== */
 .map-legend {
-    box-sizing: border-box; /* Boa prática! */
-    position: fixed; /* Mantenha FIXED para flutuar sobre a viewport */
-    bottom:10vh;
-    left: 2vw;
-    max-width: 90vw;
+    box-sizing: border-box;
+    position: fixed;
+    /* Aqui usamos a variável da parede e do espaço! */
+    bottom: clamp(20px, 10vh, 50px); 
+    left: var(--parede); /* <-- Relativo à parede esquerda */
+    
+    width: calc(100vw - (var(--parede) * 2)); /* Largura total menos as duas paredes */
+    max-width: 300px; 
+    max-height: 40vh; 
+    overflow-y: auto; 
+    
     z-index: 9999;
-    font-size: 14px;
+    font-size: clamp(11px, 2vw, 14px); 
     background-color: white;
     border: 2px solid grey;
     padding: 10px;
     box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
-    overflow-x: auto;
     word-wrap: break-word;
     border-radius: 8px;
-}
-.map-legend {
-    transition: bottom 0.3s ease-in-out; /* Faz a legenda deslizar suavemente */
+    transition: bottom 0.3s ease-in-out;
 }
 
-/* 4. Estilos dos Ícones da Legenda */
 .map-legend i {
-    display: block;
-    width: 18px;
-    height: 10px;
-    float: left;
-    margin-right: 8px;
-    border: 1px solid #ccc;
-    border-radius: 2px;
+    display: block; width: 16px; height: 10px; float: left;
+    margin-right: var(--espaco-itens); /* <-- Relativo ao espaço entre itens */
+    border: 1px solid #ccc; border-radius: 2px;
 }
 
-/* 5. Estilo para o Botão Toggle Leaflet */
-.leaflet-control-toggle-button {
-    background-color: white;
-    width: 30px;
-    height: 30px;
-    line-height: 30px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    text-decoration: none;
-    color: #333;
-    cursor: pointer;
-    border-radius: 5px;
-    border-bottom: 1px solid #ccc;
+.map-legend i.cluster-icon {
+    border-radius: 50%; opacity: 0.7; border: 1px solid #333;
 }
 
-/* 6. Media Query para Celular (Ajustes de tamanho e rolagem interna) */
-@media (max-width: 768px) {
-    /* Ajustes de Legenda */
-    .map-legend {
-        bottom:15vh;
-        left: 1vw; 
-        max-width: 48vw; 
-        font-size: 10px; 
-        padding: 5px; 
-    }
-    
-    /* Ajustes de Ícones */
-    .map-legend i {
-        width: 12px;
-        height: 8px;
-        margin-right: 5px;
-    }
-
-    /* Controle de Camadas (Rolagem interna) */
-    .leaflet-control-layers {
-        font-size: 10px; 
-        max-height: 45vh !important; /* Aumentado um pouco para ser menos apertado */
-        overflow-y: hidden !important; /* **MANTENHA ISSO!** Cria a barra de rolagem interna */
-        box-sizing: border-box;
-    }
-
-    /* Aplicar scroll apenas na lista */
-    .leaflet-control-layers-list {
-        max-height: 30vh;        /* limite de altura no celular */
-        overflow-y: auto;        /* barra interna de rolagem */
-        -webkit-overflow-scrolling: touch; /* rolagem suave no iOS */
-    }
-
-}
-
-/* 7. Estilos para os Filtros (Comboboxes) */
+/* 5. Filtros */
 .filter-container {
-    display: none; /* Ativado via JS */
+    display: none;
     flex-direction: column;
     position: fixed;
-    top: 10px;
-    right: 10px; /* Aumente para não sobrepor o botão de fechar do Leaflet */
+    
+    /* Encostado no topo e na direita, respeitando a variável da parede */
+    top: var(--parede); 
+    right: var(--parede); 
+    
+    /* Distância entre as caixinhas de filtro */
+    gap: var(--espaco-itens); 
+    
     z-index: 1100;
     background-color: white;
-    padding: 4px;
+    padding: 2px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    width: 200px; /* Largura fixa para evitar o "quadrado pequeno" */
-    gap: 8px;
+    
+    width: calc(100vw - 60px); 
+    max-width: 250px; 
+    max-height: 50vh;
+    overflow-y: auto;
 }
 
-.leaflet-top.leaflet-right .leaflet-control-layers {
-    margin-top: 10px !important; /* Garante que fique no topo ao iniciar */
-    transition: margin-top 0.3s ease-in-out;
-}
-
-.leaflet-top.leaflet-right .leaflet-control-layers.leaflet-control-layers-pushed {
-    margin-top: 240px !important; /* Ajuste esse valor conforme a altura real das suas caixas */
-}
-
-/* Classe auxiliar que aplicaremos via JS para descer o menu */
-.leaflet-control-layers-pushed {
-    margin-top: 190px !important; /* Ajuste conforme a altura do seu filtro */
-}
-
-/* Grupos Individuais (Casos e Focos) */
 .filter-group {
     border: 1px solid #e0e0e0;
-    padding: 8px;
+    padding: 2px;
     border-radius: 4px;
     background: #fcfcfc;
 }
 
 .filter-title {
-    display: block;
-    font-weight: bold;
-    font-size: 12px;
-    margin-bottom: 8px;
-    color: #333;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 4px;
+    display: block; font-weight: bold;
+    font-size: clamp(11px, 2.5vw, 13px);
+    margin-bottom: var(--espaco-itens);
+    color: #333; border-bottom: 1px solid #eee; padding-bottom: 1px;
 }
 
 .filter-row {
-    display: flex;
-    justify-content: space-between;
-    gap: 5px;
+    display: flex; justify-content: space-between;
+    gap: 5px; /* Espaço pequeno específico dos selects */
 }
 
 .filter-row select {
-    flex: 1; /* Faz os selects ocuparem o espaço disponível */
-    padding: 4px;
-    font-size: 12px;
+    flex: 1; padding: 6px 4px; font-size: clamp(11px, 2vw, 13px);
 }
 
-/* Estilo para ícones circulares/poligonais na legenda */
-.map-legend i.cluster-icon {
-    border-radius: 50%; /* Faz o ícone da legenda parecer uma bolha de cluster */
-    opacity: 0.7;
-    border: 1px solid #333;
+/* 6. O Botão Flexível */
+.player-controls {
+    margin-top: var(--espaco-itens);
+    display: flex; justify-content: center; width: 75%; height: 10%; padding-left:12%;
 }
 
-/* Ajuste para mobile */
-@media (max-width: 768px) {
-    .filter-container {
-        top: 10px;
-        right: 10px;
-        flex-direction: column; /* Pilhar as caixas no celular */
-        gap: 5px;
-        padding: 5px;
-        width: 160px; /* Reduz um pouco a largura no mobile */
-        max-height: 40vh; /* Limita a altura do filtro */
-        overflow-y: auto; /* Permite rolar os filtros se houver muitos */
-    }
-    .leaflet-control-layers-pushed {
-        margin-top: 160px !important; /* Ajuste o empurrão do menu no mobile */
-    }
+#btn-play {
+    background-color: #006837; color: white; border: none; border-radius: 6px;
+    padding: clamp(4px, 1.5vh, 4px) 4px; 
+    font-size: clamp(11px, 2.5vw, 14px); font-weight: bold;
+    cursor: pointer; width: 100%; box-sizing: border-box;
+    white-space: normal; line-height: 1.2; transition: background-color 0.2s;
+}
 
-    .leaflet-top.leaflet-right .leaflet-control-layers {
-        margin-top: 10px !important;
-    }
-    
-    .leaflet-top.leaflet-right .leaflet-control-layers.leaflet-control-layers-pushed {
-        margin-top: 180px !important; /* Um pouco menor no celular */
-    }
+#btn-play:hover { background-color: #1a9850; }
+
+/* ==========================================================================
+   7. COMPORTAMENTOS DO LEAFLET (RELATIVOS)
+   ========================================================================== */
+.leaflet-control-toggle-button {
+    background-color: white; width: 30px; height: 30px; line-height: 30px;
+    text-align: center; font-size: 14px; font-weight: bold; color: #333; 
+    cursor: pointer; border-radius: 5px; border-bottom: 1px solid #ccc;
+}
+
+.leaflet-top.leaflet-right .leaflet-control-layers {
+    /* O controle do mapa respeita a distância da parede do topo */
+    margin-top: var(--parede) !important;
+    transition: margin-top 0.3s ease-in-out;
+}
+
+.leaflet-top.leaflet-right .leaflet-control-layers.leaflet-control-layers-pushed {
+    /* Quando aberto, ele desce a distância da parede + o tamanho do empurrão que definimos no topo */
+    margin-top: calc(var(--parede) + var(--empurrao-menu)) !important; 
 }

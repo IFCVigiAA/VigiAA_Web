@@ -2,7 +2,8 @@ import { useMemo, useState, useRef } from 'react'
 import './Upload_planilhas.css'
 import NavBar from '../components/NavBar';
 
-const API_BASE = 'http://127.0.0.1:8000'
+// const API_BASE = 'http://127.0.0.1:8000'
+const API_BASE = ''
 
 const endpoints = {
   focos: '/api/casos/upload/focos/',
