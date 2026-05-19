@@ -194,6 +194,11 @@ def task_processar_positivos(self, job_id, arquivo_path):
         df_bruto = pd.read_excel(arquivo_path)
         df = df_bruto.dropna(how='all')
 
+        # --- VALIDAÇÃO DE SEGURANÇA ---
+        colunas_limpas = [str(c).strip().upper() for c in df.columns]
+        if "SINAN" not in colunas_limpas or "RESULTADO" not in colunas_limpas:
+            raise ValueError("Arquivo inválido! O arquivo enviado não possui as colunas estruturais de Casos Positivos.")
+
         # 2. Mapeamento de colunas
         c_nome    = col(df, "NOME")
         c_end     = col(df, "ENDEREÇO", "ENDERECO")
@@ -284,8 +289,7 @@ def task_geoprocessar_pendentes(self, job_id):
         with connection.cursor() as cursor:
             # Seleciona todos da temp para geoprocessar
             cursor.execute("""
-                SELECT t.* 
-                FROM casos_positivos_temp t
+                SELECT t.* FROM casos_positivos_temp t
                 LEFT JOIN casos_positivos_temp_gl gl ON t.hash_registro = gl.hash_registro
                 WHERE gl.hash_registro IS NULL
             """)
@@ -359,6 +363,12 @@ def task_processar_focos(self, job_id, arquivo_path):
         erros = ErrorLogger()
 
         df_raw = pd.read_excel(arquivo_path, header=None)
+        
+        # --- VALIDAÇÃO DE SEGURANÇA ---
+        conteudo_total_texto = " ".join(df_raw.astype(str).values.flatten()).upper()
+        if "N FOCO" not in _normalize(conteudo_total_texto) or "TIPO DE ATIVIDADE" not in conteudo_total_texto:
+            raise ValueError("Arquivo inválido! O arquivo enviado não possui as colunas estruturais de Focos.")
+
         h_idx = next((i for i, row in df_raw.iterrows() if any("N FOCO" in _normalize(str(x)) for x in row)), 2)
         
         df = pd.read_excel(arquivo_path, header=h_idx).dropna(how='all')

@@ -11,7 +11,7 @@ const Publicações = () => {
       autores: 'Fischer, L. M. et al.',
       data: 'Agosto de 2025',
       link: 'https://publicacoes.ifc.edu.br/index.php/fice/article/view/7118',
-      premiado: '1º Lugar FICE XVI na categoria pesquisa em Ciências exatas e da Terra',
+      premiado: '1º Lugar FICE XVI na categoria pesquisa em Ciências exatas e da Terra.',
       categoria: 'FICE',
     },
     {
@@ -33,7 +33,6 @@ const Publicações = () => {
       autores: 'Fischer, L. M. et al.',
       data: 'Agosto de 2025',
       link: 'https://centraldeeventos.ifc.edu.br/anais/micti2025/1381841-revisao-sistematica-simplificada-da-literatura-acerca-de---georreferenciamento-de-casos-de-dengue-e-aedes-aegypt/',
-      premiado: '1º Lugar FICE XVI na categoria pesquisa em Ciências exatas e da Terra',
       categoria: 'MICTI',
     },
     {
@@ -48,6 +47,7 @@ const Publicações = () => {
       autores: 'Ferreira, I. M. A. et al.',
       data: 'Agosto de 2025',
       link: 'https://centraldeeventos.ifc.edu.br/anais/micti2025/1381919-revisao-sistematica-simplificada-sobre-tecnicas-de-georreferenciamento-para-combate-do-aedes-aegypti/',
+      premiado: 'Trabalho destaque categoria EAD.',
       categoria: 'MICTI',
     }
   ];
