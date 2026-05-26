@@ -39,8 +39,8 @@ html, body {
     left: var(--parede); /* <-- Relativo à parede esquerda */
     
     width: calc(100vw - (var(--parede) * 2)); /* Largura total menos as duas paredes */
-    max-width: 300px; 
-    max-height: 40vh; 
+    max-width: 135px; 
+    max-height: 45vh; 
     overflow-y: auto; 
     
     z-index: 9999;
