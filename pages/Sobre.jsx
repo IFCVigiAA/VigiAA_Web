@@ -68,7 +68,6 @@
               ></iframe>
             </div>
             <br /><br />
-            <WeatherComponent />
           </div>
         </div>
         <Footer />

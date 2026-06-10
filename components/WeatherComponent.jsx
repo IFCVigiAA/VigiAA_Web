@@ -7,7 +7,7 @@ const WeatherComponent = () => {
 
   const latitude = -27.014487;
   const longitude = -48.657806;
-  const API_KEY = '762ceaf4164ae21bc3ccb5ae6c8354db';
+  const API_KEY = '';
 
   const fetchWeatherData = async () => {
     setLoading(true);
