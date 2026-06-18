@@ -7,7 +7,6 @@ import Sobre from "../pages/Sobre";
 import Educação from "../pages/Educacao";
 import Estação from "../pages/Estacao";
 import Publicações from "../pages/Publicacoes";
-import Casos from "../pages/cadastro_casos";
 import UploadPlanilhas from "../pages/Upload_planilhas";
 import Login from "../pages/Login";
 
@@ -24,7 +23,6 @@ function App() {
       <Route path="/Educação" element={<Educação/>} />
       <Route path="/Estação-meteorologica" element={<Estação/>} />
       <Route path="/Publicações" element={<Publicações/>} />
-      <Route path="/casos" element={<Casos />} />
       <Route path="/UploadPlanilhas" element={<UploadPlanilhas />} />
       <Route path="/Login" element={<Login />} />
     </Routes>
