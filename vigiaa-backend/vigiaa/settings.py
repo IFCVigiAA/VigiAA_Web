@@ -12,19 +12,29 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 from datetime import timedelta
+import environ  # Importa o django-environ
+
+# Inicializa o enviroment manager
+env = environ.Env(
+    # Define tipos padrão caso a variável não exista no .env
+    DEBUG=(bool, False) 
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Lê o arquivo .env localizado na raiz do projeto
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(3hd0_fup6$8lnn(&&#5o!&7sot9%5r!lozsxukl(r_4))h67f'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 
@@ -44,14 +54,12 @@ INSTALLED_APPS = [
     "rest_framework",    
 ]
 
-
 SESSION_COOKIE_SAMESITE = "Lax"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
     "http://192.168.70.74:5173"
 ]
-
 
 CORS_ALLOW_CREDENTIALS = True
 
@@ -60,14 +68,15 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-# Celery Config
-CELERY_BROKER_URL = 'redis://localhost:6379/0'
-CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+# Celery Config vindo do .env
+CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
@@ -91,32 +100,20 @@ TEMPLATES = [
 WSGI_APPLICATION = 'vigiaa.wsgi.application'
 
 
-# Database
+# Database utilizando URL de conexões configuradas no .env
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
-        "NAME": "vigiaa_temp",
-        "USER": "postgres",
-        "PASSWORD": "postgres",  
-        "HOST": "192.168.70.74",               
-        "PORT": "5432",
-    },
-    "oficial": {  # banco final
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "vigiaa_ofc",
-        "USER": "postgres",
-        "PASSWORD": "postgres", 
-        "HOST": "192.168.70.74",
-        "PORT": "5432",
-    },
+    'default': env.db('DATABASE_URL_TEMP'),
+    'oficial': env.db('DATABASE_URL_OFC'),
 }
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),  
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),  
@@ -124,6 +121,7 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
 
@@ -165,14 +163,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Caminho para as bibliotecas do GDAL
-GDAL_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll' # Verifique o número da DLL exata dentro da sua pasta bin! Pode ser gdal310.dll, gdal308.dll, etc.
 
-# Caminho para o GEOS (também necessário para o GeoDjango)
-GEOS_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll'
-
-# Adicionando a pasta bin ao PATH do sistema apenas durante a execução do Django
-os.environ['PATH'] = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W;' + os.environ.get('PATH', '')
-
+# Configurações do OSGeo4W / GeoDjango mapeadas dinamicamente no .env
+if env('GDAL_LIBRARY_PATH', default=None):
+    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
+    GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')
+    os.environ['PATH'] = env('OSGEO4W_PATH') + ';' + os.environ.get('PATH', '')
 # Força o Celery a rodar as tarefas na hora, sem precisar de um servidor Redis rodando
 CELERY_TASK_ALWAYS_EAGER = True
