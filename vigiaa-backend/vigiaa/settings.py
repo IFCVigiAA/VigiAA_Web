@@ -106,6 +106,8 @@ WSGI_APPLICATION = 'vigiaa.wsgi.application'
 DATABASES = {
     'default': env.db('DATABASE_URL_TEMP'),
     'oficial': env.db('DATABASE_URL_OFC'),
+    'OPTIONS': {
+            'options': '-c client_encoding=utf8'}
 }
 
 REST_FRAMEWORK = {
