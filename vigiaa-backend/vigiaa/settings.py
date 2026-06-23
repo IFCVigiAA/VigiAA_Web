@@ -100,9 +100,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'vigiaa.wsgi.application'
 
 
-# Database utilizando URL de conexões configuradas no .env
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
 DATABASES = {
     'default': env.db('DATABASE_URL_TEMP'),
     'oficial': env.db('DATABASE_URL_OFC'),

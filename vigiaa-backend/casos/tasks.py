@@ -365,8 +365,11 @@ def task_processar_focos(self, job_id, arquivo_path):
         df_raw = pd.read_excel(arquivo_path, header=None)
         
         # --- VALIDAÇÃO DE SEGURANÇA ---
-        conteudo_total_texto = " ".join(df_raw.astype(str).values.flatten()).upper()
-        if "N FOCO" not in _normalize(conteudo_total_texto) or "TIPO DE ATIVIDADE" not in conteudo_total_texto:
+        # Garante a conversão estrita de cada elemento para string, tratando nulos
+        conteudo_total_texto = " ".join([str(x) for x in df_raw.values.flatten() if pd.notna(x)]).upper()
+        
+        # Procuramos pelo nome do mosquito, que é exclusivo dessa planilha
+        if "AEGYPTI" not in conteudo_total_texto:
             raise ValueError("Arquivo inválido! O arquivo enviado não possui as colunas estruturais de Focos.")
 
         h_idx = next((i for i, row in df_raw.iterrows() if any("N FOCO" in _normalize(str(x)) for x in row)), 2)
