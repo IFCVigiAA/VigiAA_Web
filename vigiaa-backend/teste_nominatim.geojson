@@ -1,0 +1,35 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.6779999,
+          -27.0363876
+        ]
+      },
+      "properties": {
+        "endereco_buscado": "AVENIDA NORUEGA, 88, SANTA REGINA, CAMBORIÚ, SC, BRASIL",
+        "endereco_retornado_api": "Avenida Noruega, Loteamento Jardim Europa, Santa Regina, Camboriú, Santa Catarina, Região Sul, 88345-806, Brasil",
+        "cidade_identificada": "Camboriú"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -48.6779999,
+          -27.0363876
+        ]
+      },
+      "properties": {
+        "endereco_buscado": "AVENIDA NORUEGA 100, SANTA REGINA, CAMBORIÚ, SC, BRASIL",
+        "endereco_retornado_api": "Avenida Noruega, Loteamento Jardim Europa, Santa Regina, Camboriú, Santa Catarina, Região Sul, 88345-806, Brasil",
+        "cidade_identificada": "Camboriú"
+      }
+    }
+  ]
+}

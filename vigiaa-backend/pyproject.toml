@@ -1,0 +1,18 @@
+[project]
+name = "vigiaa-backend"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "celery>=5.6.3",
+    "django>=6.0.6",
+    "django-cors-headers>=4.9.0",
+    "django-environ>=0.14.0",
+    "djangorestframework>=3.17.1",
+    "djangorestframework-simplejwt>=5.5.1",
+    "geocoder>=1.38.1",
+    "openpyxl>=3.1.5",
+    "pandas>=3.0.3",
+    "psycopg2>=2.9.12",
+    "redis>=8.0.1",
+    "xlrd>=2.0.2",
+]

@@ -5,6 +5,11 @@ export default defineConfig({
   plugins: [react()],
 
   server: {
+    host: true,
+    cors: true,
+    headers:{
+      'Cache-Control': 'no-store',
+    },
     proxy: {
       '/api': {
         target: 'http://localhost:8000',

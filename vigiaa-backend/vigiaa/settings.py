@@ -31,12 +31,12 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = 'django-insecure-(3hd0_fup6$8lnn(&&#5o!&7sot9%5r!lozsxukl(r_4))h67f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
+ALLOWED_HOSTS = ["localhost", "192.168.70.74", "127.0.0.1"]
 
 
 # Application definition
@@ -101,10 +101,22 @@ WSGI_APPLICATION = 'vigiaa.wsgi.application'
 
 
 DATABASES = {
-    'default': env.db('DATABASE_URL_TEMP'),
-    'oficial': env.db('DATABASE_URL_OFC'),
-    'OPTIONS': {
-            'options': '-c client_encoding=utf8'}
+    'default':{
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": "vigiaa_temp",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "192.168.70.74",
+        "PORT": "5432"
+    },
+    'oficial':{
+        "ENGINE": "django.contrib.gis.db.backends.postgis",
+        "NAME": "vigiaa_ofc",
+        "USER": "postgres",
+        "PASSWORD": "postgres",
+        "HOST": "192.168.70.74",
+        "PORT": "5432"
+    },
 }
 
 REST_FRAMEWORK = {
@@ -162,11 +174,8 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# Configurações do OSGeo4W / GeoDjango mapeadas dinamicamente no .env
-if env('GDAL_LIBRARY_PATH', default=None):
-    GDAL_LIBRARY_PATH = env('GDAL_LIBRARY_PATH')
-    GEOS_LIBRARY_PATH = env('GEOS_LIBRARY_PATH')
-    os.environ['PATH'] = env('OSGEO4W_PATH') + ';' + os.environ.get('PATH', '')
+GDAL_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll'
+GEOS_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll'
+os.environ['PATH'] = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W;' + ';' + os.environ.get('PATH', '')
 # Força o Celery a rodar as tarefas na hora, sem precisar de um servidor Redis rodando
 CELERY_TASK_ALWAYS_EAGER = True
