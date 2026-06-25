@@ -13,30 +13,36 @@ import os
 from pathlib import Path
 from datetime import timedelta
 import environ  # Importa o django-environ
+import platform
 
-# Inicializa o enviroment manager
+# 1. Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# 2. Inicializa o environment manager
 env = environ.Env(
     # Define tipos padrão caso a variável não exista no .env
     DEBUG=(bool, False) 
 )
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# 3. Lê o arquivo .env localizado na raiz do projeto (Formato universal Path)
+environ.Env.read_env(BASE_DIR / '.env')
 
-# Lê o arquivo .env localizado na raiz do projeto
-environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-
+# Diretórios base do projeto de forma dinâmica
+MEDIA_ROOT = BASE_DIR / 'media'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+TEMPLATE_DIR = BASE_DIR / 'templates'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(3hd0_fup6$8lnn(&&#5o!&7sot9%5r!lozsxukl(r_4))h67f'
+SECRET_KEY = env('SECRET_KEY', default='django-insecure-padrao-caso-nao-tenha-no-env')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ["localhost", "192.168.70.74", "127.0.0.1"]
+# Hosts permitidos dinâmicos (puxa o IP atual da máquina via .env se necessário)
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "192.168.70.74", "desktop-m6ukbn7.local"]
 
 
 # Application definition
@@ -55,10 +61,13 @@ INSTALLED_APPS = [
 ]
 
 SESSION_COOKIE_SAMESITE = "Lax"
+
+# Origens de CORS dinâmicas mapeando localhost, IP e o Hostname local
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "http://192.168.70.74:5173"
+    "http://192.168.70.74:5173",
+    "http://desktop-m6ukbn7.local:5173"
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -79,13 +88,14 @@ CELERY_BROKER_URL = env('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = env('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+CELERY_TASK_ALWAYS_EAGER = True
 
 ROOT_URLCONF = 'vigiaa.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR],  # Apontado para a sua variável dinâmica TEMPLATE_DIR
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -100,23 +110,19 @@ TEMPLATES = [
 WSGI_APPLICATION = 'vigiaa.wsgi.application'
 
 
+# Bancos de Dados dinâmicos usando dj-database-url mapeado direto do seu .env
+# (Evita expor usuário e senha fixos no código do repositório)
+import dj_database_url
+
 DATABASES = {
-    'default':{
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "vigiaa_temp",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "192.168.70.74",
-        "PORT": "5432"
-    },
-    'oficial':{
-        "ENGINE": "django.contrib.gis.db.backends.postgis",
-        "NAME": "vigiaa_ofc",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "192.168.70.74",
-        "PORT": "5432"
-    },
+    'default': dj_database_url.config(
+        env='DATABASE_URL_TEMP',
+        default='postgis://postgres:postgres@192.168.70.74:5432/vigiaa_temp'
+    ),
+    'oficial': dj_database_url.config(
+        env='DATABASE_URL_OFC',
+        default='postgis://postgres:postgres@192.168.70.74:5432/vigiaa_ofc'
+    ),
 }
 
 REST_FRAMEWORK = {
@@ -155,9 +161,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-br'  # Ajustado para o padrão brasileiro
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'  # Ajustado para o fuso horário local de SC
 
 USE_I18N = True
 
@@ -174,8 +180,13 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-GDAL_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll'
-GEOS_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll'
-os.environ['PATH'] = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W;' + ';' + os.environ.get('PATH', '')
-# Força o Celery a rodar as tarefas na hora, sem precisar de um servidor Redis rodando
-CELERY_TASK_ALWAYS_EAGER = True
+
+# Configuração Automática e Universal do GeoDjango (Windows vs Linux)
+if platform.system() == "Windows":
+    GDAL_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\gdal312.dll'
+    GEOS_LIBRARY_PATH = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W\bin\geos_c.dll'
+    os.environ['PATH'] = r'C:\Users\geati\AppData\Local\Programs\OSGeo4W;' + ';' + os.environ.get('PATH', '')
+else:
+    # No Linux (Ubuntu), o GeoDjango localiza as bibliotecas .so automaticamente 
+    # desde que o pacote gdal-bin esteja instalado globalmente no sistema.
+    pass

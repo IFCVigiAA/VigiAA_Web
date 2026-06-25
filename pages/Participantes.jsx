@@ -73,13 +73,6 @@ const Participantes = () => {
               lattesUrl="http://lattes.cnpq.br/3849463744234834"
               linkedinUrl="https://www.linkedin.com/in/lissandramaiarafischer/"
             />
-            <ParticipanteCard
-              nome="Vitoria Maria C. da Mota"
-              cargo="Bolsista"
-              foto={import.meta.env.BASE_URL + 'participantes/vitoria.jpg'}
-              lattesUrl=""
-              linkedinUrl="https://www.linkedin.com/in/vitória-mota09"
-            />
           </ul>
         </div>
 

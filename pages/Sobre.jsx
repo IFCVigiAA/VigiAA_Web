@@ -26,30 +26,40 @@
           </div>
           <div className="sobre-section">
             <p>
-              O <strong>VigiAA</strong> é uma plataforma georreferenciada de monitoramento do mosquito
-              <em> Aedes aegypti</em>, vetor da dengue. A plataforma visa disponibilizar dados claros e acessíveis à
-              população, pesquisadores e gestores públicos. <br /> Este projeto de pesquisa foi aprovado no edital <strong><a href="https://fapesc.sc.gov.br/wp-content/uploads/2024/07/CP_fapesc_37_2024_aedes.pdf">37/2024 FAPESC</a></strong>.
+              O <strong>VigiAA</strong> é uma plataforma georreferenciada voltada a vigilância, 
+              análise epidemiológica e mapeamento preditivo do mosquito <em>Aedes aegypti</em>, vetor da Dengue. 
+              A plataforma automatiza a ingestão de dados municipais brutos e os transforma em inteligência geográfica, 
+              disponibilizando mapas claros e acessíveis para a população, pesquisadores e gestores públicos.
+            </p>
+            <br />
+            <p>
+              Este projeto de pesquisa e desenvolvimento tecnológico foi aprovado e financiado pelo edital institucional 
+              <strong><a href="https://fapesc.sc.gov.br/wp-content/uploads/2024/07/CP_fapesc_37_2024_aedes.pdf" target="_blank" rel="noopener noreferrer"> 37/2024 FAPESC</a></strong>.
             </p>
           </div>
-      
 
           <div className="sobre-section">
-            <h2>Tecnologias Utilizadas</h2>
-            <p>A plataforma foi desenvolvida com tecnologias como:</p>
+            <h2>Arquitetura e Tecnologias Utilizadas</h2>
+            <p>A plataforma foi projetada sob uma arquitetura robusta e distribuída, utilizando tecnologias como:</p>
             <ul className="tech-list">
-              <li><strong>QGIS</strong> – para análise, criação de mapas e exportação de dados geográficos.</li>
-              <li><strong>React</strong> – para construção da interface web.</li>
-              <li><strong>Leaflet</strong> – para visualização interativa de mapas.</li>
-              <li><strong>PostgreSQL</strong> – para armazenamento de dados.</li>
-              <li><strong>Geoserver</strong> – para para exportação de mapas em tempo real.</li>
+              <li><strong>React</strong> – Engenharia do ecossistema frontend para a construção de uma interface dinâmica e de alta responsividade.</li>
+              <li><strong>Django & Django REST Framework</strong> – Arquitetura de backend robusta, responsável pelas regras de negócio, APIs seguras e orquestração do sistema.</li>
+              <li><strong>ArcGIS API & Geocodificação</strong> – Integração com microsserviços geográficos externos para tradução de endereços urbanos brutos em coordenadas espaciais precisas em tempo real.</li>
+              <li><strong>PostgreSQL & PostGIS</strong> – Banco de dados analítico e geoespacial robusto, estruturado sob o Sistema Geodésico Brasileiro para armazenamento de geometrias complexas e tratamento de dados puros.</li>
+              <li><strong>Leaflet & QGIS</strong> – Bibliotecas de visualização interativa no frontend integradas a ferramentas analíticas SIG para renderização de camadas de calor, mapas de pontos e focos de calor espaciais.</li>
             </ul>
           </div>
 
           <div className="sobre-section">
             <h2>Qual a importância do projeto?</h2>
             <p>
-              O VigiAA reúne informações geográficas sobre as áreas de risco e acompanha a evolução dos
-              focos de infestação do mosquito Aedes Aegypti, incentivando a conscientização e ações preventivas.
+              O VigiAA quebra o gargalo do processamento manual de dados de saúde pública. Ele centraliza de forma inteligente 
+              o ciclo completo da informação: desde o upload rápido de relatórios fragmentados (Casos Positivos, Pontos Estratégicos, 
+              Armadilhas e Focos de Aedes) até a geração automática de mapas epidemiológicos de risco. 
+            </p>
+            <p>
+              Com isso, o projeto reduz drasticamente o tempo de resposta das equipes de Vigilância Sanitária e Ambiental, 
+              permitindo a ação mais rápida.
             </p>
           </div>
           <div className="sobre-section">
