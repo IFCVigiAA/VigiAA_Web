@@ -297,11 +297,10 @@ def task_geoprocessar_pendentes(self, job_id):
             registros = [dict(zip(colunas, row)) for row in cursor.fetchall()]
 
         if not registros:
-            log.status = "finalizado"
-            log.mensagem = "Nenhum dado na tabela temporária para geoprocessar."
+            log.status = "erro"
+            log.mensagem = "Nenhum dado pendente encontrado na tabela temporária. Faça o upload da planilha antes de gerar o mapa."
             log.save()
             return
-
         total = len(registros)
         params_gl = []
         
@@ -470,11 +469,15 @@ def task_processar_pontos(self, job_id, arquivo_path):
             
             registros.append([None if pd.isna(r.get(c)) else r.get(c) for c in campos_sql])
 
-        if registros:
-            query = f"INSERT INTO pontos_estrategicos_temp ({', '.join(campos_sql)}) VALUES ({', '.join(['%s']*len(campos_sql))}) ON CONFLICT DO NOTHING"
-            with transaction.atomic():
-                with connection.cursor() as cursor:
-                    cursor.executemany(query, registros)
+        # --- NOVA VALIDAÇÃO DE PLANILHA VAZIA ---
+        if not registros:
+            raise ValueError("Nenhum registro válido encontrado. Selecione pelo menos 1 planilha com dados válidos de coordenadas (Latitude/Longitude).")
+
+        # Se passou da validação, faz a inserção normal
+        query = f"INSERT INTO pontos_estrategicos_temp ({', '.join(campos_sql)}) VALUES ({', '.join(['%s']*len(campos_sql))}) ON CONFLICT DO NOTHING"
+        with transaction.atomic():
+            with connection.cursor() as cursor:
+                cursor.executemany(query, registros)
 
         log.mensagem, log.status = erros.to_json(), "finalizado"
         log.save()
@@ -482,7 +485,6 @@ def task_processar_pontos(self, job_id, arquivo_path):
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
         if os.path.exists(arquivo_path): os.remove(arquivo_path)
-
 
 @shared_task(bind=True)
 def task_processar_armadilhas(self, job_id, arquivo_path):
