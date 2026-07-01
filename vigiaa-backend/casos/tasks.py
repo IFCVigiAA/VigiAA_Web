@@ -97,7 +97,7 @@ def _get_date_str(r, col_name, maxlen=50):
     Lê um campo que pode ser data, datetime, número serial Excel ou string de data,
     e retorna sempre uma string 'YYYY-MM-DD' (ou None se vazio/inválido).
     Usado para colunas VARCHAR que guardam datas (ex: prim_visita).
-    """
+    """             
     if col_name is None:
         return None
     val = r.get(col_name)
