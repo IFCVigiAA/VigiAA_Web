@@ -136,12 +136,17 @@ export default function UploadPlanilhas() {
         }
       }
 
-      if (syncAfter) {
-        await sincronizar()
-      }
-
-      if (geoprocessarAfter) {
+      if (syncAfter && geoprocessarAfter) {
         await geoprocessar()
+        await sincronizar()
+      } else {
+        if (geoprocessarAfter) {
+          await geoprocessar()
+        }
+
+        if (syncAfter) {
+          await sincronizar()
+        }
       }
     } catch {
       setLog(prev => prev + `✖ Erro crítico no envio.\n`)
