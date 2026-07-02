@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "🚀 Iniciando o ecossistema do projeto..."
+echo "Iniciando o ecossistema do projeto..."
 
 # 1. Iniciar o Django Backend em segundo plano
 echo "-> Iniciando Django Backend..."
@@ -23,7 +23,7 @@ FRONTEND_PID=$! # Guarda o ID do processo do NPM
 # Função para derrubar todos os servidores juntos quando você der Ctrl+C
 trap ctrl_c INT
 function ctrl_c() {
-        echo -e "\n🛑 Desligando todos os serviços..."
+        echo -e "\nDesligando todos os serviços..."
         kill $BACKEND_PID
         kill $CELERY_PID
         kill $FRONTEND_PID
