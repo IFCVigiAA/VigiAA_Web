@@ -73,6 +73,13 @@ const Participantes = () => {
               lattesUrl="http://lattes.cnpq.br/3849463744234834"
               linkedinUrl="https://www.linkedin.com/in/lissandramaiarafischer/"
             />
+            <ParticipanteCard
+              nome="Kayo Kuhlmann"
+              cargo="Bolsista"
+              foto={import.meta.env.BASE_URL + 'participantes/kayo.jpg'}
+              lattesUrl=""
+              linkedinUrl="https://www.linkedin.com/in/kayo-kuhlmann-de-oliveira-0a98b03a9/"
+            />
           </ul>
         </div>
 
@@ -80,11 +87,11 @@ const Participantes = () => {
           <h2>Bolsistas Estação Meteorológica</h2>
           <ul className="lista-participantes">
             <ParticipanteCard
-              nome="Rafael Luiz Pereira"
+              nome="Rafael Luiz Charnesca Santos Pereira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/rafaelluis.png'}
               lattesUrl="http://lattes.cnpq.br/6550069771613064"
-              linkedinUrl=""
+              linkedinUrl="https://www.linkedin.com/in/sudo-rafael-luiz/"
             />
           </ul>
         </div>
@@ -97,6 +104,25 @@ const Participantes = () => {
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/tauana.png'}
               lattesUrl="http://lattes.cnpq.br/6660505753553493"
+              linkedinUrl=""
+            />
+          </ul>
+        </div>
+        <div className="grupo">
+          <h2>Ex participantes</h2>
+          <ul className="lista-participantes">
+            <ParticipanteCard
+              nome="Vitória Maria Carvalho da Mota"
+              cargo="Bolsista"
+              foto={import.meta.env.BASE_URL + 'participantes/vitoria.jpg'}
+              lattesUrl=""
+              linkedinUrl="https://www.linkedin.com/in/vitória-mota09"
+            />
+            <ParticipanteCard
+              nome="Cauã da Costa Silva"
+              cargo="Bolsista"
+              foto={import.meta.env.BASE_URL + 'participantes/caua.png'}
+              lattesUrl="http://lattes.cnpq.br/6896619338301324"
               linkedinUrl=""
             />
           </ul>

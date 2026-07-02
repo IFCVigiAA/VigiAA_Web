@@ -1,8 +1,7 @@
 import { useMemo, useState, useRef } from 'react'
 import './Upload_planilhas.css'
-import NavBar from '../components/NavBar';
+import NavBar from '../components/NavBar'
 
-// const API_BASE = 'http://127.0.0.1:8000'
 const API_BASE = ''
 
 const endpoints = {
@@ -82,7 +81,7 @@ export default function UploadPlanilhas() {
           const data = await res.json()
 
           if (data.progresso !== undefined) setProgresso(data.progresso)
-          
+
           if (data.mensagem && data.mensagem !== ultimaMensagem.current) {
             setLog(prev => prev + `[${tipo.toUpperCase()}] ${data.mensagem}\n`)
             ultimaMensagem.current = data.mensagem
@@ -99,7 +98,7 @@ export default function UploadPlanilhas() {
             setLog(prev => prev + `✖ ${tipo}: Erro -> ${data.mensagem}\n\n`)
             resolve()
           }
-        } catch (e) {
+        } catch {
           clearInterval(interval)
           resolve()
         }
@@ -107,7 +106,9 @@ export default function UploadPlanilhas() {
     })
   }
 
-  async function enviar({ syncAfter } = { syncAfter: false }) {
+  async function enviar(
+    { syncAfter = false, geoprocessarAfter = false } = {}
+  ) {
     if (pendentes.length === 0) {
       setLog('Selecione pelo menos 1 planilha.')
       return
@@ -124,7 +125,7 @@ export default function UploadPlanilhas() {
         formData.append(uploadKeyByTipo[tipo], file)
 
         setLog(prev => prev + `Enviando arquivo ${tipo} para o servidor...\n`)
-        
+
         const r = await uploadArquivo(url, formData)
 
         if (r.ok && r.data.job_id) {
@@ -138,7 +139,11 @@ export default function UploadPlanilhas() {
       if (syncAfter) {
         await sincronizar()
       }
-    } catch (error) {
+
+      if (geoprocessarAfter) {
+        await geoprocessar()
+      }
+    } catch {
       setLog(prev => prev + `✖ Erro crítico no envio.\n`)
     } finally {
       setEnviando(false)
@@ -162,6 +167,7 @@ export default function UploadPlanilhas() {
         },
       })
       const data = await res.json()
+
       if (data.job_id) {
         await monitorarJob(data.job_id, 'Mapa')
       } else {
@@ -192,6 +198,7 @@ export default function UploadPlanilhas() {
         },
       })
       const data = await res.json()
+
       if (data.job_id) {
         await monitorarJob(data.job_id, 'Sincronização')
       }
@@ -205,31 +212,60 @@ export default function UploadPlanilhas() {
   return (
     <div className="vigiaa-upload">
       <NavBar />
+
       <div className="vigiaa-card">
         <div className="vigiaa-card__header">
           <div>
             <h2 className="vigiaa-title">Upload de dados</h2>
-            <p className="vigiaa-subtitle">Envie as planilhas e acompanhe o progresso real.</p>
+            <p className="vigiaa-subtitle">
+              Envie as planilhas e acompanhe o progresso real.
+            </p>
           </div>
-          <span className="vigiaa-badge">{pendentes.length} selecionada(s)</span>
+
+          <span className="vigiaa-badge">
+            {pendentes.length} selecionada(s)
+          </span>
         </div>
 
         <div className="vigiaa-fields">
           <label className="vigiaa-field">
             <span>Casos positivos</span>
-            <input type="file" name="casos" onChange={handleChange} disabled={enviando} />
+            <input
+              type="file"
+              name="casos"
+              onChange={handleChange}
+              disabled={enviando}
+            />
           </label>
+
           <label className="vigiaa-field">
             <span>Pontos estratégicos</span>
-            <input type="file" name="pontos" onChange={handleChange} disabled={enviando} />
+            <input
+              type="file"
+              name="pontos"
+              onChange={handleChange}
+              disabled={enviando}
+            />
           </label>
+
           <label className="vigiaa-field">
             <span>Focos</span>
-            <input type="file" name="focos" onChange={handleChange} disabled={enviando} />
+            <input
+              type="file"
+              name="focos"
+              onChange={handleChange}
+              disabled={enviando}
+            />
           </label>
+
           <label className="vigiaa-field">
             <span>Armadilhas</span>
-            <input type="file" name="armadilhas" onChange={handleChange} disabled={enviando} />
+            <input
+              type="file"
+              name="armadilhas"
+              onChange={handleChange}
+              disabled={enviando}
+            />
           </label>
         </div>
 
@@ -252,7 +288,12 @@ export default function UploadPlanilhas() {
 
           <button
             className="vigiaa-btn vigiaa-btn--outline"
-            onClick={() => enviar({ syncAfter: true })}
+            onClick={() =>
+              enviar({
+                syncAfter: true,
+                geoprocessarAfter: true,
+              })
+            }
             disabled={enviando || sincronizando || geoprocessando}
           >
             Processar + sincronizar
@@ -269,7 +310,10 @@ export default function UploadPlanilhas() {
 
         {(enviando || sincronizando || geoprocessando) && (
           <div className="vigiaa-progress">
-            <div className="vigiaa-progress__bar" style={{ width: `${progresso}%` }} />
+            <div
+              className="vigiaa-progress__bar"
+              style={{ width: `${progresso}%` }}
+            />
           </div>
         )}
 
