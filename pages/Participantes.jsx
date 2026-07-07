@@ -19,20 +19,6 @@ const Participantes = () => {
               linkedinUrl="https://www.linkedin.com/in/angelo-frozza/"
             />
             <ParticipanteCard
-              nome="Rafael de M. Speroni"
-              cargo="Pesquisador"
-              foto={import.meta.env.BASE_URL + 'participantes/speroni.png'}
-              lattesUrl="http://lattes.cnpq.br/3483462003007835"
-              linkedinUrl="https://www.linkedin.com/in/rafaelsperoni/"
-            />
-            <ParticipanteCard
-              nome="Joice S. Mota"
-              cargo="Pesquisadora"
-              foto={import.meta.env.BASE_URL + 'participantes/joice.png'}
-              lattesUrl="http://lattes.cnpq.br/7777714279933344"
-              linkedinUrl="https://www.linkedin.com/in/joices/"
-            />
-            <ParticipanteCard
               nome="Airton Zancanaro"
               cargo="Pesquisador"
               foto={import.meta.env.BASE_URL + 'participantes/airton.png'}
@@ -45,6 +31,20 @@ const Participantes = () => {
               foto={import.meta.env.BASE_URL + 'participantes/cleonice.png'}
               lattesUrl="http://lattes.cnpq.br/9868609834605055"
               linkedinUrl="https://www.linkedin.com/in/cleonice-beppler-5120b814/"
+            />
+            <ParticipanteCard
+              nome="Joice S. Mota"
+              cargo="Pesquisadora"
+              foto={import.meta.env.BASE_URL + 'participantes/joice.png'}
+              lattesUrl="http://lattes.cnpq.br/7777714279933344"
+              linkedinUrl="https://www.linkedin.com/in/joices/"
+            />
+            <ParticipanteCard
+              nome="Rafael de M. Speroni"
+              cargo="Pesquisador"
+              foto={import.meta.env.BASE_URL + 'participantes/speroni.png'}
+              lattesUrl="http://lattes.cnpq.br/3483462003007835"
+              linkedinUrl="https://www.linkedin.com/in/rafaelsperoni/"
             />
           </ul>
         </div>
@@ -60,11 +60,11 @@ const Participantes = () => {
               linkedinUrl="https://www.linkedin.com/in/ianmuradaraujoferreira/"
             />
             <ParticipanteCard
-              nome="Luis H. de M. Santiago"
+              nome="Kayo Kuhlmann"
               cargo="Bolsista"
-              foto={import.meta.env.BASE_URL + 'participantes/luis.png'}
-              lattesUrl="http://lattes.cnpq.br/4395447968887299"
-              linkedinUrl="https://www.linkedin.com/in/luis-henrique-de-melo-santiago-02064a96/"
+              foto={import.meta.env.BASE_URL + 'participantes/kayo.jpg'}
+              lattesUrl=""
+              linkedinUrl="https://www.linkedin.com/in/kayo-kuhlmann-de-oliveira-0a98b03a9?utm_source=share_via&utm_content=profile&utm_medium=member_android"
             />
             <ParticipanteCard
               nome="Lissandra M. Fischer"
@@ -74,12 +74,13 @@ const Participantes = () => {
               linkedinUrl="https://www.linkedin.com/in/lissandramaiarafischer/"
             />
             <ParticipanteCard
-              nome="Kayo Kuhlmann"
+              nome="Luis H. de M. Santiago"
               cargo="Bolsista"
-              foto={import.meta.env.BASE_URL + 'participantes/kayo.jpg'}
-              lattesUrl=""
-              linkedinUrl="https://www.linkedin.com/in/kayo-kuhlmann-de-oliveira-0a98b03a9/"
+              foto={import.meta.env.BASE_URL + 'participantes/luis.png'}
+              lattesUrl="http://lattes.cnpq.br/4395447968887299"
+              linkedinUrl="https://www.linkedin.com/in/luis-henrique-de-melo-santiago-02064a96/"
             />
+            
           </ul>
         </div>
 
