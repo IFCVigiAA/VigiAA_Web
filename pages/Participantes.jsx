@@ -60,7 +60,7 @@ const Participantes = () => {
               linkedinUrl="https://www.linkedin.com/in/ianmuradaraujoferreira/"
             />
             <ParticipanteCard
-              nome="Kayo Kuhlmann"
+              nome="Kayo Kuhlmann de Oliveira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/kayo.jpg'}
               lattesUrl=""

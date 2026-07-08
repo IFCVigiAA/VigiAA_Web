@@ -51,7 +51,7 @@ function Home() {
   return (
     <div className={`page-container ${isFullscreen ? 'fullscreen-active' : ''}`}>
       {!isFullscreen && <NavBar />}
-      <br /><br /><br />
+      <br /><br />
       <p className="mapTitle">{mapTitle}</p>
 
       <div className="mapButtons">
@@ -65,7 +65,7 @@ function Home() {
         >
           Mapa GeoServer + Leaflet
         </button>
-        <button
+        {/* <button
           onClick={() => {
             setIframeLoaded(false);
             setMapSrc(import.meta.env.BASE_URL + 'mapa_postgres.html');
@@ -84,7 +84,7 @@ function Home() {
           }}
         >
           Mapa Altimétrico
-        </button>
+        </button> */}
       </div>
 
       <div className={`mapSection ${isFullscreen ? 'fullscreen-active' : ''}`}>

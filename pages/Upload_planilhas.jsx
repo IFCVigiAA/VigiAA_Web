@@ -36,7 +36,7 @@ export default function UploadPlanilhas() {
   const [log, setLog] = useState('')
 
   const ultimaMensagem = useRef('')
-
+  
   const pendentes = useMemo(
     () => Object.entries(arquivos).filter(([_, file]) => !!file),
     [arquivos]
