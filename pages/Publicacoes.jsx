@@ -76,15 +76,21 @@ const Publicações = () => {
 
         {categorias.map((cat) => {
           const artigosFiltrados = artigos.filter((artigo) => artigo.categoria === cat);
+          const artigosOrdenados = [...artigosFiltrados].sort((a, b) => {
+            if (a.premiado && !b.premiado) return -1; 
+            if (!a.premiado && b.premiado) return 1;  
+            return 0;                                 
+          });
 
           return (
             <div key={cat} className="secao-categoria">
               <h2 className="titulo-categoria">{cat}</h2>
               <hr className="divisoria-categoria" />
               
-              {artigosFiltrados.length > 0 ? (
+              {/* 3. Renderiza a lista usando o array ordenado */}
+              {artigosOrdenados.length > 0 ? (
                 <ul className="lista-artigos">
-                  {artigosFiltrados.map((artigo, index) => (
+                  {artigosOrdenados.map((artigo, index) => (
                     <li key={index} className="item-artigo">
                       <h3 className="titulo-artigo">{artigo.titulo}</h3>
                       <p className="autores-artigo">{artigo.autores}</p>
