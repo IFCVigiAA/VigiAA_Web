@@ -227,8 +227,6 @@ def task_processar_positivos(self, job_id, arquivo_path):
             nome_v = _get_str(r, c_nome, 100).upper()
             if not nome_v or nome_v == 'NAN':
                 continue
-
-            # Montando a tupla para a tabela temp (DADOS PUROS)
             dados = (
                 _get_str(r, c_local, 100).upper(),
                 r.get(c_inicio).date() if pd.notna(r.get(c_inicio)) else None,
