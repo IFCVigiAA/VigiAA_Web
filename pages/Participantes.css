@@ -39,19 +39,26 @@
   align-items: center;
   transition: transform 0.2s ease;
   cursor: pointer;
-  width: 150px; 
+  width: 180px; 
+  box-sizing: border-box;
 }
 
 .participantes:hover {
   transform: translateY(-5px);
 }
 
-
+/* FORÇA O TAMANHO E CORTE PADRONIZADO DA IMAGEM */
 .participantes img {
+  width: 150px !important;
+  height: 200px !important;
+  max-width: 150px !important;
+  max-height: 200px !important;
+  min-width: 150px !important;
+  min-height: 200px !important;
+  object-fit: cover !important;
+  object-position: center top !important;
   border-radius: 2px;
-  width: 150px;
-  height: 200px;
-  object-fit: cover;
+  display: block;
 }
 
 .participantes .nome {
@@ -69,15 +76,19 @@
   color: #1f9e61;
 }
 
-
+/* Responsividade */
 
 @media (max-width: 1024px) {
   .participantes {
-    width: 120px; 
+    width: 140px; 
   }
   .participantes img {
-    width: 120px;
-    height: 160px;
+    width: 120px !important;
+    height: 160px !important;
+    max-width: 120px !important;
+    max-height: 160px !important;
+    min-width: 120px !important;
+    min-height: 160px !important;
   }
   .participantes .nome {
     font-size: 18px;
@@ -89,11 +100,15 @@
     gap: 15px;
   }
   .participantes {
-    width: 100px;
+    width: 120px;
   }
   .participantes img {
-    width: 100px;
-    height: 140px;
+    width: 100px !important;
+    height: 140px !important;
+    max-width: 100px !important;
+    max-height: 140px !important;
+    min-width: 100px !important;
+    min-height: 140px !important;
   }
   .participantes .nome {
     font-size: 16px;
@@ -101,16 +116,19 @@
 }
 
 @media (max-width: 480px) {
-
   .lista-participantes {
     gap: 10px;
   }
   .participantes {
-    width: 90px;
+    width: 100px;
   }
   .participantes img {
-    width: 90px;
-    height: 120px;
+    width: 90px !important;
+    height: 120px !important;
+    max-width: 90px !important;
+    max-height: 120px !important;
+    min-width: 90px !important;
+    min-height: 120px !important;
   }
   .participantes .nome {
     font-size: 15px;

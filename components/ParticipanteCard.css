@@ -6,21 +6,33 @@
   width: 220px;
   background-color: #d9d9d9;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+/* Força todas as imagens a terem rigorosamente o mesmo tamanho e proporção */
 .foto-participante {
-  width: 150px;
-  height: 200px;
+  width: 150px !important;
+  height: 190px !important;
+  min-width: 150px !important;
+  min-height: 190px !important;
+  max-width: 150px !important;
+  max-height: 190px !important;
+  object-fit: cover !important;
+  object-position: center top !important; /* Centraliza o corte focando no rosto */
   border-radius: 2px;
-  object-fit: cover;
   margin-bottom: 15px;
+  display: block;
 }
 
 .botoes-links {
-  margin-top: 10px;
+  margin-top: auto; /* Empurra os ícones para o fundo caso o texto do nome/cargo varie */
   display: flex;
   justify-content: center;
   gap: 15px;
+  padding-top: 10px;
 }
 
 .btn-link {

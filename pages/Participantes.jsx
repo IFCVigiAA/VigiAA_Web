@@ -48,7 +48,6 @@ const Participantes = () => {
             />
           </ul>
         </div>
-
         <div className="grupo">
           <h2>Bolsistas VigiAA</h2>
           <ul className="lista-participantes">
@@ -60,14 +59,14 @@ const Participantes = () => {
               linkedinUrl="https://www.linkedin.com/in/ianmuradaraujoferreira/"
             />
             <ParticipanteCard
-              nome="Kayo Kuhlmann de Oliveira"
+              nome="Kayo K. de Oliveira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/kayo.jpg'}
               lattesUrl=""
               linkedinUrl="https://www.linkedin.com/in/kayo-kuhlmann-de-oliveira-0a98b03a9?utm_source=share_via&utm_content=profile&utm_medium=member_android"
             />
             <ParticipanteCard
-              nome="Lissandra M. Fischer"
+              nome="Lissandra Maria Fischer"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/lissandra.jpg'}
               lattesUrl="http://lattes.cnpq.br/3849463744234834"
@@ -88,7 +87,7 @@ const Participantes = () => {
           <h2>Bolsistas Estação Meteorológica</h2>
           <ul className="lista-participantes">
             <ParticipanteCard
-              nome="Rafael Luiz Charnesca Santos Pereira"
+              nome="Rafael L. C. S. Pereira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/rafaelluis.png'}
               lattesUrl="http://lattes.cnpq.br/6550069771613064"
@@ -110,17 +109,17 @@ const Participantes = () => {
           </ul>
         </div>
         <div className="grupo">
-          <h2>Ex participantes</h2>
+          <h2>Bolsistas Anteriores</h2>
           <ul className="lista-participantes">
             <ParticipanteCard
-              nome="Vitória Maria Carvalho da Mota"
+              nome="Vitória Maria C. da Mota"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/vitoria.jpg'}
               lattesUrl=""
               linkedinUrl="https://www.linkedin.com/in/vitória-mota09"
             />
             <ParticipanteCard
-              nome="Cauã da Costa Silva"
+              nome="Cauã da C. Silva"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/caua.png'}
               lattesUrl="http://lattes.cnpq.br/6896619338301324"
