@@ -12,7 +12,7 @@ const Participantes = () => {
           <h2>Pesquisadores</h2>
           <ul className="lista-participantes">
             <ParticipanteCard
-              nome="Angelo A. Frozza"
+              nome="Angelo Augusto Frozza"
               cargo="Coordenador Geral"
               foto={import.meta.env.BASE_URL + 'participantes/angelo.png'}
               lattesUrl="http://lattes.cnpq.br/5878372087019892"
@@ -66,14 +66,14 @@ const Participantes = () => {
               linkedinUrl="https://www.linkedin.com/in/kayo-kuhlmann-de-oliveira-0a98b03a9?utm_source=share_via&utm_content=profile&utm_medium=member_android"
             />
             <ParticipanteCard
-              nome="Lissandra Maria Fischer"
+              nome="Lissandra Maiara Fischer"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/lissandra.jpg'}
               lattesUrl="http://lattes.cnpq.br/3849463744234834"
               linkedinUrl="https://www.linkedin.com/in/lissandramaiarafischer/"
             />
             <ParticipanteCard
-              nome="Luis H. de M. Santiago"
+              nome="Luis Henrique de M. Santiago"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/luis.png'}
               lattesUrl="http://lattes.cnpq.br/4395447968887299"
