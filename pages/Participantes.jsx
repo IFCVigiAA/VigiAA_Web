@@ -87,7 +87,7 @@ const Participantes = () => {
           <h2>Bolsistas Estação Meteorológica</h2>
           <ul className="lista-participantes">
             <ParticipanteCard
-              nome="Rafael L. C. S. Pereira"
+              nome="Rafael Luiz C. S. Pereira"
               cargo="Bolsista"
               foto={import.meta.env.BASE_URL + 'participantes/rafaelluis.png'}
               lattesUrl="http://lattes.cnpq.br/6550069771613064"
