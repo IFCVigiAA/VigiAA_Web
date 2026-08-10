@@ -47,7 +47,6 @@
   transform: translateY(-5px);
 }
 
-/* FORÇA O TAMANHO E CORTE PADRONIZADO DA IMAGEM */
 .participantes img {
   width: 150px !important;
   height: 200px !important;
@@ -76,7 +75,7 @@
   color: #1f9e61;
 }
 
-/* Responsividade */
+
 
 @media (max-width: 1024px) {
   .participantes {

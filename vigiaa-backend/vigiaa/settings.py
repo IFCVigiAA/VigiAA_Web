@@ -117,11 +117,11 @@ import dj_database_url
 DATABASES = {
     'default': dj_database_url.config(
         env='DATABASE_URL_TEMP',
-        default='postgis://postgres:postgres@192.168.70.74:5432/vigiaa_temp'
+        default='postgis://postgres:postgres@localhost:5432/vigiaa_temp'
     ),
     'oficial': dj_database_url.config(
         env='DATABASE_URL_OFC',
-        default='postgis://postgres:postgres@192.168.70.74:5432/vigiaa_ofc'
+        default='postgis://postgres:postgres@localhost:5432/vigiaa_ofc'
     ),
 }
 

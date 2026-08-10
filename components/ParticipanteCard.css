@@ -12,7 +12,7 @@
   align-items: center;
 }
 
-/* Força todas as imagens a terem rigorosamente o mesmo tamanho e proporção */
+
 .foto-participante {
   width: 150px !important;
   height: 190px !important;
@@ -21,14 +21,14 @@
   max-width: 150px !important;
   max-height: 190px !important;
   object-fit: cover !important;
-  object-position: center top !important; /* Centraliza o corte focando no rosto */
+  object-position: center top !important; 
   border-radius: 2px;
   margin-bottom: 15px;
   display: block;
 }
 
 .botoes-links {
-  margin-top: auto; /* Empurra os ícones para o fundo caso o texto do nome/cargo varie */
+  margin-top: auto; 
   display: flex;
   justify-content: center;
   gap: 15px;
