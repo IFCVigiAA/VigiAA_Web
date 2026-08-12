@@ -1,12 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville&display=swap');
 
+/* Reset global para remover margens padrão e o scroll */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 .login-container {
   height: 100vh;
+  width: 100vw;
   display: flex;
   justify-content: center;
   align-items: center;
   background: linear-gradient(to bottom right, #0d1b2a, #123524);
   font-family: 'Libre Baskerville', serif;
+  position: relative; /* Permite posicionar o botão voltar dentro da tela */
+  overflow: hidden;  /* Trava qualquer rolagem na tela */
+}
+
+/* Botão de voltar posicionado de forma fixa no canto superior esquerdo */
+.voltarBtn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: white;
+  background-color: transparent;
+  border: none;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.voltarBtn:hover {
+  transform: translateX(-4px); /* Efeito suave de deslocamento no hover */
 }
 
 .login-box {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import "./Login.css";
+import { FiArrowLeft } from "react-icons/fi";
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -11,7 +12,6 @@ export default function Login() {
     setError("");
 
     try {
-      //const response = await fetch("http://127.0.0.1:8000/api/token/", {
       const response = await fetch("/api/token/", {
         method: "POST",
         headers: {
@@ -36,6 +36,11 @@ export default function Login() {
 
   return (
     <div className="login-container">
+      {/* Botão flutuante no canto superior esquerdo */}
+      <button className="voltarBtn" onClick={() => window.history.back()}>
+        <FiArrowLeft size={28} className="setaVoltar"/>
+      </button>
+
       <form className="login-box" onSubmit={handleLogin}>
         <h2>Login Vigiaa</h2>
 
