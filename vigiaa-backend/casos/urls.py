@@ -9,6 +9,7 @@ from .views import me
 from django.contrib.auth import views as auth_views
 from .views import status_processamento
 from .views import disparar_geoprocessamento
+from . import views
 
 urlpatterns = [
     path("me/", me, name="me"),
@@ -22,4 +23,5 @@ urlpatterns = [
     path("sincronizar/", sincronizar_oficial_api, name="sincronizar_oficial"),
     path("status-processamento/<int:job_id>/", status_processamento),
     path('geoprocessar-positivos/', disparar_geoprocessamento, name='geoprocessar_positivos'),
+    path('extrair-cabecalho/', views.extrair_cabecalho_e_sugerir, name='extrair_cabecalho'),
 ]
