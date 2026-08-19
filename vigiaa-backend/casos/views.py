@@ -3,7 +3,7 @@ import re
 import json
 import pandas as pd
 from difflib import get_close_matches
-
+import unicodedata
 from django.conf import settings
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -32,15 +32,21 @@ CAMPOS_BANCO_POR_TIPO = {
         'data_nasc': 'Data de Nascimento',
         'local_atendimento': 'Local de Atendimento',
         'nome_mae': 'Nome da Mãe',
-        'resultado': 'Resultado (Ex: Positivo)'
+        'resultado': 'Resultado',
+        'aplicacao': 'Data de Aplicação',
+        'agentes': 'Agente(s) Responsável(is)',
+        'prim_visita': '1ª Visita',
+        'situacao': 'Situação do Caso',
+        'observacoes': 'Observações',
+        'recebido': 'Data de Recebimento'
     },
     'pontos': {
-        'numero': 'Número / Código do Ponto',
         'municipio': 'Município',
         'localidade': 'Localidade / Bairro',
-        'endereco': 'Endereço / Logradouro',
-        'quarteiroes': 'Quarteirões',
+        'endereco': 'Rua / Logradouro',
+        'numero': 'Número do Imóvel (Endereço)',
         'complemento': 'Complemento',
+        'quarteiroes': 'Quarteirão / Quarteirões',
         'latitude': 'Latitude',
         'longitude': 'Longitude'
     },
@@ -58,11 +64,8 @@ CAMPOS_BANCO_POR_TIPO = {
         'data_coleta': 'Data da Coleta',
         'data_entrada': 'Data de Entrada',
         'data_exame': 'Data do Exame',
-        'a_aegypti_form_aquaticas': 'Aedes Aegypti (Formas Aquáticas)',
-        'a_aegypti_form_adultas': 'Aedes Aegypti (Formas Adultas)',
-        'a_albopictus_form_aquaticas': 'Aedes Albopictus (Formas Aquáticas)',
-        'a_albopictus_form_adultas': 'Aedes Albopictus (Formas Adultas)',
-        'ovo_a_aegypti': 'Ovos Aedes Aegypti',
+        'a_aegypti_form_aquaticas': 'A. Aegypti (Formas Aquáticas)',
+        'a_albopictus_form_aquaticas': 'A. Albopictus (Formas Aquáticas)',
         'latitude': 'Latitude',
         'longitude': 'Longitude'
     },
@@ -143,51 +146,124 @@ def status_processamento(request, job_id):
         return JsonResponse({"erro": "Job não encontrado"}, status=404)
 
 
-# --- EXTRAÇÃO DE CABEÇALHO E SUGESTÃO ---
+
+def _normalizar_texto(texto):
+    if pd.isna(texto) or texto is None:
+        return ""
+    s = str(texto).strip().lower()
+    s = ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+    s = re.sub(r'[.ªº]', '', s)
+    return s.replace(' ', '_')
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def extrair_cabecalho_e_sugerir(request):
-    arquivo = request.FILES.get("arquivo")
-    celula_cabecalho = request.POST.get("celula_cabecalho", None)
-    tipo_planilha = request.POST.get("tipo", "casos")
+    arquivo = (
+        request.FILES.get("arquivo") 
+        or (hasattr(request, 'data') and request.data.get("arquivo"))
+    )
+    celula_cabecalho = (
+        request.POST.get("celula_cabecalho") 
+        or (hasattr(request, 'data') and request.data.get("celula_cabecalho"))
+    )
+    
+    # Garante a captura correta do tipo
+    tipo_planilha = str(
+        request.data.get("tipo") 
+        or request.POST.get("tipo") 
+        or "casos"
+    ).strip().lower()
 
     if not arquivo:
         return JsonResponse({"erro": "Nenhum arquivo enviado"}, status=400)
 
     try:
+        engine = 'odf' if arquivo.name.endswith('.ods') else None
         h_idx = None
+
         if celula_cabecalho:
             match = re.search(r'\d+', str(celula_cabecalho))
             if match:
                 h_idx = max(0, int(match.group()) - 1)
 
-        engine = 'odf' if arquivo.name.endswith('.ods') else None
-
+        # Varredura inteligente das primeiras 20 linhas
         if h_idx is None:
-            df_temp = pd.read_excel(arquivo, header=None, engine=engine)
-            h_idx = next(
-                (i for i, row in df_temp.iterrows() if any(
-                    k in str(x).upper() for x in row for k in ["NOME", "SINAN", "NÚMERO", "NUMERO", "FOCO", "ARMADILHA"]
-                )), 
-                0
-            )
+            df_temp = pd.read_excel(arquivo, header=None, nrows=20, engine=engine)
+            
+            # Marcadores específicos de cada tipo de tabela (evita pegar cabeçalhos institucionais)
+            marcadores_por_tipo = {
+                'focos': ["Nº FOCO", "N FOCO", "REGIONAL", "ATIVIDADE", "DATA DA COLETA", "DATA DE ENTRADA"],
+                'armadilhas': ["TIPO ARMADILHA", "TIPO IMÓVEL", "TIPO IMOVEL", "NÚMERO", "NUMERO"],
+                'pontos': ["PONTO", "QUARTEIRÕES", "QUARTEIROES", "COMPLEMENTO"],
+                'casos': ["SINAN", "PACIENTE", "INÍCIO SINTOMAS", "INICIO SINTOMAS", "DATA NOT"]
+            }
+            
+            termos_alvo = marcadores_por_tipo.get(tipo_planilha, [])
+            termos_gerais = ["SINAN", "Nº FOCO", "N FOCO", "REGIONAL", "TIPO ARMADILHA", "QUARTEIRÃO", "PACIENTE"]
 
+            for i, row in df_temp.iterrows():
+                # Conta quantas colunas não-nulas existem na linha
+                celulas_texto = [str(x).upper().strip() for x in row.values if pd.notna(x) and str(x).strip() != '']
+                linha_completa = " ".join(celulas_texto)
+                
+                # Cabeçalhos institucionais costumam ter apenas 1 célula preenchida
+                # Cabeçalhos reais têm múltiplas colunas preenchidas (> 2)
+                if len(celulas_texto) >= 3:
+                    if any(t in linha_completa for t in termos_alvo) or any(t in linha_completa for t in termos_gerais):
+                        h_idx = i
+                        break
+
+            if h_idx is None:
+                # Fallback: pega a primeira linha com mais de 3 colunas preenchidas
+                for i, row in df_temp.iterrows():
+                    validos = [x for x in row.values if pd.notna(x) and str(x).strip() != '']
+                    if len(validos) >= 4:
+                        h_idx = i
+                        break
+                if h_idx is None:
+                    h_idx = 0
+
+        # Lê apenas 2 linhas a partir do cabeçalho detectado
         arquivo.seek(0)
         df = pd.read_excel(arquivo, header=h_idx, nrows=2, engine=engine)
-        colunas_planilha = [str(c).strip() for c in df.columns if not str(c).startswith('Unnamed')]
+        
+        colunas_planilha = [
+            str(c).replace('\n', ' ').strip() 
+            for c in df.columns 
+            if not str(c).startswith('Unnamed') and str(c).strip() != ''
+        ]
 
-        campos_banco = CAMPOS_BANCO_POR_TIPO.get(tipo_planilha, CAMPOS_BANCO_POR_TIPO['casos'])
+        # Resgata os campos do banco garantindo fallback seguro
+        campos_banco = CAMPOS_BANCO_POR_TIPO.get(tipo_planilha)
+        if not campos_banco:
+            # Fallback caso a chave venha como 'foco' em vez de 'focos'
+            for k in CAMPOS_BANCO_POR_TIPO:
+                if k in tipo_planilha or tipo_planilha in k:
+                    campos_banco = CAMPOS_BANCO_POR_TIPO[k]
+                    break
+        if not campos_banco:
+            campos_banco = CAMPOS_BANCO_POR_TIPO['casos']
 
+        # Fuzzy matching
         mapeamento_sugerido = {}
-        colunas_norm = {col.lower().replace(' ', '').replace('_', ''): col for col in colunas_planilha}
+        colunas_norm = {
+            _normalizar_texto(col): col 
+            for col in colunas_planilha
+        }
 
         for campo_bd, label in campos_banco.items():
-            matches = get_close_matches(campo_bd, colunas_norm.keys(), n=1, cutoff=0.3)
+            chave_busca = _normalizar_texto(campo_bd)
+            matches = get_close_matches(chave_busca, colunas_norm.keys(), n=1, cutoff=0.3)
             if matches:
                 mapeamento_sugerido[campo_bd] = colunas_norm[matches[0]]
             else:
                 mapeamento_sugerido[campo_bd] = None
+
+        print(f"\n{'='*50}")
+        print(f">>> [EXTRAIR CABEÇALHO] Tipo: {tipo_planilha} | Linha encontrada: {h_idx}")
+        print(f">>> [EXTRAIR CABEÇALHO] Colunas extraídas ({len(colunas_planilha)}): {colunas_planilha}")
+        print(f">>> [EXTRAIR CABEÇALHO] Campos do Banco ({len(campos_banco)}): {list(campos_banco.keys())}")
+        print(f"{'='*50}\n", flush=True)
 
         return Response({
             "colunas_planilha": colunas_planilha,
@@ -196,7 +272,8 @@ def extrair_cabecalho_e_sugerir(request):
         })
 
     except Exception as e:
-        return JsonResponse({"erro": f"Falha ao ler cabeçalho da planilha: {str(e)}"}, status=400)
+        print(f"❌ Erro ao extrair cabeçalho: {e}", flush=True)
+        return JsonResponse({"erro": f"Falha ao ler cabeçalho: {str(e)}"}, status=400)
 
 
 # --- VIEWS DE UPLOAD ---

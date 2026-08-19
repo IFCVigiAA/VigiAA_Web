@@ -72,7 +72,7 @@ export default function UploadPlanilhas() {
       const formData = new FormData()
       formData.append('arquivo', file)
       formData.append('tipo', tipo)
-      
+
       if (celulaCabecalho.trim()) {
         formData.append('celula_cabecalho', celulaCabecalho.trim())
       }
@@ -88,9 +88,9 @@ export default function UploadPlanilhas() {
           const data = await res.json()
           setTipoMapeando(tipo)
           setDadosMapeamento({
-            colunasPlanilha: data.colunas_planilha,
-            camposBanco: data.campos_banco,
-            sugestao: data.mapeamento_sugerido,
+            colunasPlanilha: data.colunas_planilha || [],
+            camposBanco: data.campos_banco || {},
+            sugestao: data.mapeamento_sugerido || {},
           })
           setModalOpen(true)
         }
@@ -100,36 +100,34 @@ export default function UploadPlanilhas() {
     }
   }
 
-  // Salva o de-para definido pelo usuário no estado E no sessionStorage
+  // Salva o de-para isolado no estado e no sessionStorage para cada tipo de planilha
   const handleConfirmarMapeamento = (mapeamentoConfirmado) => {
-    console.log("📌 SALVANDO MAPEAMENTO NO STORAGE:", tipoMapeando, mapeamentoConfirmado)
-    
-    const mapaObj = {
+    console.log(`📌 SALVANDO MAPEAMENTO DO MODAL [${tipoMapeando}]:`, mapeamentoConfirmado)
+
+    const mapaAtualizado = {
       ...mapeamentosDefinidos,
       [tipoMapeando]: mapeamentoConfirmado,
-      casos: mapeamentoConfirmado,
-      positivos: mapeamentoConfirmado,
     }
 
-    setMapeamentosDefinidos(mapaObj)
-    sessionStorage.setItem('mapeamento_temp', JSON.stringify(mapaObj))
+    setMapeamentosDefinidos(mapaAtualizado)
+    sessionStorage.setItem('mapeamento_temp', JSON.stringify(mapaAtualizado))
     setModalOpen(false)
   }
 
   async function uploadArquivo(url, formData) {
-  try {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: getAuthHeader(), // Apenas Authorization, SEM 'Content-Type'
-      body: formData,
-    })
-    const data = await res.json()
-    return { ok: res.ok, data }
-  } catch (err) {
-    console.error('Erro no uploadArquivo:', err)
-    return { ok: false }
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: getAuthHeader(), // Apenas Authorization, sem forçar Content-Type
+        body: formData,
+      })
+      const data = await res.json()
+      return { ok: res.ok, data }
+    } catch (err) {
+      console.error('Erro no uploadArquivo:', err)
+      return { ok: false }
+    }
   }
-}
 
   async function monitorarJob(jobId, tipo) {
     return new Promise(resolve => {
@@ -167,81 +165,81 @@ export default function UploadPlanilhas() {
     })
   }
 
-  // Função 'enviar' ÚNICA com resgate robusto do sessionStorage
+  // Função enviar genérica e compatível com todos os tipos de planilha
   async function enviar({ syncAfter = false, geoprocessarAfter = false } = {}) {
-  if (pendentes.length === 0) {
-    setLog('Selecione pelo menos 1 planilha.')
-    return
-  }
-  setEnviando(true)
-  setLog('')
-  setProgresso(0)
-
-  // 1. Resgata do sessionStorage ou do state
-  let mapaAtivo = {}
-  try {
-    const salvo = sessionStorage.getItem('mapeamento_temp')
-    if (salvo) mapaAtivo = JSON.parse(salvo)
-  } catch (e) {
-    console.warn('Erro lendo sessionStorage:', e)
-  }
-  
-  if (!mapaAtivo || Object.keys(mapaAtivo).length === 0) {
-    mapaAtivo = mapeamentosDefinidos || {}
-  }
-
-  try {
-    for (const [tipo, file] of pendentes) {
-      const url = API_BASE + endpoints[tipo]
-      const formData = new FormData()
-      formData.append(uploadKeyByTipo[tipo], file)
-
-      if (celulaCabecalho.trim()) {
-        formData.append('celula_cabecalho', celulaCabecalho.trim())
-      }
-
-      // 2. Busca exaustiva de mapeamento
-      const mapeamentoCustom =
-        mapaAtivo[tipo] ||
-        mapaAtivo[uploadKeyByTipo[tipo]] ||
-        mapaAtivo['casos'] ||
-        mapaAtivo['positivos']
-
-      if (mapeamentoCustom && Object.keys(mapeamentoCustom).length > 0) {
-        const payloadStr = JSON.stringify(mapeamentoCustom)
-        console.log(`🚀 [FRONTEND] ENVIANDO MAPEAMENTO PARA [${tipo}]:`, payloadStr)
-        formData.append('mapeamento', payloadStr)
-      } else {
-        console.warn(`⚠️ [FRONTEND] NENHUM MAPEAMENTO ENCONTRADO PARA [${tipo}]`)
-      }
-
-      setLog(prev => prev + `Enviando arquivo ${tipo} para o servidor...\n`)
-      const r = await uploadArquivo(url, formData)
-
-      if (r.ok && r.data?.job_id) {
-        setLog(prev => prev + `✔ ${tipo} recebido! Processando...\n`)
-        await monitorarJob(r.data.job_id, tipo)
-      } else {
-        setLog(prev => prev + `✖ ${tipo} Falha ao enviar arquivo.\n\n`)
-      }
+    if (pendentes.length === 0) {
+      setLog('Selecione pelo menos 1 planilha.')
+      return
     }
 
-    if (syncAfter && geoprocessarAfter) {
-      await geoprocessar()
-      await sincronizar()
-    } else {
-      if (geoprocessarAfter) await geoprocessar()
-      if (syncAfter) await sincronizar()
+    setEnviando(true)
+    setLog('')
+    setProgresso(0)
+
+    // 1. Resgata o mapa geral do sessionStorage ou do estado
+    let mapaAtivo = {}
+    try {
+      const salvo = sessionStorage.getItem('mapeamento_temp')
+      if (salvo) mapaAtivo = JSON.parse(salvo)
+    } catch (e) {
+      console.warn('Erro ao ler sessionStorage:', e)
     }
-  } catch (err) {
-    console.error(err)
-    setLog(prev => prev + `✖ Erro crítico no envio.\n`)
-  } finally {
-    setEnviando(false)
-    setProgresso(100)
-    setTimeout(() => setProgresso(0), 2000)
+
+    if (!mapaAtivo || Object.keys(mapaAtivo).length === 0) {
+      mapaAtivo = mapeamentosDefinidos || {}
+    }
+
+    try {
+      for (const [tipo, file] of pendentes) {
+        const url = API_BASE + endpoints[tipo]
+        const formData = new FormData()
+        formData.append(uploadKeyByTipo[tipo], file)
+
+        if (celulaCabecalho.trim()) {
+          formData.append('celula_cabecalho', celulaCabecalho.trim())
+        }
+
+        // 2. Busca exata do mapeamento do tipo atual
+        const mapeamentoDoTipo =
+          mapaAtivo[tipo] ||
+          mapaAtivo[uploadKeyByTipo[tipo]] ||
+          (tipo === 'casos' ? mapaAtivo['positivos'] : null)
+
+        if (mapeamentoDoTipo && Object.keys(mapeamentoDoTipo).length > 0) {
+          const payloadStr = JSON.stringify(mapeamentoDoTipo)
+          console.log(`🚀 [FRONTEND] ENVIANDO MAPEAMENTO PARA [${tipo}]:`, payloadStr)
+          formData.append('mapeamento', payloadStr)
+        } else {
+          console.warn(`⚠️ [FRONTEND] NENHUM MAPEAMENTO CUSTOMIZADO PARA [${tipo}] (usará fallback)`)
+        }
+
+        setLog(prev => prev + `Enviando arquivo ${tipo} para o servidor...\n`)
+        const r = await uploadArquivo(url, formData)
+
+        if (r.ok && r.data?.job_id) {
+          setLog(prev => prev + `✔ ${tipo} recebido! Processando...\n`)
+          await monitorarJob(r.data.job_id, tipo)
+        } else {
+          setLog(prev => prev + `✖ ${tipo} Falha ao enviar arquivo.\n\n`)
+        }
+      }
+
+      if (syncAfter && geoprocessarAfter) {
+        await geoprocessar()
+        await sincronizar()
+      } else {
+        if (geoprocessarAfter) await geoprocessar()
+        if (syncAfter) await sincronizar()
+      }
+    } catch (err) {
+      console.error(err)
+      setLog(prev => prev + `✖ Erro crítico no envio.\n`)
+    } finally {
+      setEnviando(false)
+      setProgresso(100)
+      setTimeout(() => setProgresso(0), 2000)
+    }
   }
-}
 
   async function geoprocessar() {
     if (geoprocessando) return
@@ -418,7 +416,7 @@ export default function UploadPlanilhas() {
         )}
       </div>
 
-      {/* COMPONENTE MODAL DE MAPEAMENTO DE COLUNAS */}
+      {/* MODAL DE MAPEAMENTO DE COLUNAS */}
       {modalOpen && (
         <ModalMapeamento
           open={modalOpen}
@@ -439,12 +437,14 @@ function ModalMapeamento({ open, tipo, colunasPlanilha, camposBanco, sugestao, o
   const [dePara, setDePara] = useState({})
 
   useEffect(() => {
-    if (sugestao) {
+    if (sugestao && Object.keys(sugestao).length > 0) {
       setDePara(sugestao)
     }
   }, [sugestao, open])
 
   if (!open) return null
+
+  const campos = camposBanco && Object.keys(camposBanco).length > 0 ? camposBanco : {}
 
   const handleChange = (campoBd, colunaPlanilha) => {
     setDePara(prev => ({
@@ -459,26 +459,27 @@ function ModalMapeamento({ open, tipo, colunasPlanilha, camposBanco, sugestao, o
         <div className="modal-header">
           <h3 className="modal-title">Confirmar Mapeamento de Colunas</h3>
           <p className="modal-subtitle">
-            Verifique se os dados da planilha de <strong>{tipo?.toUpperCase()}</strong> correspondem às informações do sistema.
+            Planilha de <strong>{tipo?.toUpperCase()}</strong> — Associe os campos do banco às colunas da planilha:
           </p>
         </div>
 
         <div className="mapeamento-grid">
-          {Object.entries(camposBanco).map(([campoBd, labelAmigavel]) => (
+          {Object.entries(campos).map(([campoBd, labelAmigavel]) => (
             <div key={campoBd} className="mapeamento-row">
-              <div className="field-label">
+              <label className="field-label" htmlFor={`map-${campoBd}`}>
                 <strong>{labelAmigavel}</strong>
-              </div>
+              </label>
 
               <select
+                id={`map-${campoBd}`}
                 value={dePara[campoBd] || ''}
                 onChange={e => handleChange(campoBd, e.target.value)}
                 className={dePara[campoBd] ? 'select-mapped' : 'select-empty'}
               >
                 <option value="">-- Ignorar / Deixar Nulo --</option>
-                {colunasPlanilha.map(col => (
+                {(colunasPlanilha || []).map(col => (
                   <option key={col} value={col}>
-                    📄 Coluna: {col}
+                    📄 {col}
                   </option>
                 ))}
               </select>
