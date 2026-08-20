@@ -299,21 +299,6 @@ export default function UploadPlanilhas() {
 
           <span className="vigiaa-badge">{pendentes.length} selecionada(s)</span>
         </div>
-
-        <div className="vigiaa-header-input">
-          <label htmlFor="celulaCabecalho">
-            <span>Célula inicial do cabeçalho (opcional)</span>
-          </label>
-          <input
-            id="celulaCabecalho"
-            type="text"
-            placeholder="Ex: B3, A1, 3 (Deixe em branco para busca automática)"
-            value={celulaCabecalho}
-            onChange={e => setCelulaCabecalho(e.target.value)}
-            disabled={enviando}
-          />
-        </div>
-
         <div className="vigiaa-fields">
           <label className="vigiaa-field">
             <span>Casos positivos</span>
