@@ -1,13 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
 * {
   box-sizing: border-box;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-width: thin; 
   scrollbar-color: #8a8a8a transparent;
-  
 }
+
 :root {
-  font-family: sans-serif;
+  font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
@@ -17,26 +19,20 @@ body {
   min-height: 100vh;
   background-color: rgb(236, 236, 236);
 }
+
 ::-webkit-scrollbar {
   display: none;
 }
 
-
 ::-webkit-scrollbar-track {
   background: #f1f1f1; 
 }
-
 
 ::-webkit-scrollbar-thumb {
   background: #979797;
   border-radius: 10px;
 }
 
-
 ::-webkit-scrollbar-thumb:hover {
   background: #043f08;
 }
-
-
-
-

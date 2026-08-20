@@ -5,6 +5,7 @@ import Footer from '../components/Footer';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExpand, faXmark } from '@fortawesome/free-solid-svg-icons';
 
+
 function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
@@ -53,7 +54,7 @@ function Home() {
       {!isFullscreen && <NavBar />}
       <br /><br />
       <p className="mapTitle">{mapTitle}</p>
-
+<br />
       <div className="mapButtons">
         <button
           onClick={() => {

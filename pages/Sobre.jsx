@@ -2,7 +2,7 @@
   import NavBar from '../components/NavBar';
   import Footer from '../components/Footer';
   import './Sobre.css';
-  import WeatherComponent from '../components/WeatherComponent';
+
 
   const Sobre = () => {
     return (
