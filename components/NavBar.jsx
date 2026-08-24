@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import './NavBar.css';
 
 const NavBar = () => {
   const [showModal, setShowModal] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
-  const [isStaff, setIsStaff] = useState(false);
-  const [carregando, setCarregando] = useState(true);
+  const [isLogged, setIsLogged] = useState(false);
 
   const modalRef = useRef(null);
   const navigate = useNavigate();
+  const location = useLocation(); // Reavalia a autenticação a cada troca de rota
 
   const toggleModal = () => setShowModal(prev => !prev);
   const toggleMenu = () => setShowMenu(prev => !prev);
 
-  // Fecha o dropdown de projetos ao clicar fora dele
+  // Fecha dropdown ao clicar fora
   useEffect(() => {
     function handleClickOutside(event) {
       if (modalRef.current && !modalRef.current.contains(event.target)) {
@@ -25,57 +25,62 @@ const NavBar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 🔐 Verifica a sessão do usuário no backend ou via JWT
+  // 🔐 Verifica se há token salvo no navegador sempre que a página/rota muda
   useEffect(() => {
-  async function carregarUsuario() {
-    const token = localStorage.getItem('access') || localStorage.getItem('token');
+    async function verificarAutenticacao() {
+      const token = localStorage.getItem('access') || localStorage.getItem('token');
 
-    // Se não tem token no localStorage, já define como deslogado na hora
-    if (!token) {
-      setIsStaff(false);
-      setCarregando(false);
-      return;
-    }
-
-    try {
-      const res = await fetch('/api/casos/me/', {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: 'include',
-      });
-
-      if (!res.ok) {
-        setIsStaff(false);
+      // Se não há token, está 100% deslogado
+      if (!token) {
+        setIsLogged(false);
         return;
       }
 
-      const data = await res.json();
-      setIsStaff(!!data.is_staff);
-    } catch {
-      setIsStaff(false);
-    } finally {
-      setCarregando(false);
+      // Se tem token, valida no backend passando o Bearer Token
+      try {
+        const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
+        const res = await fetch('/api/casos/me/', {
+          headers: {
+            'Authorization': authHeader,
+          },
+          credentials: 'include',
+        });
+
+        if (res.ok) {
+          setIsLogged(true);
+        } else {
+          // Se o backend recusar o token por expiração
+          setIsLogged(false);
+        }
+      } catch (err) {
+        // Fallback: se houver token local, considera logado para renderizar o botão
+        setIsLogged(!!token);
+      }
     }
-  }
 
-  carregarUsuario();
-}, []);
+    verificarAutenticacao();
+  }, [location.pathname]); // Executa sempre que a URL mudar (ex: ao sair do /Login para /UploadPlanilhas)
 
+  // Função de logout
   const handleLogout = async () => {
-  localStorage.removeItem('access');
-  localStorage.removeItem('refresh');
-  localStorage.removeItem('token');
-  sessionStorage.clear();
-  try {
-    await fetch('/api/casos/logout/', {
-      method: 'POST',
-      credentials: 'include',
-    });
-  } catch (e) {
-  }
-  setIsStaff(false);
-  setShowMenu(false);
-  navigate('/');
-};
+    localStorage.removeItem('access');
+    localStorage.removeItem('refresh');
+    localStorage.removeItem('token');
+    sessionStorage.clear();
+
+    try {
+      await fetch('/api/casos/logout/', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (e) {
+      // Ignora erro se rota não existir
+    }
+
+    setIsLogged(false);
+    setShowMenu(false);
+    navigate('/');
+  };
 
   return (
     <div className="navbar">
@@ -110,16 +115,16 @@ const NavBar = () => {
           Participantes
         </NavLink>
 
-        {/* Se logado, vai direto pro upload; se não, vai pro login */}
+        {/* Direciona para Upload se logado, ou Login se deslogado */}
         <NavLink
-          to={isStaff ? '/UploadPlanilhas' : '/Login'}
+          to={isLogged ? '/UploadPlanilhas' : '/Login'}
           className={({ isActive }) => (isActive ? 'active' : '')}
           onClick={() => setShowMenu(false)}
         >
           Upload dados
         </NavLink>
 
-        {/* Dropdown Projetos */}
+        {/* Dropdown de Projetos */}
         <div ref={modalRef} style={{ position: 'relative' }}>
           <button
             type="button"
@@ -170,13 +175,12 @@ const NavBar = () => {
           Publicações
         </NavLink>
 
-        {/* Botão de Sair condicional */}
-        {isStaff && (
+        {isLogged && (
           <button
             type="button"
             className="projetosBtn"
             onClick={handleLogout}
-            style={{ color: '#ff6b6b' }}
+            style={{ color: '#ff7878'}}
           >
             Sair
           </button>

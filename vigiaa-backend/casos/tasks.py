@@ -933,7 +933,7 @@ def task_processar_armadilhas(self, job_id, arquivo_path, celula_cabecalho=None,
 
         if h_idx is None:
             df_temp = pd.read_excel(arquivo_path, header=None, engine=engine)
-            h_idx = next((i for i, row in df_temp.iterrows() if any("Número" in str(x) or "Tipo Armadilha" in str(x) for x in row)), 0)
+            h_idx = next((i for i, row in df_temp.iterrows() if any("Número" in str(x)                                                                                                                                                                                                                                                                                                                                                                                                                                                                  or "Tipo Armadilha" in str(x) for x in row)), 0)
 
         df = pd.read_excel(arquivo_path, header=h_idx, engine=engine).dropna(how='all')
         colunas_limpas = [str(c).strip() for c in df.columns]

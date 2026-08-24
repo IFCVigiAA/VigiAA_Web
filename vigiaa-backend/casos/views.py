@@ -38,7 +38,6 @@ CAMPOS_BANCO_POR_TIPO = {
         'prim_visita': '1ª Visita',
         'situacao': 'Situação do Caso',
         'observacoes': 'Observações',
-        'recebido': 'Data de Recebimento'
     },
     'pontos': {
         'municipio': 'Município',
