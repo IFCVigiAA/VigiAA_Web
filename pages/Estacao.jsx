@@ -27,6 +27,7 @@ const Estacao = () => {
             <li><strong>DHT22</strong> – sensor de temperatura e umidade</li>
             <li><strong>BMP180</strong> – sensor de pressão atmosférica</li>
             <li><strong>ESP32</strong> – módulo Wi-Fi para envio dos dados</li>
+            <li><strong>Impressão 3D</strong> – estrutura e carcaça da estação </li>
           </ul>
         </div>
       </div>

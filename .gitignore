@@ -36,3 +36,9 @@ dist/
 # IDE
 .vscode/
 .idea/
+
+vigiaa-backend/media/
+media/
+temp_uploads
+*.geojson
+teste_*

@@ -1,7 +1,6 @@
 .body {
   max-width: 960px;
   margin: 0 auto;
-
   color: #000000;
   padding-top: 10vh;
   padding-left: 20px;
@@ -51,14 +50,13 @@
 .banner p {
   font-size: 12px;
   margin-bottom: 5vh;
-  margin-top: -2px;
-  text-align: center; 
+  margin-left: 47px;
 }
 
 .banner img {
   border-radius: 5px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.4); 
-  max-width: 100%; 
+  max-width: 90%; 
   height: auto;    
   display: block;  
   margin: 0 auto;  

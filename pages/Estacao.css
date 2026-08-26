@@ -8,7 +8,6 @@ html, body {
   padding: 40px 20px;
   margin: 0 auto;
   max-width: 1200px;
-
   box-sizing: border-box;
 }
 
@@ -61,15 +60,10 @@ html, body {
 }
 
 .tech-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
   text-align: left;
 }
 
 .tech-list li {
-  margin-bottom: 10px;
   font-size: 1.05rem;
   padding: 10px 12px 10px 28px;
-  border-radius: 6px;
 }

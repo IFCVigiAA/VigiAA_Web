@@ -13,7 +13,7 @@
         <div className="sobre-banner">
           <div className="text-box">
             <h1 className="main-title">Plataforma Georreferenciada VigiAA</h1>
-            <h2 className="subtitle">Vigilância do Aedes Aegypti</h2>
+            <h2 className="subtitle">Vigilância do Aedes aegypti</h2>
           </div>
           <div className="logo-box">
             <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logoSobre" />
@@ -40,7 +40,7 @@
 
           <div className="sobre-section">
             <h2>Arquitetura e Tecnologias Utilizadas</h2>
-            <p>A plataforma foi projetada sob uma arquitetura robusta e distribuída, utilizando tecnologias como:</p>
+            
             <ul className="tech-list">
               <li><strong>React</strong> – Engenharia do ecossistema frontend para a construção de uma interface dinâmica e de alta responsividade.</li>
               <li><strong>Django & Django REST Framework</strong> – Arquitetura de backend robusta, responsável pelas regras de negócio, APIs seguras e orquestração do sistema.</li>
