@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import logoVigiaa from '/logos/logo.svg'; // Importação direta pelo Vite (carregamento instantâneo)
 import './NavBar.css';
 
 const NavBar = () => {
@@ -9,7 +10,7 @@ const NavBar = () => {
 
   const modalRef = useRef(null);
   const navigate = useNavigate();
-  const location = useLocation(); // Reavalia a autenticação a cada troca de rota
+  const location = useLocation();
 
   const toggleModal = () => setShowModal(prev => !prev);
   const toggleMenu = () => setShowMenu(prev => !prev);
@@ -25,41 +26,11 @@ const NavBar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // 🔐 Verifica se há token salvo no navegador sempre que a página/rota muda
+  // 🔐 Checagem rápida de Login (Sem fazer fetch de rede pesado a cada navegação)
   useEffect(() => {
-    async function verificarAutenticacao() {
-      const token = localStorage.getItem('access') || localStorage.getItem('token');
-
-      // Se não há token, está 100% deslogado
-      if (!token) {
-        setIsLogged(false);
-        return;
-      }
-
-      // Se tem token, valida no backend passando o Bearer Token
-      try {
-        const authHeader = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-        const res = await fetch('/api/casos/me/', {
-          headers: {
-            'Authorization': authHeader,
-          },
-          credentials: 'include',
-        });
-
-        if (res.ok) {
-          setIsLogged(true);
-        } else {
-          // Se o backend recusar o token por expiração
-          setIsLogged(false);
-        }
-      } catch (err) {
-        // Fallback: se houver token local, considera logado para renderizar o botão
-        setIsLogged(!!token);
-      }
-    }
-
-    verificarAutenticacao();
-  }, [location.pathname]); // Executa sempre que a URL mudar (ex: ao sair do /Login para /UploadPlanilhas)
+    const token = localStorage.getItem('access') || localStorage.getItem('token');
+    setIsLogged(!!token);
+  }, [location.pathname]);
 
   // Função de logout
   const handleLogout = async () => {
@@ -74,7 +45,7 @@ const NavBar = () => {
         credentials: 'include',
       });
     } catch (e) {
-      // Ignora erro se rota não existir
+      // Ignora erro
     }
 
     setIsLogged(false);
@@ -87,7 +58,7 @@ const NavBar = () => {
       <div className="NavTitle">
         <NavLink to="/" className="logo">
           <img
-            src={import.meta.env.BASE_URL + 'logos/logo.svg'}
+            src={logoVigiaa}
             alt="Logo VigiAA"
             className="logoNav"
           />
@@ -115,7 +86,6 @@ const NavBar = () => {
           Participantes
         </NavLink>
 
-        {/* Direciona para Upload se logado, ou Login se deslogado */}
         <NavLink
           to={isLogged ? '/UploadPlanilhas' : '/Login'}
           className={({ isActive }) => (isActive ? 'active' : '')}
