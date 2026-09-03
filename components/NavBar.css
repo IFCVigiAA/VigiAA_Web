@@ -134,51 +134,68 @@
     transform: translateX(100%);
     opacity: 0;
     pointer-events: none;
-    display: flex;
+    display: none;
     flex-wrap: nowrap;
     overflow-y: auto;
     z-index: 9999;
+    margin-right: 0;
   }
-  
-  .NavButtons {
-      display: none; 
-  }
-  
 
   .NavButtons.show {
-    display: flex; 
+    display: flex;
     transform: translateX(0);
     opacity: 1;
     pointer-events: auto;
   }
 
-
-  .NavButtons a,
-  .NavButtons button {
+  /* Garante que os links ocupem 100% da largura clicável */
+  .NavButtons a {
     width: 100%;
     text-align: center;
     padding: 20px 0;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    box-sizing: border-box;
   }
 
+  /* 1. Expande a div wrapper do botão "Projetos" */
+  .NavButtons > div {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 2. Expande o botão "Projetos" para toda a largura da tela */
+  .NavButtons .projetosBtn {
+    width: 100%;
+    text-align: center;
+    padding: 20px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0;
+    box-sizing: border-box;
+  }
 
   .hamburger-menu {
     display: block;
   }
 
+  /* 3. Estilização do Submenu de Projetos no Mobile */
   .projetosModal {
     position: static;
     background: none;
     border: none;
     box-shadow: none;
     padding: 0;
-    margin-top: 10px;
+    margin-top: 0;
     width: 100%;
   }
 
   .projetosModal a {
-    padding-left: 30px;
-    border-bottom: none;
-    text-align: left;
+    width: 100%;
+    text-align: center;
+    padding: 16px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background-color: rgba(0, 0, 0, 0.15); /* Destaque visual sutil para subitens */
+    font-size: 15px;
   }
 }
