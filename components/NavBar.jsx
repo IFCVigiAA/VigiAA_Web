@@ -65,10 +65,13 @@ const NavBar = () => {
         </NavLink>
       </div>
 
-      <button className="hamburger-menu" onClick={toggleMenu} aria-label="Abrir Menu">
-        &#9776;
+      <button 
+        className="hamburger-menu" 
+        onClick={toggleMenu} 
+        aria-label={showMenu ? "Fechar Menu" : "Abrir Menu"}
+      >
+        {showMenu ? '✕' : '☰'}
       </button>
-
       <div className={`NavButtons ${showMenu ? 'show' : ''}`}>
         <NavLink
           to="/"
@@ -114,6 +117,15 @@ const NavBar = () => {
                 }}
               >
                 VigiAA
+              </NavLink>
+              <NavLink
+                to="/SobreApp"
+                onClick={() => {
+                  setShowModal(false);
+                  setShowMenu(false);
+                }}
+              >
+                VigiAA App
               </NavLink>
               <NavLink
                 to="/Educação"

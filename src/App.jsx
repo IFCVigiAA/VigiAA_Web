@@ -9,6 +9,7 @@ import Estação from "../pages/Estacao";
 import Publicações from "../pages/Publicacoes";
 import UploadPlanilhas from "../pages/Upload_planilhas";
 import Login from "../pages/Login";
+import SobreApp from "../pages/SobreApp";
 
 
 
@@ -25,6 +26,7 @@ function App() {
       <Route path="/Publicações" element={<Publicações/>} />
       <Route path="/UploadPlanilhas" element={<UploadPlanilhas />} />
       <Route path="/Login" element={<Login />} />
+      <Route path="SobreApp" element={<SobreApp />} /> 
     </Routes>
    </Router>
   )

@@ -177,6 +177,8 @@
 
   .hamburger-menu {
     display: block;
+    position: relative;
+    z-index: 10000;
   }
 
   /* 3. Estilização do Submenu de Projetos no Mobile */
