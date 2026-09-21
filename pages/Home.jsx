@@ -56,16 +56,7 @@ function Home() {
       <p className="mapTitle">{mapTitle}</p>
 <br />
       <div className="mapButtons">
-        <button
-          onClick={() => {
-            setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'map_src/index.html');
-            setMapTitle('Mapa Principal');
-            if (document.fullscreenElement) document.exitFullscreen();
-          }}
-        >
-          Mapa GeoServer + Leaflet
-        </button>
+        
         {/* <button
           onClick={() => {
             setIframeLoaded(false);
