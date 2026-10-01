@@ -98,6 +98,22 @@ const Publicações = () => {
       evento_revista: 'ENSIPEX',
       link: 'https://ime.events/v-ensipex/anais?utm_source=direct&utm_medium=organic#trabalho/81092/plataforma-vigiaa-mapeamento-do-aedes-aegypti-em-camboriu-sc',
       categoria: 'Plataforma VigiAA',
+    },
+    {
+      titulo: 'CROWDSOURCING APLICADO À VIGILÂNCIA E AO CONTROLE DO Aedes aegypti: DESENVOLVIMENTO DO APLICATIVO VigiAAapp',
+      autores: 'Fischer, L. M. et al.',
+      data: 'Setembro de 2026',
+      evento_revista: 'FICE',
+      link: 'https://drive.google.com/file/d/1wKxscrOZTQ9w0cOvb6l3MJAyEH3EQLKz/view',
+      categoria: 'Plataforma VigiAA',
+    },
+    {
+      titulo: 'ANÁLISE DE DADOS SOBRE DENGUE E Aedes aegypti: UM ENSAIO EM CAMBORIÚ/SC A PARTIR DA PLATAFORMA VigiAA',
+      autores: 'Fischer, L. M. et al.',
+      data: 'Setembro de 2026',
+      evento_revista: 'FICE',
+      link: 'https://drive.google.com/file/d/1wKxscrOZTQ9w0cOvb6l3MJAyEH3EQLKz/view',
+      categoria: 'Plataforma VigiAA',
     }
   ];
 

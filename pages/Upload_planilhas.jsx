@@ -9,6 +9,7 @@ const endpoints = {
   armadilhas: '/api/casos/upload/armadilhas/',
   pontos: '/api/casos/upload/pontos/',
   casos: '/api/casos/upload/positivos/',
+  ovitrampas: '/api/casos/upload/positivos',
   geoprocessar: '/api/casos/geoprocessar-positivos/',
   extrairCabecalho: '/api/casos/extrair-cabecalho/',
 }
@@ -20,6 +21,7 @@ const uploadKeyByTipo = {
   focos: 'focos',
   armadilhas: 'armadilhas',
   pontos: 'pontos',
+  ovitrampas: 'ovitrampas',
 }
 
 export default function UploadPlanilhas() {
@@ -28,6 +30,7 @@ export default function UploadPlanilhas() {
     pontos: null,
     focos: null,
     armadilhas: null,
+    ovitrampas: null,
   })
 
   const [celulaCabecalho, setCelulaCabecalho] = useState('')
@@ -332,8 +335,18 @@ export default function UploadPlanilhas() {
               disabled={enviando}
             />
           </label>
-
           <label className="vigiaa-field">
+            <span>Ovitrampas</span>
+            <input
+              type="file"
+              name="ovitrampas"
+              accept=".xlsx, .xls, .ods"
+              onChange={handleChange}
+              disabled={enviando}
+            />
+          </label>
+
+         {/* <label className="vigiaa-field">
             <span>Armadilhas</span>
             <input
               type="file"
@@ -342,7 +355,7 @@ export default function UploadPlanilhas() {
               onChange={handleChange}
               disabled={enviando}
             />
-          </label>
+          </label> */}
         </div>
 
         <div className="vigiaa-actions">

@@ -55,7 +55,7 @@
             <p>
               O VigiAA quebra o gargalo do processamento manual de dados de saúde pública. Ele centraliza de forma inteligente 
               o ciclo completo da informação: desde o upload rápido de relatórios fragmentados (Casos Positivos, Pontos Estratégicos, 
-              Armadilhas e Focos de Aedes) até a geração automática de mapas epidemiológicos de risco. 
+              Ovitrampas e Focos de Aedes) até a geração automática de mapas epidemiológicos de risco. 
             </p>
             <p>
               Com isso, o projeto reduz drasticamente o tempo de resposta das equipes de Vigilância Sanitária e Ambiental, 

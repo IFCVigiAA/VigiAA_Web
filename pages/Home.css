@@ -44,15 +44,14 @@ hr {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  margin-bottom: 50px;
   width: 100%;
   position: relative;
 }
 
 .mapaHome {
   display: block !important;
-  width: 50% !important;
-  height: 70vh !important;
+  width: 87% !important;
+  height: 75vh !important;
   border: 2px solid rgb(7, 126, 68) !important;
   border-radius: 5px;
   margin: 0 auto 20px auto !important;

@@ -54,29 +54,8 @@ function Home() {
       {!isFullscreen && <NavBar />}
       <br /><br />
       <p className="mapTitle">{mapTitle}</p>
-<br />
+      <br />
       <div className="mapButtons">
-        
-        {/* <button
-          onClick={() => {
-            setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'mapa_postgres.html');
-            setMapTitle('Mapa GeoServer Remoto');
-            if (document.fullscreenElement) document.exitFullscreen();
-          }}
-        >
-          Mapa Folium
-        </button>
-        <button
-          onClick={() => {
-            setIframeLoaded(false);
-            setMapSrc(import.meta.env.BASE_URL + 'mapa_altimetrico.html');
-            setMapTitle('Mapa do PostGIS');
-            if (document.fullscreenElement) document.exitFullscreen();
-          }}
-        >
-          Mapa Altimétrico
-        </button> */}
       </div>
 
       <div className={`mapSection ${isFullscreen ? 'fullscreen-active' : ''}`}>
