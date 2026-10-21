@@ -58,13 +58,7 @@ const Participantes = () => {
               lattesUrl="http://lattes.cnpq.br/5974108989255365"
               linkedinUrl="https://www.linkedin.com/in/ianmuradaraujoferreira/"
             />
-            <ParticipanteCard
-              nome="Kayo K. de Oliveira"
-              cargo="Bolsista"
-              foto={import.meta.env.BASE_URL + 'participantes/kayo.jpg'}
-              lattesUrl=""
-              linkedinUrl="https://www.linkedin.com/in/kayo-kuhlmann-de-oliveira-0a98b03a9?utm_source=share_via&utm_content=profile&utm_medium=member_android"
-            />
+            
             <ParticipanteCard
               nome="Lissandra Maiara Fischer"
               cargo="Bolsista"
@@ -78,6 +72,13 @@ const Participantes = () => {
               foto={import.meta.env.BASE_URL + 'participantes/luis.png'}
               lattesUrl="http://lattes.cnpq.br/4395447968887299"
               linkedinUrl="https://www.linkedin.com/in/luis-henrique-de-melo-santiago-02064a96/"
+            />
+            <ParticipanteCard
+              nome="Vitória W. Pereira"
+              cargo="Bolsista"
+              foto={import.meta.env.BASE_URL + 'participantes/vitória.png'}
+              lattesUrl="http://lattes.cnpq.br/9979795139998789"
+              linkedinUrl="https://www.linkedin.com/in/vitoria-w-pereira/"
             />
             
           </ul>
@@ -124,6 +125,13 @@ const Participantes = () => {
               foto={import.meta.env.BASE_URL + 'participantes/caua.png'}
               lattesUrl="http://lattes.cnpq.br/6896619338301324"
               linkedinUrl=""
+            />
+            <ParticipanteCard
+              nome="Kayo K. de Oliveira"
+              cargo="Bolsista"
+              foto={import.meta.env.BASE_URL + 'participantes/kayo.jpg'}
+              lattesUrl=""
+              linkedinUrl="https://www.linkedin.com/in/kayo-kuhlmann-de-oliveira-0a98b03a9?utm_source=share_via&utm_content=profile&utm_medium=member_android"
             />
           </ul>
         </div>
