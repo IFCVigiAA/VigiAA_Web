@@ -9,11 +9,12 @@ import geocoder
 from celery import shared_task
 from django.db import connection, transaction
 from django.contrib.gis.geos import Point
-
+from casos.importadores._utils import to_int
+from casos.importadores._utils import col, hash_row, to_date, to_int, to_str
 from casos.utils.log_errors import ErrorLogger
 from .models import (
     LogSincronizacao, PontoEstrategicoTemp, FocoTemp,
-    ArmadilhaTemp, CasoPositivoTemp, CasoPositivoTempGL
+    ArmadilhaTemp, CasoPositivoTemp, CasoPositivoTempGL, OvitrampaTemp
 )
 
 logger = logging.getLogger(__name__)
@@ -84,22 +85,20 @@ CENTRO_MAPA_CAMBORIU = (-27.0245, -48.6534)
 LIMITES_GEO = [-27.2000, -26.9000, -48.8000, -48.5000]
 
 ESQUEMA_SINONIMOS_CASOS = {
-    'local_atendimento': ['local_atendimento', 'local_notificacao', 'local_de_notificacao', 'local_de_atendimento', 'unidade'],
-    'inicio_sintomas': ['inicio_sintomas', 'data_sintomas', 'inicio_dos_sintomas', 'dt_sintomas'],
-    'notificacao': ['notificacao', 'data_not', 'data_notificacao', 'dt_notificacao'],
-    'sinan': ['sinan', 'n_sinan', 'numero_sinan', 'num_sinan'],
-    'nome': ['nome', 'nome_completo', 'paciente', 'nome_do_paciente'],
-    'endereco': ['endereco', 'endereco_completo', 'logradouro', 'rua', 'end'],
-    'bairro': ['bairro', 'localidade', 'bairros'],
-    'nome_mae': ['nome_da_mae', 'nome_mae', 'mae'],
-    'data_nasc': ['data_de_nascimento', 'nascimento', 'data_nasc', 'dt_nasc', 'dt_nascimento'],
-    'resultado': ['resultado', 'classificacao', 'resultado_final'],
-    'aplicacao': ['aplicacao', 'data_aplicacao', 'dt_aplicacao'],
-    'agentes': ['agentes', 'agente', 'responsavel', 'agente_visita'],
-    'prim_visita': ['1_visita', 'prim_visita', 'primeira_visita', 'visita', 'data_visita', '1a_visita'],
-    'situacao': ['situacao', 'status', 'situacao_caso'],
-    'observacoes': ['observacoes', 'observacao', 'obs'],
-    'recebido': ['recebido', 'data_recebido', 'dt_recebido']
+    'local_atendimento': ['LOCAL NOTIFICAÇÃO', 'LOCAL_NOTIFICACAO', 'LOCAL ATENDIMENTO', 'UNIDADE'],
+    'notificacao': ['DATA NOT.', 'DATA_NOTIFICACAO', 'NOTIFICACAO', 'DATA NOTIFICACAO'],
+    'inicio_sintomas': ['INICIO SINTOMAS', 'INICIO_SINTOMAS', 'DATA SINTOMAS', 'DT_SINTOMAS'],
+    'sinan': ['SINAN', 'N_SINAN', 'NUMERO_SINAN', 'NUM_SINAN'],
+    'nome': ['NOME COMPLETO', 'NOME_COMPLETO', 'NOME', 'PACIENTE'],
+    'data_nasc': ['NASCIMENTO', 'DATA_NASC', 'DATA DE NASCIMENTO', 'DT_NASC'],
+    'sexo': ['SEXO'],
+    'endereco': ['ENDEREÇO', 'ENDERECO', 'LOGRADOURO', 'RUA'],
+    'bairro': ['BAIRRO', 'LOCALIDADE'],
+    'resultado': ['RESULTADO', 'CLASSIFICACAO'],
+    'latitude': ['LATITUDE', 'LAT', 'Y'],
+    'longitude': ['LONGITUDE', 'LNG', 'LON', 'X'],
+    'situacao': ['SITUAÇÃO', 'SITUACAO', 'STATUS'],
+    'observacoes': ['OBSERVAÇÃO', 'OBSERVACAO', 'OBS']
 }
 
 
@@ -274,6 +273,10 @@ def _geocodificar_cascata(endereco, bairro):
 def task_processar_positivos(self, job_id, arquivo_path, celula_cabecalho=None, mapeamento_customizado=None):
     try:
         log = LogSincronizacao.objects.get(id=job_id)
+        log.status = "processando"
+        log.mensagem = "Lendo planilha padronizada de casos positivos..."
+        log.save()
+
         engine = 'odf' if arquivo_path.endswith('.ods') else None
 
         if isinstance(mapeamento_customizado, str):
@@ -292,7 +295,7 @@ def task_processar_positivos(self, job_id, arquivo_path, celula_cabecalho=None, 
             df_temp = pd.read_excel(arquivo_path, header=None, engine=engine)
             h_idx = next((
                 i for i, row in df_temp.iterrows()
-                if any(k in str(x).upper() for x in row for k in ["SINAN", "RESULTADO", "NOME", "PACIENTE", "ENDEREÇO", "BAIRRO"])
+                if any(k in str(x).upper() for x in row for k in ["SINAN", "RESULTADO", "NOME COMPLETO", "LOCAL NOTIFICAÇÃO", "ENDEREÇO"])
             ), 0)
 
         df = pd.read_excel(arquivo_path, header=h_idx, engine=engine).dropna(how='all')
@@ -301,34 +304,35 @@ def task_processar_positivos(self, job_id, arquivo_path, celula_cabecalho=None, 
         cols = _resolver_colunas_casos(df, mapeamento_customizado)
 
         c_local   = cols.get('local_atendimento')
-        c_inicio  = cols.get('inicio_sintomas')
         c_notif   = cols.get('notificacao')
+        c_inicio  = cols.get('inicio_sintomas')
         c_sinan   = cols.get('sinan')
         c_nome    = cols.get('nome')
+        c_nasc    = cols.get('data_nasc')
+        c_sexo    = cols.get('sexo')
         c_end     = cols.get('endereco')
         c_bairro  = cols.get('bairro')
-        c_mae     = cols.get('nome_mae')
-        c_nasc    = cols.get('data_nasc')
         c_res     = cols.get('resultado')
-        c_aplic   = cols.get('aplicacao')
-        c_agentes = cols.get('agentes')
-        c_visita  = cols.get('prim_visita')
+        c_lat     = cols.get('latitude')
+        c_lng     = cols.get('longitude')
         c_sit     = cols.get('situacao')
         c_obs     = cols.get('observacoes')
-        c_rec     = cols.get('recebido')
+
+        # Limpa staging local antigo
+        CasoPositivoTemp.objects.all().delete()
 
         params_temp = []
+        total_rows = len(df)
+
         for idx, r in df.iterrows():
             nome_raw = r.get(c_nome) if c_nome and c_nome in df.columns else None
             nome_v = str(nome_raw).strip().upper() if pd.notna(nome_raw) else ""
             if not nome_v or nome_v in ['NAN', 'NULL', 'NONE', 'NAT', '']:
                 continue
 
-            # Aplicação da regra de negócio de endereço + fuzzy matching
             end_original = _get_str(r, c_end, 255)
             end_tratado = _corrigir_endereco_fuzzy(end_original) if end_original else None
 
-            # Recuperação de Bairro embutido no endereço
             bairro_v = _get_str(r, c_bairro, 50)
             if not bairro_v and end_original and ',' in end_original:
                 partes = end_original.split(',')
@@ -338,9 +342,6 @@ def task_processar_positivos(self, job_id, arquivo_path, celula_cabecalho=None, 
             dt_inicio = _parse_data_segura(r.get(c_inicio)) if c_inicio else None
             dt_notif  = _parse_data_segura(r.get(c_notif)) if c_notif else None
             dt_nasc   = _parse_data_segura(r.get(c_nasc)) if c_nasc else None
-            dt_aplic  = _parse_data_segura(r.get(c_aplic)) if c_aplic else None
-            dt_visita = _parse_data_segura(r.get(c_visita)) if c_visita else None
-            dt_rec    = _parse_data_segura(r.get(c_rec)) if c_rec else None
 
             val_sinan = r.get(c_sinan) if c_sinan and c_sinan in df.columns else None
             try:
@@ -349,41 +350,41 @@ def task_processar_positivos(self, job_id, arquivo_path, celula_cabecalho=None, 
                 val_sinan_clean = None
 
             val_local   = _get_str(r, c_local, 100)
-            val_mae     = _get_str(r, c_mae, 100)
             val_res     = _get_str(r, c_res, 50)
-            val_agentes = _get_str(r, c_agentes, 150)
             val_sit     = _get_str(r, c_sit, 50)
             val_obs     = _get_str(r, c_obs, 255)
 
             dados = (
                 val_local.upper() if val_local else None,
-                dt_inicio,
                 dt_notif,
+                dt_inicio,
                 val_sinan_clean,
                 nome_v,
+                dt_nasc,
+                _get_str(r, c_sexo, 20),
                 end_tratado.upper() if end_tratado else None,
                 bairro_v.upper() if bairro_v else None,
-                val_mae.upper() if val_mae else None,
-                dt_nasc,
-                val_obs,
                 val_res.upper() if val_res else None,
-                dt_aplic,
-                val_agentes.upper() if val_agentes else None,
-                dt_visita,
+                _get_str(r, c_lat, 50),
+                _get_str(r, c_lng, 50),
                 val_sit.upper() if val_sit else None,
-                dt_rec
+                val_obs
             )
             params_temp.append(dados)
+
+            if idx % 50 == 0 or idx == total_rows - 1:
+                log.progresso = int(((idx + 1) / total_rows) * 100)
+                log.save()
 
         if params_temp:
             with transaction.atomic():
                 with connection.cursor() as cursor:
                     sql = """
                         INSERT INTO casos_positivos_temp 
-                        (local_atendimento, inicio_sintomas, notificacao, sinan, nome, 
-                         endereco, bairro, nome_mae, data_nasc, observacoes, resultado, 
-                         aplicacao, agentes, prim_visita, situacao, observacao2)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        (local_atendimento, notificacao, inicio_sintomas, sinan, nome, 
+                         data_nasc, sexo, endereco, bairro, resultado, latitude, 
+                         longitude, situacao, observacoes)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                         ON CONFLICT DO NOTHING
                     """
                     cursor.executemany(sql, params_temp)
@@ -404,13 +405,14 @@ def task_processar_positivos(self, job_id, arquivo_path, celula_cabecalho=None, 
 
 
 # ==============================================================================
-# 2. TASK GEOPROCESSAMENTO (CASCATA MULTINÍVEL COM BOUNDING BOX)
+# 2. TASK GEOPROCESSAMENTO 
 # ==============================================================================
 
 @shared_task(bind=True)
 def task_geoprocessar_pendentes(self, job_id):
     try:
         log = LogSincronizacao.objects.get(id=job_id)
+        log.status = "processando"
         log.mensagem = "Iniciando geoprocessamento em cascata dos endereços..."
         log.save()
 
@@ -424,7 +426,7 @@ def task_geoprocessar_pendentes(self, job_id):
             registros = [dict(zip(colunas, row)) for row in cursor.fetchall()]
 
         if not registros:
-            log.status = "erro"
+            log.status = "finalizado"
             log.mensagem = "Nenhum dado pendente encontrado na tabela temporária."
             log.save()
             return
@@ -434,13 +436,25 @@ def task_geoprocessar_pendentes(self, job_id):
 
         for idx, r in enumerate(registros):
             try:
-                lat, lon = _geocodificar_cascata(r.get('endereco'), r.get('bairro'))
+                lat, lon = None, None
+
+                # 1. Tenta usar as coordenadas diretas se vieram na planilha
+                if r.get('latitude') and r.get('longitude'):
+                    try:
+                        lat = float(str(r.get('latitude')).replace(',', '.'))
+                        lon = float(str(r.get('longitude')).replace(',', '.'))
+                    except (ValueError, TypeError):
+                        lat, lon = None, None
+
+                # 2. Fallback: Geocodificação em cascata caso não existam coordenadas
+                if not lat or not lon:
+                    lat, lon = _geocodificar_cascata(r.get('endereco'), r.get('bairro'))
+
                 dados = (
-                    r.get('local_atendimento'), r.get('inicio_sintomas'), r.get('notificacao'),
-                    r.get('sinan'), r.get('nome'), r.get('endereco'), r.get('bairro'),
-                    r.get('nome_mae'), r.get('data_nasc'), r.get('observacoes'),
-                    r.get('resultado'), r.get('aplicacao'), r.get('agentes'),
-                    r.get('prim_visita'), r.get('situacao'), r.get('observacao2'),
+                    r.get('local_atendimento'), r.get('notificacao'), r.get('inicio_sintomas'),
+                    r.get('sinan'), r.get('nome'), r.get('data_nasc'), r.get('sexo'),
+                    r.get('endereco'), r.get('bairro'), r.get('resultado'),
+                    r.get('situacao'), r.get('observacoes'),
                     f"POINT({lon} {lat})"
                 )
                 params_gl.append(dados)
@@ -448,7 +462,7 @@ def task_geoprocessar_pendentes(self, job_id):
                 continue
 
             if idx % 10 == 0 or idx == total - 1:
-                log.progresso = int((idx / total) * 100)
+                log.progresso = int(((idx + 1) / total) * 100)
                 log.mensagem = f"Processando: {idx + 1} de {total} endereços..."
                 log.save()
 
@@ -457,10 +471,10 @@ def task_geoprocessar_pendentes(self, job_id):
                 with connection.cursor() as cursor:
                     sql_gl = """
                         INSERT INTO casos_positivos_temp_gl
-                        (local_atendimento, inicio_sintomas, notificacao, sinan, nome, 
-                         endereco, bairro, nome_mae, data_nasc, observacoes, resultado, 
-                         aplicacao, agentes, prim_visita, situacao, observacao2, geometry)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, ST_GeomFromText(%s, 4674))
+                        (local_atendimento, notificacao, inicio_sintomas, sinan, nome, 
+                         data_nasc, sexo, endereco, bairro, resultado, situacao, 
+                         observacoes, geometry)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, ST_GeomFromText(%s, 4674))
                         ON CONFLICT DO NOTHING
                     """
                     cursor.executemany(sql_gl, params_gl)
@@ -472,7 +486,6 @@ def task_geoprocessar_pendentes(self, job_id):
 
     except Exception as e:
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
-
 
 # ==============================================================================
 # AUXILIAR: CORREÇÃO INTELIGENTE DE ESCALA DE COORDENADAS (FOCOS / ARMADILHAS)
@@ -547,7 +560,7 @@ def _corrigir_coordenadas_escalavel(df, coluna):
 
 
 # ==============================================================================
-# 3. TASK FOCOS (COM AUTO-CORREÇÃO DE COORDENADAS E DE-PARA FLEXÍVEL)
+# 3. TASK FOCOS 
 # ==============================================================================
 
 @shared_task(bind=True)
@@ -556,7 +569,6 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
         log = LogSincronizacao.objects.get(id=job_id)
         erros = ErrorLogger()
 
-        # 1. Seleção dinâmica do motor de leitura conforme a extensão
         _, ext = os.path.splitext(arquivo_path)
         ext = ext.lower()
         if ext == '.ods':
@@ -572,13 +584,8 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
             except Exception:
                 mapeamento_customizado = None
 
-        print("\n" + "="*60, flush=True)
-        print(">>> [CELERY FOCOS] MAPEAMENTO RECEBIDO:", mapeamento_customizado, flush=True)
-        print("="*60 + "\n", flush=True)
-
         df_raw = pd.read_excel(arquivo_path, header=None, nrows=30, engine=engine)
 
-        # 2. Identificação inteligente do cabeçalho por pontuação de interseção
         h_idx = None
         if celula_cabecalho:
             match = re.search(r'\d+', str(celula_cabecalho))
@@ -587,9 +594,9 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
 
         if h_idx is None:
             TERMOS_RECONHECIDOS = {
-                'foco', 'n_foco', 'regional', 'municipio', 'localidade', 'bairro',
+                'foco', 'n_foco', 'regional', 'municipio', 'bairro', 'endereco',
                 'atividade', 'tipo_atividade', 'coleta', 'data_coleta', 'exame',
-                'imovel', 'deposito', 'latitude', 'longitude', 'lat', 'lng', 'lon'
+                'imovel', 'deposito', 'latitude', 'longitude', 'aquaticas'
             }
 
             melhor_linha = 0
@@ -605,25 +612,28 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
 
             h_idx = melhor_linha if max_matches >= 3 else 0
 
-        # 3. Carrega a planilha a partir do cabeçalho real
         df = pd.read_excel(arquivo_path, header=h_idx, engine=engine).dropna(how='all')
         df.columns = [str(c).replace('\n', ' ').strip() for c in df.columns]
 
-        print(f">>> [CELERY FOCOS] Linha de cabeçalho utilizada: {h_idx}", flush=True)
-        print(f">>> [CELERY FOCOS] Colunas na planilha: {list(df.columns)}", flush=True)
-
-        # 4. Esquema relacional oficial do banco vigiaa_temp
+        # Mapeamento DE_PARA oficial atualizado para as 16 colunas reais
         DE_PARA_PADRAO = {
-            'n_foco': 'Nº Foco', 'regional': 'Regional', 'municipio': 'Município',
-            'localidade': 'Localidade', 'rua_numero': 'Rua/número', 'complemento': 'Complemento',
-            'quarteirao': 'Quarteirão', 'imovel': 'Imóvel', 'deposito': 'Depósito',
-            'tipo_atividade': 'Tipo de Atividade', 'data_coleta': 'Data da Coleta',
-            'data_entrada': 'Data de Entrada', 'data_exame': 'Data do Exame',
-            'a_aegypti_form_aquaticas': 'A. aegypti formas aquáticas',
-            'a_aegypti_form_adultas': 'A. aegypti formas adultas',
-            'a_albopictus_form_aquaticas': 'A. albopictus formas aquáticas',
-            'a_albopictus_form_adultas': 'A. albopictus formas adultas',
-            'ovo_a_aegypti': 'Ovo A. aegypti', 'latitude': 'Latitude', 'longitude': 'Longitude'
+            'n_foco': 'Nº FOCO',
+            'regional': 'REGIONAL',
+            'municipio': 'MUNICÍPIO',
+            'localidade': 'BAIRRO',
+            'rua_numero': 'ENDEREÇO',
+            'complemento': 'COMPLEMENTO',
+            'quarteirao': 'QUARTEIRÃO',
+            'imovel': 'IMÓVEL',
+            'deposito': 'DEPÓSITO',
+            'tipo_atividade': 'TIPO DE ATIVIDADE',
+            'data_coleta': 'DATA DA COLETA',
+            'data_entrada': 'DATA DE ENTRADA',
+            'data_exame': 'DATA DO EXAME',
+            'a_aegypti_form_aquaticas': 'A. AEGYPTI FORMAS AQUÁTICAS',
+            'a_albopictus_form_aquaticas': 'A. ALBOPICTUS FORMAS AQUÁTICAS',
+            'latitude': 'LATITUDE',
+            'longitude': 'LONGITUDE'
         }
 
         DE_PARA = {}
@@ -636,14 +646,12 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
         col_lat = DE_PARA.get('latitude')
         col_lng = DE_PARA.get('longitude')
 
-        # 5. Auto-correção de escala de coordenadas por mediana
         if col_lat and col_lat in df.columns:
             df[col_lat] = _corrigir_coordenadas_escalavel(df, col_lat)
         if col_lng and col_lng in df.columns:
             df[col_lng] = _corrigir_coordenadas_escalavel(df, col_lng)
 
-        # 6. Montagem dos registros e Geometria PostGIS
-        campos_sql = list(DE_PARA_PADRAO.keys()) + ['geometry']
+        campos_sql = list(DE_PARA_PADRAO.keys())
         registros = []
 
         for idx, r in df.iterrows():
@@ -668,21 +676,18 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
 
                     if campo_bd in ['data_coleta', 'data_entrada', 'data_exame']:
                         valores.append(_parse_data_segura(val))
-                    elif campo_bd in ['a_aegypti_form_aquaticas', 'a_aegypti_form_adultas', 'a_albopictus_form_aquaticas', 'a_albopictus_form_adultas', 'ovo_a_aegypti']:
+                    elif campo_bd in ['a_aegypti_form_aquaticas', 'a_albopictus_form_aquaticas']:
                         val_num = pd.to_numeric(val, errors='coerce')
                         valores.append(0 if pd.isna(val_num) else int(val_num))
                     else:
                         valores.append(None if (pd.isna(val) or str(val).strip().upper() in ['NAN', 'NONE', 'NAT']) else str(val).strip())
                 else:
-                    if campo_bd in ['a_aegypti_form_adultas', 'a_albopictus_form_adultas', 'ovo_a_aegypti']:
+                    if campo_bd in ['a_aegypti_form_aquaticas', 'a_albopictus_form_aquaticas']:
                         valores.append(0)
                     else:
                         valores.append(None)
 
-            valores.append(f"POINT({lon_f} {lat_f})")
             registros.append(valores)
-
-        print(f">>> [CELERY FOCOS] Total de registros válidos para inserção: {len(registros)}", flush=True)
 
         if not registros:
             log.status = "erro"
@@ -693,7 +698,7 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
         with connection.cursor() as cursor:
             cursor.execute("TRUNCATE TABLE focos_aedes_temp RESTART IDENTITY;")
 
-        placeholders = ["%s"] * len(DE_PARA_PADRAO.keys()) + ["ST_GeomFromText(%s, 4674)"]
+        placeholders = ["%s"] * len(DE_PARA_PADRAO.keys())
         query = f"""
             INSERT INTO focos_aedes_temp ({", ".join(campos_sql)}) 
             VALUES ({", ".join(placeholders)}) 
@@ -709,7 +714,6 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
         log.save()
 
     except Exception as e:
-        print(f"❌ [CELERY FOCOS] ERRO: {e}", flush=True)
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
         if os.path.exists(arquivo_path):
@@ -729,7 +733,6 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
         log = LogSincronizacao.objects.get(id=job_id)
         erros = ErrorLogger()
 
-        # 1. Seleção dinâmica do motor de leitura conforme a extensão
         _, ext = os.path.splitext(arquivo_path)
         ext = ext.lower()
         if ext == '.ods':
@@ -745,13 +748,8 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
             except Exception:
                 mapeamento_customizado = None
 
-        print("\n" + "="*60, flush=True)
-        print(">>> [CELERY PONTOS] MAPEAMENTO RECEBIDO:", mapeamento_customizado, flush=True)
-        print("="*60 + "\n", flush=True)
-
         df_raw = pd.read_excel(arquivo_path, header=None, nrows=30, engine=engine)
 
-        # 2. Identificação da linha do cabeçalho por pontuação de interseção
         h_idx = None
         if celula_cabecalho:
             match = re.search(r'\d+', str(celula_cabecalho))
@@ -760,9 +758,8 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
 
         if h_idx is None:
             TERMOS_RECONHECIDOS = {
-                'municipio', 'localidade', 'bairro', 'endereco', 'rua', 
-                'numero', 'quarteirao', 'quarteiroes', 'complemento', 
-                'latitude', 'longitude', 'lat', 'lng', 'lon', 'ponto'
+                'pe', 'n_pe', 'regional', 'municipio', 'bairro', 'endereco',
+                'atividade', 'tipo_atividade', 'coleta', 'exame', 'latitude', 'longitude'
             }
 
             melhor_linha = 0
@@ -778,52 +775,50 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
 
             h_idx = melhor_linha if max_matches >= 3 else 0
 
-        # 3. Carrega a planilha oficial e limpa cabeçalhos
         df = pd.read_excel(arquivo_path, header=h_idx, engine=engine).dropna(how='all')
         df.columns = [str(c).replace('\n', ' ').strip() for c in df.columns]
 
-        # Descarta linhas de totais / rodapés
         if not df.empty:
             primeira_coluna = df.columns[0]
             df = df[~df[primeira_coluna].astype(str).str.upper().str.contains("TOTAL", na=False)]
 
-        print(f">>> [CELERY PONTOS] Linha de cabeçalho utilizada: {h_idx}", flush=True)
-        print(f">>> [CELERY PONTOS] Colunas encontradas: {list(df.columns)}", flush=True)
-
-        # 4. Esquema relacional oficial do banco vigiaa_temp (descartando colunas de vistoria)
-        CAMPOS_BD = ['numero', 'municipio', 'localidade', 'endereco', 'quarteiroes', 'complemento', 'latitude', 'longitude']
-        
+        # Mapeamento DE_PARA padronizado para as 17 colunas
         DE_PARA_PADRAO = {
-            'numero': 'Número', 
-            'municipio': 'Município', 
-            'localidade': 'Localidade',
-            'endereco': 'Endereço', 
-            'quarteiroes': 'Quarteirões', 
-            'complemento': 'Complemento',
-            'latitude': 'Latitude', 
-            'longitude': 'Longitude'
+            'n_pe': 'Nº PE',
+            'regional': 'REGIONAL',
+            'municipio': 'MUNICÍPIO',
+            'localidade': 'BAIRRO',
+            'endereco': 'ENDEREÇO',
+            'complemento': 'COMPLEMENTO',
+            'quarteiroes': 'QUARTEIRÃO',  
+            'imovel': 'IMÓVEL',
+            'deposito': 'DEPÓSITO',
+            'tipo_atividade': 'TIPO DE ATIVIDADE',
+            'data_coleta': 'DATA DA COLETA',
+            'data_entrada': 'DATA DE ENTRADA',
+            'data_exame': 'DATA DO EXAME',
+            'a_aegypti_form_aquaticas': 'A. AEGYPTI FORMAS AQUÁTICAS',
+            'a_albopictus_form_aquaticas': 'A. ALBOPICTUS FORMAS AQUÁTICAS',
+            'latitude': 'LATITUDE',
+            'longitude': 'LONGITUDE'
         }
 
         DE_PARA = {}
         if mapeamento_customizado and isinstance(mapeamento_customizado, dict):
-            for campo in CAMPOS_BD:
+            for campo in DE_PARA_PADRAO.keys():
                 DE_PARA[campo] = mapeamento_customizado.get(campo, DE_PARA_PADRAO.get(campo))
         else:
             DE_PARA = DE_PARA_PADRAO
 
         col_lat = DE_PARA.get('latitude')
         col_lng = DE_PARA.get('longitude')
-        col_end = DE_PARA.get('endereco')
-        col_num = DE_PARA.get('numero')
 
-        # 5. Auto-correção de escala de coordenadas (resolve perdas de decimais do Excel)
         if col_lat and col_lat in df.columns:
             df[col_lat] = _corrigir_coordenadas_escalavel(df, col_lat)
         if col_lng and col_lng in df.columns:
             df[col_lng] = _corrigir_coordenadas_escalavel(df, col_lng)
 
-        # 6. Montagem dos registros cadastrais com separação de logradouro/número e PostGIS
-        campos_sql = CAMPOS_BD + ['geometry']
+        campos_sql = list(DE_PARA_PADRAO.keys())
         registros = []
 
         for idx, r in df.iterrows():
@@ -839,52 +834,37 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
             except (ValueError, TypeError):
                 continue
 
-            endereco_original = r.get(col_end) if col_end and col_end in df.columns else None
-            numero_original = r.get(col_num) if col_num and col_num in df.columns else None
+            valores_finais = []
+            for campo_bd in list(DE_PARA_PADRAO.keys()):
+                coluna_planilha = DE_PARA.get(campo_bd)
+                if coluna_planilha and coluna_planilha in df.columns:
+                    val = r.get(coluna_planilha)
 
-            rua_val = str(endereco_original).strip() if pd.notna(endereco_original) else None
-            num_val = str(numero_original).strip() if pd.notna(numero_original) else None
+                    if campo_bd in ['data_coleta', 'data_entrada', 'data_exame']:
+                        valores_finais.append(_parse_data_segura(val))
+                    elif campo_bd in ['a_aegypti_form_aquaticas', 'a_albopictus_form_aquaticas']:
+                        val_num = pd.to_numeric(val, errors='coerce')
+                        valores_finais.append(0 if pd.isna(val_num) else int(val_num))
+                    else:
+                        valores_finais.append(None if (pd.isna(val) or str(val).strip().upper() in ['NAN', 'NONE', 'NAT']) else str(val).strip())
+                else:
+                    if campo_bd in ['a_aegypti_form_aquaticas', 'a_albopictus_form_aquaticas']:
+                        valores_finais.append(0)
+                    else:
+                        valores_finais.append(None)
 
-            # Descarta mapeamentos acidentais de texto completo da rua no campo numero
-            if num_val and (num_val == rua_val or any(log in num_val.upper() for log in ['RUA ', 'AV ', 'AVENIDA ', 'ROD '])):
-                num_val = None
-
-            # Separação regex de endereço e número
-            if rua_val:
-                rua_limpa, num_extraido = _separar_rua_e_numero(rua_val)
-                rua_final = rua_limpa
-                numero_final = num_val or num_extraido
-            else:
-                rua_final = None
-                numero_final = num_val
-
-            linha_dict = {
-                'numero': str(numero_final).strip()[:10] if numero_final else None,
-                'municipio': str(r.get(DE_PARA.get('municipio'))).strip()[:100] if DE_PARA.get('municipio') in df.columns and pd.notna(r.get(DE_PARA.get('municipio'))) else None,
-                'localidade': str(r.get(DE_PARA.get('localidade'))).strip()[:100] if DE_PARA.get('localidade') in df.columns and pd.notna(r.get(DE_PARA.get('localidade'))) else None,
-                'endereco': str(rua_final).strip()[:100] if rua_final else None,
-                'quarteiroes': str(r.get(DE_PARA.get('quarteiroes'))).strip()[:50] if DE_PARA.get('quarteiroes') in df.columns and pd.notna(r.get(DE_PARA.get('quarteiroes'))) else None,
-                'complemento': str(r.get(DE_PARA.get('complemento'))).strip()[:100] if DE_PARA.get('complemento') in df.columns and pd.notna(r.get(DE_PARA.get('complemento'))) else None,
-                'latitude': str(lt).strip()[:100],
-                'longitude': str(ln).strip()[:100],
-            }
-
-            valores_finais = [linha_dict[c] for c in CAMPOS_BD]
-            valores_finais.append(f"POINT({lon_f} {lat_f})")
             registros.append(valores_finais)
-
-        print(f">>> [CELERY PONTOS] Total de registros válidos para inserção: {len(registros)}", flush=True)
 
         if not registros:
             log.status = "erro"
-            log.mensagem = "Nenhum registro válido encontrado. Verifique o mapeamento de Latitude e Longitude."
+            log.mensagem = "Nenhum ponto estratégico válido encontrado. Verifique as colunas de Latitude e Longitude."
             log.save()
             return
 
         with connection.cursor() as cursor:
             cursor.execute("TRUNCATE TABLE pontos_estrategicos_temp RESTART IDENTITY;")
 
-        placeholders = ["%s"] * len(CAMPOS_BD) + ["ST_GeomFromText(%s, 4674)"]
+        placeholders = ["%s"] * len(DE_PARA_PADRAO.keys())
         query = f"""
             INSERT INTO pontos_estrategicos_temp ({", ".join(campos_sql)}) 
             VALUES ({", ".join(placeholders)}) 
@@ -900,7 +880,6 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
         log.save()
 
     except Exception as e:
-        print(f"❌ [CELERY PONTOS] ERRO: {e}", flush=True)
         LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
     finally:
         if os.path.exists(arquivo_path):
@@ -977,6 +956,161 @@ def task_processar_armadilhas(self, job_id, arquivo_path, celula_cabecalho=None,
                     cursor.executemany(query, registros)
 
         log.mensagem, log.status = erros.to_json(), "finalizado"
+        log.save()
+
+    except Exception as e:
+        LogSincronizacao.objects.filter(id=job_id).update(status="erro", mensagem=str(e))
+    finally:
+        if os.path.exists(arquivo_path):
+            try:
+                os.remove(arquivo_path)
+            except:
+                pass
+# ==============================================================================
+# 6. TASK OVITRAMPAS
+# ==============================================================================
+@shared_task(bind=True)
+def task_processar_ovitrampas(self, job_id, arquivo_path, celula_cabecalho=None, mapeamento_customizado=None):
+    try:
+        log = LogSincronizacao.objects.get(id=job_id)
+        erros = ErrorLogger()
+        engine = 'odf' if arquivo_path.endswith('.ods') else None
+
+        if isinstance(mapeamento_customizado, str):
+            try:
+                mapeamento_customizado = json.loads(mapeamento_customizado)
+            except Exception:
+                mapeamento_customizado = None
+
+        h_idx = None
+        if celula_cabecalho:
+            match = re.search(r'\d+', str(celula_cabecalho))
+            if match:
+                h_idx = max(0, int(match.group()) - 1)
+
+        if h_idx is None:
+            df_temp = pd.read_excel(arquivo_path, header=None, engine=engine)
+            h_idx = next((i for i, row in df_temp.iterrows() if any("Ovitrampa" in str(x) or "Nº Armadilha" in str(x) or "Endereço" in str(x) for x in row)), 0)
+
+        df = pd.read_excel(arquivo_path, header=h_idx, engine=engine).dropna(how='all')
+        df.columns = [str(c).replace('\n', ' ').strip() for c in df.columns]
+
+        # Mapeamento oficial DE_PARA idêntico à estrutura de Armadilhas
+        DE_PARA = mapeamento_customizado or {
+            'id_ovitrampa': 'Nº Armadilha',
+            'endereco': 'Endereço',
+            'numero': 'Número',
+            'complemento_tipo': 'Complemento',
+            'bairro': 'Bairro',
+            'localizacao': 'Localidade',
+            'setor_distrito': 'Distrito',
+            'responsavel': 'Agente',
+            'quarteirao': 'Quarteirão',
+            'data_exame': 'Data Instalação',
+            'ovos_aegypti': 'A. aegypti',
+            'ovos_albopictus': 'A. albopictus',
+            'outros_ovos': 'Outros Ovos',
+            'tipo': 'Tipo Imóvel',
+            'latitude': 'Latitude',
+            'longitude': 'Longitude',
+            'acoes': 'Observação'
+        }
+
+        # Limpa registros antigos do staging
+        OvitrampaTemp.objects.all().delete()
+
+        registros = []
+        total_rows = len(df)
+
+        for idx, r in df.iterrows():
+            col_lat = DE_PARA.get('latitude')
+            col_lng = DE_PARA.get('longitude')
+            lt = r.get(col_lat) if col_lat and col_lat in df.columns else None
+            ln = r.get(col_lng) if col_lng and col_lng in df.columns else None
+
+            # Leitura direta de campos usando o dicionário DE_PARA
+            id_ovi = to_str(r.get(DE_PARA.get('id_ovitrampa'))) if DE_PARA.get('id_ovitrampa') in df.columns else ""
+            end_bruto = to_str(r.get(DE_PARA.get('endereco'))) if DE_PARA.get('endereco') in df.columns else ""
+            num_bruto = to_str(r.get(DE_PARA.get('numero'))) if DE_PARA.get('numero') in df.columns else ""
+
+            # Separação regex caso número venha junto da rua no endereço
+            if end_bruto:
+                rua_limpa, num_extraido = _separar_rua_e_numero(end_bruto)
+                end = rua_limpa or end_bruto
+                num = num_bruto or num_extraido or ""
+            else:
+                end = ""
+                num = num_bruto
+
+            comp = to_str(r.get(DE_PARA.get('complemento_tipo'))) if DE_PARA.get('complemento_tipo') in df.columns else ""
+            bairro = to_str(r.get(DE_PARA.get('bairro'))) if DE_PARA.get('bairro') in df.columns else ""
+            loc = to_str(r.get(DE_PARA.get('localizacao'))) if DE_PARA.get('localizacao') in df.columns else "CAMBORIÚ"
+            setor = to_str(r.get(DE_PARA.get('setor_distrito'))) if DE_PARA.get('setor_distrito') in df.columns else ""
+            resp = to_str(r.get(DE_PARA.get('responsavel'))) if DE_PARA.get('responsavel') in df.columns else ""
+            quart = to_str(r.get(DE_PARA.get('quarteirao'))) if DE_PARA.get('quarteirao') in df.columns else ""
+
+            val_data = r.get(DE_PARA.get('data_exame')) if DE_PARA.get('data_exame') in df.columns else None
+            dt_exame = _parse_data_segura(val_data) or to_date(val_data)
+
+            aegypti = to_int(r.get(DE_PARA.get('ovos_aegypti'))) if DE_PARA.get('ovos_aegypti') in df.columns else 0
+            albopictus = to_int(r.get(DE_PARA.get('ovos_albopictus'))) if DE_PARA.get('ovos_albopictus') in df.columns else 0
+            outros = to_int(r.get(DE_PARA.get('outros_ovos'))) if DE_PARA.get('outros_ovos') in df.columns else 0
+
+            tipo = to_str(r.get(DE_PARA.get('tipo'))) if DE_PARA.get('tipo') in df.columns else ""
+            lat_str = to_str(lt) if lt else ""
+            lng_str = to_str(ln) if ln else ""
+            acoes = to_str(r.get(DE_PARA.get('acoes'))) if DE_PARA.get('acoes') in df.columns else ""
+
+            # Geometria PostGIS
+            geom = None
+            if lat_str and lng_str:
+                try:
+                    lat_f = float(lat_str.replace(",", "."))
+                    lng_f = float(lng_str.replace(",", "."))
+                    geom = Point(lng_f, lat_f, srid=4674)
+                except (ValueError, TypeError):
+                    geom = None
+
+            if not geom and end:
+                lat_c, lon_c = _geocodificar_cascata(f"{end}, {num}", bairro)
+                if lat_c and lon_c:
+                    geom = Point(lon_c, lat_c, srid=4674)
+
+            h_reg = hash_row(id_ovi, end, num, dt_exame, aegypti, albopictus)
+
+            registros.append(
+                OvitrampaTemp(
+                    id_ovitrampa=id_ovi,
+                    endereco=end,
+                    numero=num,
+                    complemento_tipo=comp,
+                    bairro=bairro,
+                    localizacao=loc,
+                    setor_distrito=setor,
+                    responsavel=resp,
+                    quarteirao=quart,
+                    data_exame=dt_exame,
+                    ovos_aegypti=aegypti or 0,
+                    ovos_albopictus=albopictus or 0,
+                    outros_ovos=outros or 0,
+                    tipo=tipo,
+                    latitude=lat_str,
+                    longitude=lng_str,
+                    acoes=acoes,
+                    geometry=geom,
+                    hash_registro=h_reg
+                )
+            )
+
+            if idx % 50 == 0 or idx == total_rows - 1:
+                log.progresso = int(((idx + 1) / total_rows) * 100)
+                log.save()
+
+        OvitrampaTemp.objects.bulk_create(registros)
+
+        log.status = "finalizado"
+        log.progresso = 100
+        log.mensagem = f"Upload concluído! {len(registros)} registros de ovitrampas inseridos."
         log.save()
 
     except Exception as e:

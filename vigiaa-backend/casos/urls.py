@@ -4,6 +4,7 @@ from casos.importadores.focos import upload_focos
 from casos.importadores.armadilhas import upload_armadilhas
 from casos.importadores.pontos import upload_pontos_estrategicos
 from casos.importadores.positivos import upload_casos_positivos
+from casos.importadores.ovitrampas import upload_ovitrampas
 from casos.sincronizar import sincronizar_oficial_api
 from .views import me
 from django.contrib.auth import views as auth_views
@@ -24,4 +25,5 @@ urlpatterns = [
     path("status-processamento/<int:job_id>/", status_processamento),
     path('geoprocessar-positivos/', disparar_geoprocessamento, name='geoprocessar_positivos'),
     path('extrair-cabecalho/', views.extrair_cabecalho_e_sugerir, name='extrair_cabecalho'),
+    path("upload/ovitrampas/", views.upload_ovitrampas, name="upload_ovitrampas"),
 ]

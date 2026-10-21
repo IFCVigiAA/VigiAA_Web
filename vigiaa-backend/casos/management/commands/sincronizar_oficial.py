@@ -1,23 +1,26 @@
 from django.core.management.base import BaseCommand
 from django.db import connections, transaction
 
+
 class Command(BaseCommand):
-    help = 'Sincroniza TEMP -> OFICIAL (apenas registros novos)'
+    help = "Sincroniza TEMP -> OFICIAL (apenas registros novos)"
 
     def handle(self, *args, **kwargs):
         self.stdout.write("Iniciando sincronização entre bancos...")
 
         try:
-            with connections['default'].cursor() as cursor_temp, \
-                 transaction.atomic(using='oficial'):
+            with (
+                connections["default"].cursor() as cursor_temp,
+                transaction.atomic(using="oficial"),
+            ):
 
-                with connections['oficial'].cursor() as cursor_ofc:
+                with connections["oficial"].cursor() as cursor_ofc:
 
                     # CASOS POSITIVOS
                     cursor_temp.execute("""
-                        SELECT hash_registro, local_atendimento, inicio_sintomas, notificacao, sinan, 
-                               bairro, data_nasc, observacoes, resultado, situacao, geometry,
-                               aplicacao, agentes, prim_visita
+                        SELECT hash_registro, local_atendimento, notificacao, inicio_sintomas, sinan, 
+                               data_nasc, sexo, endereco, bairro, resultado, situacao, 
+                               observacoes, geometry
                         FROM casos_positivos_temp_gl
                     """)
                     dados_pos = cursor_temp.fetchall()
@@ -34,18 +37,19 @@ class Command(BaseCommand):
                         if novos_pos:
                             cursor_ofc.executemany("""
                                 INSERT INTO casos_positivos (
-                                    hash_registro, local_atendimento, inicio_sintomas, notificacao, sinan, 
-                                    bairro, data_nasc, observacoes, resultado, situacao, geometry,
-                                    aplicacao, agentes, prim_visita
-                                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                    hash_registro, local_atendimento, notificacao, inicio_sintomas, sinan, 
+                                    data_nasc, sexo, endereco, bairro, resultado, situacao, 
+                                    observacoes, geometry
+                                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                             """, novos_pos)
-                        self.stdout.write(f"Positivos — total: {len(dados_pos)} | novos: {len(novos_pos)} | ignorados: {len(existentes_pos)}")
+                        self.stdout.write(
+                            f"Positivos — total: {len(dados_pos)} | novos: {len(novos_pos)} | ignorados: {len(existentes_pos)}"
+                        )
 
                     # FOCOS
                     cursor_temp.execute("""
                         SELECT hash_registro, n_foco, localidade, imovel, deposito, tipo_atividade, 
-                               data_coleta, a_aegypti_form_aquaticas, a_aegypti_form_adultas, 
-                               a_albopictus_form_aquaticas, a_albopictus_form_adultas, ovo_a_aegypti, 
+                               data_coleta, a_aegypti_form_aquaticas, a_albopictus_form_aquaticas, 
                                geometry
                         FROM focos_aedes_temp
                     """)
@@ -64,15 +68,19 @@ class Command(BaseCommand):
                             cursor_ofc.executemany("""
                                 INSERT INTO focos_aedes (
                                     hash_registro, n_foco, localidade, imovel, deposito, tipo_atividade, 
-                                    data_coleta, a_aegypti_form_aquaticas, a_aegypti_form_adultas, 
-                                    a_albopictus_form_aquaticas, a_albopictus_form_adultas, ovo_a_aegypti, geometry
-                                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                                    data_coleta, a_aegypti_form_aquaticas, a_albopictus_form_aquaticas, 
+                                    geometry
+                                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                             """, novos_foco)
-                        self.stdout.write(f"Focos — total: {len(dados_foco)} | novos: {len(novos_foco)} | ignorados: {len(existentes_foco)}")
+                        self.stdout.write(
+                            f"Focos — total: {len(dados_foco)} | novos: {len(novos_foco)} | ignorados: {len(existentes_foco)}"
+                        )
 
                     # PONTOS ESTRATÉGICOS
                     cursor_temp.execute("""
-                        SELECT hash_registro, numero, localidade, endereco, complemento, geometry
+                        SELECT hash_registro, n_pe, endereco, complemento, quarteiroes, localidade, 
+                               imovel, deposito, tipo_atividade, data_coleta, 
+                               a_aegypti_form_aquaticas, a_albopictus_form_aquaticas, geometry
                         FROM pontos_estrategicos_temp
                     """)
                     dados_ponto = cursor_temp.fetchall()
@@ -89,11 +97,14 @@ class Command(BaseCommand):
                         if novos_ponto:
                             cursor_ofc.executemany("""
                                 INSERT INTO pontos_estrategicos (
-                                    hash_registro, numero, localidade, endereco, complemento, geometry
-                                ) VALUES (%s, %s, %s, %s, %s, %s)
+                                    hash_registro, n_pe, endereco, complemento, quarteiroes, localidade, 
+                                    imovel, deposito, tipo_atividade, data_coleta, 
+                                    a_aegypti_form_aquaticas, a_albopictus_form_aquaticas, geometry
+                                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                             """, novos_ponto)
-                        self.stdout.write(f"Pontos — total: {len(dados_ponto)} | novos: {len(novos_ponto)} | ignorados: {len(existentes_ponto)}")
-
+                        self.stdout.write(
+                            f"Pontos — total: {len(dados_ponto)} | novos: {len(novos_ponto)} | ignorados: {len(existentes_ponto)}"
+                        )
                     # ARMADILHAS
                     cursor_temp.execute("""
                         SELECT hash_registro, numero, localidade, complemento, tipo_imovel, tipo_armadilha, geometry
@@ -104,22 +115,78 @@ class Command(BaseCommand):
                     if dados_arm:
                         hashes_arm = [d[0] for d in dados_arm]
                         cursor_ofc.execute(
-                            "SELECT hash_registro FROM relat_arm WHERE hash_registro = ANY(%s)",
-                            [hashes_arm]
+                            "SELECT hash_registro FROM relat_arm WHERE"
+                            " hash_registro = ANY(%s)",
+                            [hashes_arm],
                         )
-                        existentes_arm = {row[0] for row in cursor_ofc.fetchall()}
-                        novos_arm = [d for d in dados_arm if d[0] not in existentes_arm]
+                        existentes_arm = {
+                            row[0] for row in cursor_ofc.fetchall()
+                        }
+                        novos_arm = [
+                            d for d in dados_arm if d[0] not in existentes_arm
+                        ]
 
                         if novos_arm:
-                            cursor_ofc.executemany("""
+                            cursor_ofc.executemany(
+                                """
                                 INSERT INTO relat_arm (
                                     hash_registro, numero, localidade, complemento, tipo_imovel, tipo_armadilha, geometry
                                 ) VALUES (%s, %s, %s, %s, %s, %s, %s)
-                            """, novos_arm)
-                        self.stdout.write(f"Armadilhas — total: {len(dados_arm)} | novos: {len(novos_arm)} | ignorados: {len(existentes_arm)}")
+                            """,
+                                novos_arm,
+                            )
+                        self.stdout.write(
+                            f"Armadilhas — total: {len(dados_arm)} | novos:"
+                            f" {len(novos_arm)} | ignorados:"
+                            f" {len(existentes_arm)}"
+                        )
 
-            self.stdout.write(self.style.SUCCESS("✅ SINCRONIZAÇÃO CONCLUÍDA"))
+                    # OVITRAMPAS
+                    cursor_temp.execute("""
+                        SELECT hash_registro, id_ovitrampa, endereco, numero, complemento_tipo, bairro,
+                               localizacao, setor_distrito, responsavel, quarteirao, data_exame,
+                               ovos_aegypti, ovos_albopictus, outros_ovos, tipo, acoes, geometry
+                        FROM ovitrampas_temp
+                    """)
+                    dados_ovi = cursor_temp.fetchall()
+
+                    if dados_ovi:
+                        hashes_ovi = [d[0] for d in dados_ovi]
+                        cursor_ofc.execute(
+                            "SELECT hash_registro FROM ovitrampas WHERE"
+                            " hash_registro = ANY(%s)",
+                            [hashes_ovi],
+                        )
+                        existentes_ovi = {
+                            row[0] for row in cursor_ofc.fetchall()
+                        }
+                        novos_ovi = [
+                            d for d in dados_ovi if d[0] not in existentes_ovi
+                        ]
+
+                        if novos_ovi:
+                            cursor_ofc.executemany(
+                                """
+                                INSERT INTO ovitrampas (
+                                    hash_registro, id_ovitrampa, endereco, numero, complemento_tipo, bairro,
+                                    localizacao, setor_distrito, responsavel, quarteirao, data_exame,
+                                    ovos_aegypti, ovos_albopictus, outros_ovos, tipo, acoes, geometry
+                                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                            """,
+                                novos_ovi,
+                            )
+                        self.stdout.write(
+                            f"Ovitrampas — total: {len(dados_ovi)} | novos:"
+                            f" {len(novos_ovi)} | ignorados:"
+                            f" {len(existentes_ovi)}"
+                        )
+
+            self.stdout.write(
+                self.style.SUCCESS("✅ SINCRONIZAÇÃO CONCLUÍDA")
+            )
 
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f"Erro na sincronização: {str(e)}"))
+            self.stdout.write(
+                self.style.ERROR(f"Erro na sincronização: {str(e)}")
+            )
             raise e

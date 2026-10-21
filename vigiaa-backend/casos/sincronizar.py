@@ -11,8 +11,9 @@ def _extrair_processados(texto):
     if not texto:
         return []
 
+
     numeros = re.findall(
-        r'processad(?:o|os)\s*[:=]?\s*(\d+)',
+        r'(?:novos|processad(?:o|os))\s*[:=]?\s*(\d+)',
         texto,
         flags=re.IGNORECASE
     )

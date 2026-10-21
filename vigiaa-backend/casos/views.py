@@ -17,56 +17,65 @@ from .tasks import (
     task_processar_pontos, 
     task_processar_focos, 
     task_processar_armadilhas,
-    task_geoprocessar_pendentes
+    task_geoprocessar_pendentes,
+    task_processar_ovitrampas
 )
 
 # Dicionários de colunas esperadas pelo Banco para cada tipo de planilha
 CAMPOS_BANCO_POR_TIPO = {
     'casos': {
-        'nome': 'Nome do Paciente',
+        'local_atendimento': 'Local de Notificação / Atendimento',
+        'notificacao': 'Data da Notificação',
+        'inicio_sintomas': 'Data de Início dos Sintomas',
+        'sinan': 'Número do SINAN',
+        'nome': 'Nome Completo',
+        'data_nasc': 'Data de Nascimento',
+        'sexo': 'Sexo',
         'endereco': 'Endereço Completo',
         'bairro': 'Bairro',
-        'sinan': 'Número do SINAN',
-        'inicio_sintomas': 'Data de Início dos Sintomas',
-        'notificacao': 'Data da Notificação',
-        'data_nasc': 'Data de Nascimento',
-        'local_atendimento': 'Local de Atendimento',
-        'nome_mae': 'Nome da Mãe',
-        'resultado': 'Resultado',
-        'aplicacao': 'Data de Aplicação',
-        'agentes': 'Agente(s) Responsável(is)',
-        'prim_visita': '1ª Visita',
+        'resultado': 'Resultado Final',
+        'latitude': 'Latitude',
+        'longitude': 'Longitude',
         'situacao': 'Situação do Caso',
         'observacoes': 'Observações',
     },
     'pontos': {
-        'municipio': 'Município',
-        'localidade': 'Localidade / Bairro',
-        'endereco': 'Rua / Logradouro',
-        'numero': 'Número do Imóvel (Endereço)',
-        'complemento': 'Complemento',
-        'quarteiroes': 'Quarteirão / Quarteirões',
-        'latitude': 'Latitude',
-        'longitude': 'Longitude'
-    },
-    'focos': {
-        'n_foco': 'Nº do Foco',
+        'n_pe': 'Nº PE',
         'regional': 'Regional',
         'municipio': 'Município',
-        'localidade': 'Localidade / Bairro',
-        'rua_numero': 'Rua / Número',
+        'localidade': 'Bairro',
+        'endereco': 'Endereço',
         'complemento': 'Complemento',
-        'quarteirao': 'Quarteirão',
-        'imovel': 'Tipo de Imóvel',
-        'deposito': 'Tipo de Depósito',
+        'quarteiroes': 'Quarteirão',
+        'imovel': 'Imóvel',
+        'deposito': 'Depósito',
         'tipo_atividade': 'Tipo de Atividade',
         'data_coleta': 'Data da Coleta',
         'data_entrada': 'Data de Entrada',
         'data_exame': 'Data do Exame',
-        'a_aegypti_form_aquaticas': 'A. Aegypti (Formas Aquáticas)',
-        'a_albopictus_form_aquaticas': 'A. Albopictus (Formas Aquáticas)',
+        'a_aegypti_form_aquaticas': 'A. aegypti formas aquáticas',
+        'a_albopictus_form_aquaticas': 'A. albopictus formas aquáticas',
         'latitude': 'Latitude',
-        'longitude': 'Longitude'
+        'longitude': 'Longitude',
+    },
+    'focos': {
+        'n_foco': 'Nº Foco',
+        'regional': 'Regional',
+        'municipio': 'Município',
+        'localidade': 'Bairro',
+        'rua_numero': 'Endereço',
+        'complemento': 'Complemento',
+        'quarteirao': 'Quarteirão',
+        'imovel': 'Imóvel',
+        'deposito': 'Depósito',
+        'tipo_atividade': 'Tipo de Atividade',
+        'data_coleta': 'Data da Coleta',
+        'data_entrada': 'Data de Entrada',
+        'data_exame': 'Data do Exame',
+        'a_aegypti_form_aquaticas': 'A. aegypti formas aquáticas',
+        'a_albopictus_form_aquaticas': 'A. albopictus formas aquáticas',
+        'latitude': 'Latitude',
+        'longitude': 'Longitude',
     },
     'armadilhas': {
         'numero': 'Número / Código da Armadilha',
@@ -79,8 +88,28 @@ CAMPOS_BANCO_POR_TIPO = {
         'tipo_armadilha': 'Tipo de Armadilha',
         'latitude': 'Latitude',
         'longitude': 'Longitude'
+    },
+    'ovitrampas': {
+        'id_ovitrampa': 'ID / N. Ovitrampa',
+        'endereco': 'Endereço',
+        'numero': 'Número do Logradouro',
+        'complemento_tipo': 'Complemento / Tipo Imóvel',
+        'bairro': 'Bairro',
+        'localizacao': 'Localização da Ovitrampa',
+        'setor_distrito': 'Setor / Distrito',
+        'responsavel': 'Responsável',
+        'quarteirao': 'Quarteirão',
+        'data_exame': 'Data do Exame',
+        'ovos_aegypti': 'Ovo A. Aegypti',
+        'ovos_albopictus': 'Ovo A. Albopictus',
+        'outros_ovos': 'Outros Ovos',
+        'tipo': 'Tipo',
+        'latitude': 'Latitude',
+        'longitude': 'Longitude',
+        'acoes': 'Ações (BRI, UBV e Outras)',
     }
 }
+
 
 
 # --- FUNÇÕES AUXILIARES ---
@@ -398,3 +427,32 @@ def disparar_geoprocessamento(request):
         "message": "Geoprocessamento iniciado em segundo plano!",
         "job_id": job.id
     })
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def upload_ovitrampas(request):
+    arquivo = request.FILES.get("ovitrampas") or request.FILES.get("arquivo")
+    celula_cabecalho = request.POST.get("celula_cabecalho", None)
+    mapeamento_raw = request.POST.get("mapeamento", None)
+
+    mapeamento_dict = None
+    if mapeamento_raw:
+        try:
+            mapeamento_dict = json.loads(mapeamento_raw) if isinstance(mapeamento_raw, str) else mapeamento_raw
+        except Exception as e:
+            print(f"Erro ao converter JSON no upload_ovitrampas: {e}", flush=True)
+
+    if not arquivo:
+        return JsonResponse({"erro": "Arquivo de ovitrampas não enviado"}, status=400)
+
+    job = LogSincronizacao.objects.create(tipo="ovitrampas", nome_arquivo=arquivo.name, status="na_fila")
+    caminho = _salvar_arquivo_temporario(job.id, arquivo)
+    celula_cabecalho = request.POST.get("celula_cabecalho")
+    mapeamento = request.POST.get("mapeamento")
+
+    task_processar_ovitrampas.delay(
+        job.id,
+        caminho,
+        celula_cabecalho=celula_cabecalho,
+        mapeamento_customizado=mapeamento,
+    )
+    return JsonResponse({"sucesso": True, "job_id": job.id})

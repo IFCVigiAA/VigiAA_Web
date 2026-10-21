@@ -9,7 +9,7 @@ const endpoints = {
   armadilhas: '/api/casos/upload/armadilhas/',
   pontos: '/api/casos/upload/pontos/',
   casos: '/api/casos/upload/positivos/',
-  ovitrampas: '/api/casos/upload/positivos',
+  ovitrampas: '/api/casos/upload/ovitrampas/',
   geoprocessar: '/api/casos/geoprocessar-positivos/',
   extrairCabecalho: '/api/casos/extrair-cabecalho/',
 }
@@ -121,7 +121,7 @@ export default function UploadPlanilhas() {
     try {
       const res = await fetch(url, {
         method: 'POST',
-        headers: getAuthHeader(), // Apenas Authorization, sem forçar Content-Type
+        headers: getAuthHeader(), 
         body: formData,
       })
       const data = await res.json()

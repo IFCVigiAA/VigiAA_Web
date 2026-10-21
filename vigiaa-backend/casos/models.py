@@ -12,25 +12,23 @@ class Caso(models.Model):
 
 
 class CasoPositivo(models.Model):
-    nome = models.CharField(max_length=255, null=True, blank=True)
-    endereco = models.CharField(max_length=255, null=True, blank=True)
-    nome_mae = models.CharField(max_length=255, null=True, blank=True)
     local_atendimento = models.CharField(max_length=100, null=True, blank=True)
-    inicio_sintomas = models.DateField(null=True, blank=True)
     notificacao = models.DateField(null=True, blank=True)
-    sinan = models.IntegerField(null=True, blank=True)
-    bairro = models.CharField(max_length=50, null=True, blank=True)
+    inicio_sintomas = models.DateField(null=True, blank=True)
+    sinan = models.BigIntegerField(null=True, blank=True)
+    nome = models.CharField(max_length=150, null=True, blank=True)
     data_nasc = models.DateField(null=True, blank=True)
-    observacoes = models.CharField(max_length=255, null=True, blank=True)
+    sexo = models.CharField(max_length=20, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
+    bairro = models.CharField(max_length=100, null=True, blank=True)
     resultado = models.CharField(max_length=50, null=True, blank=True)
-    aplicacao = models.CharField(max_length=50, null=True, blank=True)
-    agentes = models.CharField(max_length=100, null=True, blank=True)
-    prim_visita = models.CharField(max_length=50, null=True, blank=True)
-    situacao = models.CharField(max_length=255, null=True, blank=True)
-    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False) 
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
+    situacao = models.CharField(max_length=50, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     class Meta:
-        db_table = "casos_positivos"
+        db_table = 'casos_positivos'
         constraints = [
             models.UniqueConstraint(
                 fields=["hash_registro"],
@@ -44,21 +42,28 @@ class CasoPositivo(models.Model):
 
 
 class Foco(models.Model):
-    n_foco = models.CharField(max_length=30)
-    localidade = models.CharField(max_length=100)
-    imovel = models.CharField(max_length=50)
-    deposito = models.CharField(max_length=100)
-    tipo_atividade = models.CharField(max_length=50)
-    data_coleta = models.DateField()
-    a_aegypti_form_aquaticas = models.IntegerField()
-    a_aegypti_form_adultas = models.IntegerField()
-    a_albopictus_form_aquaticas = models.IntegerField()
-    a_albopictus_form_adultas = models.IntegerField()
-    ovo_a_aegypti = models.IntegerField()
-    geometry = models.PointField(srid=4674)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    n_foco = models.CharField(max_length=50, null=True, blank=True)
+    regional = models.CharField(max_length=100, null=True, blank=True)
+    municipio = models.CharField(max_length=100, null=True, blank=True)
+    localidade = models.CharField(max_length=100, null=True, blank=True)
+    rua_numero = models.CharField(max_length=255, null=True, blank=True)
+    complemento = models.CharField(max_length=100, null=True, blank=True)
+    quarteirao = models.CharField(max_length=50, null=True, blank=True)
+    imovel = models.CharField(max_length=100, null=True, blank=True)
+    deposito = models.CharField(max_length=100, null=True, blank=True)
+    tipo_atividade = models.CharField(max_length=100, null=True, blank=True)
+    data_coleta = models.DateField(null=True, blank=True)
+    data_entrada = models.DateField(null=True, blank=True)
+    data_exame = models.DateField(null=True, blank=True)
+    a_aegypti_form_aquaticas = models.IntegerField(default=0)
+    a_albopictus_form_aquaticas = models.IntegerField(default=0)
+    latitude = models.CharField(max_length=50, null=True, blank=True)
+    longitude = models.CharField(max_length=50, null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     class Meta:
-        db_table = "focos_aedes"
+        db_table = 'focos_aedes'
         constraints = [
             models.UniqueConstraint(
                 fields=["hash_registro"],
@@ -72,16 +77,28 @@ class Foco(models.Model):
 
 
 class PontoEstrategico(models.Model):
-    numero = models.CharField(max_length=50)
-    municipio = models.CharField(max_length=100)
-    localidade = models.CharField(max_length=100)
-    endereco = models.CharField(max_length=150)
-    quarteiroes = models.CharField(max_length=50)
-    complemento = models.CharField(max_length=100)
-    geometry = models.PointField(srid=4674)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+    n_pe = models.CharField(max_length=50, null=True, blank=True)
+    regional = models.CharField(max_length=100, null=True, blank=True)
+    municipio = models.CharField(max_length=100, null=True, blank=True)
+    localidade = models.CharField(max_length=100, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
+    complemento = models.CharField(max_length=100, null=True, blank=True)
+    quarteiroes = models.CharField(max_length=50, null=True, blank=True)
+    imovel = models.CharField(max_length=100, null=True, blank=True)
+    deposito = models.CharField(max_length=100, null=True, blank=True)
+    tipo_atividade = models.CharField(max_length=100, null=True, blank=True)
+    data_coleta = models.DateField(null=True, blank=True)
+    data_entrada = models.DateField(null=True, blank=True)
+    data_exame = models.DateField(null=True, blank=True)
+    a_aegypti_form_aquaticas = models.IntegerField(default=0)
+    a_albopictus_form_aquaticas = models.IntegerField(default=0)
+    latitude = models.CharField(max_length=50, null=True, blank=True)
+    longitude = models.CharField(max_length=50, null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     class Meta:
-        db_table = "pontos_estrategicos"
+        db_table = 'pontos_estrategicos'
         constraints = [
             models.UniqueConstraint(
                 fields=["hash_registro"],
@@ -138,93 +155,95 @@ class LogSincronizacao(models.Model):
 
 class CasoPositivoTemp(models.Model):
     local_atendimento = models.CharField(max_length=100, null=True, blank=True)
-    inicio_sintomas = models.DateField(null=True, blank=True)
     notificacao = models.DateField(null=True, blank=True)
-    sinan = models.IntegerField(null=True, blank=True)
-    bairro = models.CharField(max_length=50, null=True, blank=True)
+    inicio_sintomas = models.DateField(null=True, blank=True)
+    sinan = models.BigIntegerField(null=True, blank=True)
+    nome = models.CharField(max_length=150, null=True, blank=True)
     data_nasc = models.DateField(null=True, blank=True)
-    observacoes = models.CharField(max_length=255, null=True, blank=True)
-    resultado = models.CharField(max_length=50, null=True, blank=True)
-    aplicacao = models.CharField(max_length=50, null=True, blank=True)
-    agentes = models.CharField(max_length=100, null=True, blank=True)
-    prim_visita = models.CharField(max_length=50, null=True, blank=True)
-    situacao = models.CharField(max_length=255, null=True, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    status_geo = models.CharField(max_length=20, null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
-    nome = models.CharField(max_length=255, null=True, blank=True)
+    sexo = models.CharField(max_length=20, null=True, blank=True)
     endereco = models.CharField(max_length=255, null=True, blank=True)
-    nome_mae = models.CharField(max_length=255, null=True, blank=True)
+    bairro = models.CharField(max_length=100, null=True, blank=True)
+    resultado = models.CharField(max_length=50, null=True, blank=True)
+    latitude = models.CharField(max_length=50, null=True, blank=True)
+    longitude = models.CharField(max_length=50, null=True, blank=True)
+    situacao = models.CharField(max_length=50, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     class Meta:
-        db_table = "casos_positivos_temp"
+        db_table = 'casos_positivos_temp'
         managed = False
 
 
 class CasoPositivoTempGL(models.Model):
     local_atendimento = models.CharField(max_length=100, null=True, blank=True)
-    inicio_sintomas = models.DateField(null=True, blank=True)
     notificacao = models.DateField(null=True, blank=True)
-    sinan = models.IntegerField(null=True, blank=True)
-    bairro = models.CharField(max_length=50, null=True, blank=True)
+    inicio_sintomas = models.DateField(null=True, blank=True)
+    sinan = models.BigIntegerField(null=True, blank=True)
+    nome = models.CharField(max_length=150, null=True, blank=True)
     data_nasc = models.DateField(null=True, blank=True)
-    observacoes = models.CharField(max_length=255, null=True, blank=True)
-    resultado = models.CharField(max_length=50, null=True, blank=True)
-    aplicacao = models.CharField(max_length=50, null=True, blank=True)
-    agentes = models.CharField(max_length=100, null=True, blank=True)
-    prim_visita = models.CharField(max_length=50, null=True, blank=True)
-    situacao = models.CharField(max_length=255, null=True, blank=True)
-    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
-    nome = models.CharField(max_length=255, null=True, blank=True)
+    sexo = models.CharField(max_length=20, null=True, blank=True)
     endereco = models.CharField(max_length=255, null=True, blank=True)
-    nome_mae = models.CharField(max_length=255, null=True, blank=True)
-    
+    bairro = models.CharField(max_length=100, null=True, blank=True)
+    resultado = models.CharField(max_length=50, null=True, blank=True)
+    situacao = models.CharField(max_length=50, null=True, blank=True)
+    observacoes = models.TextField(null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     class Meta:
-        db_table = "casos_positivos_temp_gl"
+        db_table = 'casos_positivos_temp_gl'
         managed = False
 
 
 class FocoTemp(models.Model):
-    n_foco = models.CharField(max_length=30, null=True, blank=True)
+    n_foco = models.CharField(max_length=50, null=True, blank=True)
     regional = models.CharField(max_length=100, null=True, blank=True)
     municipio = models.CharField(max_length=100, null=True, blank=True)
     localidade = models.CharField(max_length=100, null=True, blank=True)
-    rua_numero = models.CharField(max_length=200, null=True, blank=True)
-    complemento = models.CharField(max_length=255, null=True, blank=True)
+    rua_numero = models.CharField(max_length=255, null=True, blank=True)
+    complemento = models.CharField(max_length=100, null=True, blank=True)
     quarteirao = models.CharField(max_length=50, null=True, blank=True)
-    imovel = models.CharField(max_length=50, null=True, blank=True)
+    imovel = models.CharField(max_length=100, null=True, blank=True)
     deposito = models.CharField(max_length=100, null=True, blank=True)
-    tipo_atividade = models.CharField(max_length=50, null=True, blank=True)
+    tipo_atividade = models.CharField(max_length=100, null=True, blank=True)
     data_coleta = models.DateField(null=True, blank=True)
     data_entrada = models.DateField(null=True, blank=True)
     data_exame = models.DateField(null=True, blank=True)
-    a_aegypti_form_aquaticas = models.IntegerField(null=True, blank=True)
-    a_aegypti_form_adultas = models.IntegerField(null=True, blank=True)
-    a_albopictus_form_aquaticas = models.IntegerField(null=True, blank=True)
-    a_albopictus_form_adultas = models.IntegerField(null=True, blank=True)
-    ovo_a_aegypti = models.IntegerField(null=True, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
+    a_aegypti_form_aquaticas = models.IntegerField(default=0)
+    a_albopictus_form_aquaticas = models.IntegerField(default=0)
+    latitude = models.CharField(max_length=50, null=True, blank=True)
+    longitude = models.CharField(max_length=50, null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     class Meta:
-        db_table = "focos_aedes_temp"
+        db_table = 'focos_aedes_temp'
         managed = False
 
 class PontoEstrategicoTemp(models.Model):
-    numero = models.CharField(max_length=50, null=True, blank=True)
+    n_pe = models.CharField(max_length=50, null=True, blank=True)
+    regional = models.CharField(max_length=100, null=True, blank=True)
     municipio = models.CharField(max_length=100, null=True, blank=True)
     localidade = models.CharField(max_length=100, null=True, blank=True)
-    endereco = models.CharField(max_length=150, null=True, blank=True)
-    quarteiroes = models.CharField(max_length=50, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
     complemento = models.CharField(max_length=100, null=True, blank=True)
-    latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
-    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
-    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
+    quarteiroes = models.CharField(max_length=50, null=True, blank=True)
+    imovel = models.CharField(max_length=100, null=True, blank=True)
+    deposito = models.CharField(max_length=100, null=True, blank=True)
+    tipo_atividade = models.CharField(max_length=100, null=True, blank=True)
+    data_coleta = models.DateField(null=True, blank=True)
+    data_entrada = models.DateField(null=True, blank=True)
+    data_exame = models.DateField(null=True, blank=True)
+    a_aegypti_form_aquaticas = models.IntegerField(default=0)
+    a_albopictus_form_aquaticas = models.IntegerField(default=0)
+    latitude = models.CharField(max_length=50, null=True, blank=True)
+    longitude = models.CharField(max_length=50, null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     class Meta:
-        db_table = "pontos_estrategicos_temp"
+        db_table = 'pontos_estrategicos_temp'
         managed = False
 
 
@@ -246,3 +265,51 @@ class ArmadilhaTemp(models.Model):
         db_table = "relat_arm_temp"
         managed = False
 
+class Ovitrampa(models.Model):
+    id_ovitrampa = models.CharField(max_length=50, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
+    numero = models.CharField(max_length=20, null=True, blank=True)
+    complemento_tipo = models.CharField(max_length=100, null=True, blank=True)
+    bairro = models.CharField(max_length=100, null=True, blank=True)
+    localizacao = models.CharField(max_length=150, null=True, blank=True)
+    setor_distrito = models.CharField(max_length=100, null=True, blank=True)
+    responsavel = models.CharField(max_length=150, null=True, blank=True)
+    quarteirao = models.CharField(max_length=50, null=True, blank=True)
+    data_exame = models.DateField(null=True, blank=True)
+    ovos_aegypti = models.IntegerField(null=True, blank=True, default=0)
+    ovos_albopictus = models.IntegerField(null=True, blank=True, default=0)
+    outros_ovos = models.IntegerField(null=True, blank=True, default=0)
+    tipo = models.CharField(max_length=50, null=True, blank=True)
+    acoes = models.TextField(null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True)
+
+    class Meta:
+        db_table = "ovitrampas"
+        managed = False
+
+
+class OvitrampaTemp(models.Model):
+    id_ovitrampa = models.CharField(max_length=50, null=True, blank=True)
+    endereco = models.CharField(max_length=255, null=True, blank=True)
+    numero = models.CharField(max_length=20, null=True, blank=True)
+    complemento_tipo = models.CharField(max_length=100, null=True, blank=True)
+    bairro = models.CharField(max_length=100, null=True, blank=True)
+    localizacao = models.CharField(max_length=150, null=True, blank=True)
+    setor_distrito = models.CharField(max_length=100, null=True, blank=True)
+    responsavel = models.CharField(max_length=150, null=True, blank=True)
+    quarteirao = models.CharField(max_length=50, null=True, blank=True)
+    data_exame = models.DateField(null=True, blank=True)
+    ovos_aegypti = models.IntegerField(null=True, blank=True, default=0)
+    ovos_albopictus = models.IntegerField(null=True, blank=True, default=0)
+    outros_ovos = models.IntegerField(null=True, blank=True, default=0)
+    tipo = models.CharField(max_length=50, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    acoes = models.TextField(null=True, blank=True)
+    geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
+    hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
+
+    class Meta:
+        db_table = "ovitrampas_temp"
+        managed = False  
