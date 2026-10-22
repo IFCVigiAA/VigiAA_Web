@@ -18,6 +18,22 @@ let map; // Variável para a instância do mapa
 
 // --- Funções de Ajuda para o Mapa ---
 
+function addLayerToControlUnique(layer, name) {
+    if (!map.layersControl || !layer) return;
+
+    // 1. Varre o array interno do Leaflet de trás pra frente
+    const controlLayers = map.layersControl._layers;
+    for (let i = controlLayers.length - 1; i >= 0; i--) {
+        // Se encontrar uma camada fantasma com o mesmo nome, remove do controle
+        if (controlLayers[i].name === name) {
+            map.layersControl.removeLayer(controlLayers[i].layer);
+        }
+    }
+
+    // 2. Adiciona a camada nova de forma limpa
+    map.layersControl.addOverlay(layer, name);
+}
+
 // Gerencia a substituição da camada no mapa e no controle
 function refreshLayerInControl(oldLayer, newLayer, layerName) {
     // Verifica se oldLayer é um objeto válido do Leaflet
@@ -37,7 +53,7 @@ function refreshLayerInControl(oldLayer, newLayer, layerName) {
     }
 
     if (map.layersControl && newLayer) {
-        map.layersControl.addOverlay(newLayer, layerName);
+        addLayerToControlUnique(newLayer, layerName);
     }
 
     if (wasOnMap && newLayer) {
@@ -53,8 +69,33 @@ function resetFiltersToDefault() {
     console.log("Filtros resetados pelo clique do usuário.");
 }
 
+// Avalia as camadas ativas e aplica o deslocamento correto no menu
+function adjustMenuPosition() {
+    const layersControl = document.querySelector('.leaflet-control-layers');
+    if (!layersControl) return;
+
+    // Checa o que está ligado no mapa agora
+    const casosAtivo = map.hasLayer(currentCasosPointLayer);
+    const focosAtivo = map.hasLayer(focosWFSLayer);
+
+    // Limpa os estados anteriores
+    layersControl.classList.remove('pushed-1', 'pushed-2', 'leaflet-control-layers-pushed');
+
+    // Conta quantos painéis o usuário abriu
+    let paineisAbertos = 0;
+    if (casosAtivo) paineisAbertos++;
+    if (focosAtivo) paineisAbertos++;
+
+    // Aplica a classe correspondente
+    if (paineisAbertos === 1) {
+        layersControl.classList.add('pushed-1');
+    } else if (paineisAbertos === 2) {
+        layersControl.classList.add('pushed-2');
+    }
+}
+
 // Função Genérica para buscar e adicionar Camadas WFS (para GeoJSON)
-function fetchWFSData(layerName, displayName, styleFunction, popupFields, version = '2.0.0', isPointLayer = false, cqlFilter = '1=1') {
+function fetchWFSData(layerName, displayName, styleFunction, popupFields, version = '2.0.0', isPointLayer = false, cqlFilter = '1=1', customPane = 'overlayPane') {
     let fullLayerName = layerName;
     if (layerName.indexOf(':') === -1) {
         // Se NÃO incluir, adiciona o WORKSPACE padrão.
@@ -78,9 +119,10 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
         })
         .then(data => {
             var layerOptions = {
+                pane: customPane,
                 style: styleFunction,
                 onEachFeature: function(feature, layer) {
-                    // ... Lógica de Popup (mantida aqui) ...
+                    // ... Lógica de Popup ...
                     if (feature.properties) {
                         var popupContent = `<b>${displayName.split('(')[0].trim()}:</b><br>`;
                         var fieldsToDisplay = popupFields && popupFields.length > 0 ? popupFields : Object.keys(feature.properties);
@@ -104,7 +146,7 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
             var newLayer = L.geoJSON(data, layerOptions);
             newLayer.name = displayName;
             return newLayer;
-        })
+        })  
         .catch(error => {
             console.error(`Erro ao buscar ou processar dados WFS para ${displayName}:`, error);
             return null;
@@ -114,20 +156,20 @@ function fetchWFSData(layerName, displayName, styleFunction, popupFields, versio
 // --- Funções de Carga e Atualização de Camadas ---
 
 // Funções de carga estática (chamadas apenas uma vez na inicialização)
-function loadBairrosOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ofc', 'Bairros - Oficial (Estático)', bairrosStyleWFS, ['nome']); }
-function loadSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_camb', 'Setores Censitários (Estático)', setCensStyleWFS, ['Nome do Bairro']); }
-function loadDensDemoSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_demo_camb_classes', 'Densidade Demográfica (SC)', densDemoSetCensStyle, ['Densidade Demografica por KM2']); }
-function loadBairrosOfcOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE (Estático)', bairrosOfcStyleWFS, ['Nome']); }
-function loadCamboriuOnce() { return fetchWFSData('vigiaa_ofc:vw_mun_camb', 'Camboriú (Estático)', camboriuStyleWFS, ['']); }
-function loadCurvaNivelOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_li', 'Curva de Nível (Estático)', curvasNivelStyleWFS, ['Altura']); } 
-function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_union', 'Declividade (Polígonos)', declividadePlStyle, ['Altura']); }
+function loadBairrosOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ofc', 'Bairros - Oficial ', bairrosStyleWFS, ['nome']); }
+function loadSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_camb', 'Setores Censitários ', setCensStyleWFS, ['Nome do Bairro']); }
+function loadDensDemoSetCensOnce() { return fetchWFSData('vigiaa_ofc:vw_set_cens_demo_camb_classes', 'Densidade Demográfica ', densDemoSetCensStyle, ['Densidade Demografica por KM2']); }
+function loadBairrosOfcOnce() { return fetchWFSData('vigiaa_ofc:vw_bairros_cb_ibge', 'Bairros - IBGE ', bairrosOfcStyleWFS, ['Nome']); }
+function loadCamboriuOnce() { return fetchWFSData('vigiaa_ofc:vw_mun_camb', 'Camboriú ', camboriuStyleWFS, ['']); }
+function loadCurvaNivelOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_li', 'Curva de Nível ', curvasNivelStyleWFS, ['Altura']); } 
+function loadDeclividadePoligonoOnce() { return fetchWFSData('vigiaa_ofc:vw_cv_nvl_camboriu_union', 'Declividade ', declividadePlStyle, ['Altura']); }
 
 // Funções de atualização dinâmica (chamadas na inicialização e no filtro/intervalo)
 function updateFocosAedes() {
     const filter = buildCqlFilter(selectedYear, selectedSE);
-    return fetchWFSData(LAYER_FOCOS_SE, 'Focos Aedes (Pontos)', focosStyleWFS, ['id', 'n_foco', 'a_aegypti_form_aquaticas', 'a_aegypti_form_adultas', 'a_albopictus_form_aquaticas', 'a_albopictus_form_adultas', 'ovo_a_aegypti'], '2.0.0', true, filter).then(newLayer => {
+    return fetchWFSData(LAYER_FOCOS_SE, 'Focos Aedes ', focosStyleWFS, ['id', 'n_foco', 'a_aegypti_form_aquaticas', 'a_aegypti_form_adultas', 'a_albopictus_form_aquaticas', 'a_albopictus_form_adultas', 'ovo_a_aegypti'], '2.0.0', true, filter).then(newLayer => {
         if (newLayer) { 
-            refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes (Pontos)'); 
+            refreshLayerInControl(focosWFSLayer, newLayer, 'Focos Aedes '); 
             focosWFSLayer = newLayer; 
         }
         return focosWFSLayer;
@@ -135,22 +177,22 @@ function updateFocosAedes() {
 }
 
 function updatePontosEstrat() {
-    return fetchWFSData('vigiaa_ofc:pontos_estrategicos', 'Pontos Estratégicos (Dinâmico)', peStyleWFS, ['id', 'numero'], '2.0.0', true).then(newLayer => {
-        if (newLayer) { refreshLayerInControl(peWFSLayer, newLayer, 'Pontos Estratégicos (Dinâmico)'); peWFSLayer = newLayer; }
+    return fetchWFSData('vigiaa_ofc:pontos_estrategicos', 'Pontos Estratégicos ', peStyleWFS, ['id', 'numero'], '2.0.0', true).then(newLayer => {
+        if (newLayer) { refreshLayerInControl(peWFSLayer, newLayer, 'Pontos Estratégicos '); peWFSLayer = newLayer; }
         return peWFSLayer;
     });
 }
 function updateArmadilhas() {
-    return fetchWFSData('vigiaa_ofc:relat_arm', 'Armadilhas (Dinâmico)', armStyleWFS, ['id', 'numero', 'tipo_imovel'], '2.0.0', true).then(newLayer => {
-        if (newLayer) { refreshLayerInControl(armWFSLayer, newLayer, 'Armadilhas (Dinâmico)'); armWFSLayer = newLayer; }
+    return fetchWFSData('vigiaa_ofc:relat_arm', 'Armadilhas ', armStyleWFS, ['id', 'numero', 'tipo_imovel'], '2.0.0', true).then(newLayer => {
+        if (newLayer) { refreshLayerInControl(armWFSLayer, newLayer, 'Armadilhas '); armWFSLayer = newLayer; }
         return armWFSLayer;
     });
 }
 
 function updateCasosPositivosPoints() {
     const filter = buildCqlFilter(selectedYear, selectedSE); // Obtém filtro atual
-    return fetchWFSData(LAYER_CASOS, 'Casos Positivos (Pontos)', casosPointStyleWFS, ['id', 'inicio_sintomas'], '2.0.0', true, filter).then(newLayer => {
-        if (newLayer) { refreshLayerInControl(currentCasosPointLayer, newLayer, 'Casos Positivos (Pontos)'); currentCasosPointLayer = newLayer; }
+    return fetchWFSData(LAYER_CASOS, 'Casos Positivos ', casosPointStyleWFS, ['id', 'inicio_sintomas'], '2.0.0', true, filter).then(newLayer => {
+        if (newLayer) { refreshLayerInControl(currentCasosPointLayer, newLayer, 'Casos Positivos '); currentCasosPointLayer = newLayer; }
         return currentCasosPointLayer;
     });
 }
@@ -219,7 +261,7 @@ function updateClustersDinamico(layerName, displayName, currentLayerVar, context
     const styleFunc = isCasos ? clusterCasosStyle : clusterFocosStyle;
 
     // Chamada para a sua função genérica WFS
-    return fetchWFSData(layerName, displayName, styleFunc, popupFields, '2.0.0', false, filter)
+    return fetchWFSData(layerName, displayName, styleFunc, popupFields, '2.0.0', false, filter, 'clustersPane')
         .then(newLayer => {
             if (newLayer) {
                 // Substitui a camada antiga pela nova no controle e no mapa
@@ -263,21 +305,21 @@ const clusterFocosStyle = function(feature) {
 };
 
 // Funções de imagem (overlay)
-function loadImageLayers() {
-    const declividadeBounds = [[-27.196900051, -48.88833825645294], [-26.951489787, -48.53321516854706]]; 
-    const demografiaBounds = [[-27.145871184999997, -48.75972971313529], [-26.95321603, -48.493185639864706]]; 
+// function loadImageLayers() {
+//     const declividadeBounds = [[-27.196900051, -48.88833825645294], [-26.951489787, -48.53321516854706]]; 
+//     const demografiaBounds = [[-27.145871184999997, -48.75972971313529], [-26.95321603, -48.493185639864706]]; 
 
-    const declividadeImageUrl = "mapa_declividade_transparente.png"; 
-    const demografiaImageUrl = "mapa_dens_transparente.png";
+//     const declividadeImageUrl = "mapa_declividade_transparente.png"; 
+//     const demografiaImageUrl = "mapa_dens_transparente.png";
 
-    declividadeImageLayer = L.imageOverlay(declividadeImageUrl, declividadeBounds, { opacity: 1.0, interactive: true, alt: 'Mapa de Declividade' });
-    declividadeImageLayer.name = 'Declividade (Imagem)'; 
+//     declividadeImageLayer = L.imageOverlay(declividadeImageUrl, declividadeBounds, { opacity: 1.0, interactive: true, alt: 'Mapa de Declividade' });
+//     declividadeImageLayer.name = 'Declividade (Imagem)'; 
 
-    demografiaImageLayer = L.imageOverlay(demografiaImageUrl, demografiaBounds, { opacity: 1.0, interactive: true, alt: 'Mapa de Demografia' });
-    demografiaImageLayer.name = 'Demografia (Imagem)'; 
+//     demografiaImageLayer = L.imageOverlay(demografiaImageUrl, demografiaBounds, { opacity: 1.0, interactive: true, alt: 'Mapa de Demografia' });
+//     demografiaImageLayer.name = 'Demografia (Imagem)'; 
 
-    return Promise.resolve([declividadeImageLayer, demografiaImageLayer]);
-}
+//     return Promise.resolve([declividadeImageLayer, demografiaImageLayer]);
+// }
 
 // --- Funções de Filtro (Lógica de Eventos) ---
 
@@ -489,6 +531,9 @@ window.onload = function() {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
+    map.createPane('clustersPane');
+    map.getPane('clustersPane').style.zIndex = 390; // overlayPane padrão é 400
+
     // 2. Inicialização e Agregação de Camadas
     var baseLayers = {}; 
     var overlayMaps = {}; 
@@ -496,8 +541,8 @@ window.onload = function() {
     Promise.all([
         loadBairrosOnce(), loadBairrosOfcOnce(), loadSetCensOnce(), loadCamboriuOnce(), loadCurvaNivelOnce(),
         updateFocosAedes(), updatePontosEstrat(), updateArmadilhas(), 
-        updateCasosPositivosPoints(), //updateHeatmapSwitch(),updateCasosHeatmap(),
-        loadImageLayers(), loadDeclividadePoligonoOnce(), loadDensDemoSetCensOnce(),
+        updateCasosPositivosPoints(), //updateHeatmapSwitch(),updateCasosHeatmap(),loadImageLayers(),
+        loadDeclividadePoligonoOnce(), loadDensDemoSetCensOnce(),
         updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', null, 'casos'),
         updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos (Áreas Críticas)', null, 'focos')
     ]).then(results => {
@@ -505,8 +550,8 @@ window.onload = function() {
         [
             bairrosWFSLayer, bairrosOfcWFSLayer, setCensWFSLayer, camboriuWFSLayer, curvasNivelWFSLayer, 
             focosWFSLayer, peWFSLayer, armWFSLayer, 
-            currentCasosPointLayer, //currentCasosHeatmapLayer,
-            [declividadeImageLayer, demografiaImageLayer], declividadePlLayer, setCensDemoCambLayer, 
+            currentCasosPointLayer, //currentCasosHeatmapLayer,[declividadeImageLayer, demografiaImageLayer],
+            declividadePlLayer, setCensDemoCambLayer, 
             clusterCasosLayer, clusterFocosLayer
         ] = results;
 
@@ -520,28 +565,55 @@ window.onload = function() {
         if (declividadePlLayer) { overlayMaps[declividadePlLayer.name] = declividadePlLayer; }
         if (setCensDemoCambLayer) { overlayMaps[setCensDemoCambLayer.name] = setCensDemoCambLayer; }
         if (camboriuWFSLayer) { overlayMaps[camboriuWFSLayer.name] = camboriuWFSLayer; }
-        if (focosWFSLayer) { overlayMaps[focosWFSLayer.name] = focosWFSLayer; }
-        if (peWFSLayer) { overlayMaps[peWFSLayer.name] = peWFSLayer; }
-        if (armWFSLayer) { overlayMaps[armWFSLayer.name] = armWFSLayer; }
+        
         if (currentCasosPointLayer) { overlayMaps[currentCasosPointLayer.name] = currentCasosPointLayer; }
-        if (currentCasosHeatmapLayer) { overlayMaps[currentCasosHeatmapLayer.name] = currentCasosHeatmapLayer; }
-        if (declividadeImageLayer) { overlayMaps[declividadeImageLayer.name] = declividadeImageLayer; }
-        if (demografiaImageLayer) { overlayMaps[demografiaImageLayer.name] = demografiaImageLayer; }
-
         // ALTERAÇÃO 2: Crie camadas de Heatmap "vazias" apenas para o controle de camadas
         // Isso permite que o usuário veja a opção no menu sem que os dados sejam baixados antes
         currentCasosHeatmapLayer = L.heatLayer([], { radius: 25 });
-        currentCasosHeatmapLayer.name = 'Casos Positivos (Mapa de Calor)';
+        currentCasosHeatmapLayer.name = 'Positivos (Mapa de Calor)';
 
+        if (focosWFSLayer) { overlayMaps[focosWFSLayer.name] = focosWFSLayer; }
         currentFocosHeatmapLayer = L.heatLayer([], { radius: 25 });
         currentFocosHeatmapLayer.name = 'Focos (Mapa de Calor)';
 
-        // Adicione-as ao overlayMaps para aparecerem no seletor
-        overlayMaps[currentCasosHeatmapLayer.name] = currentCasosHeatmapLayer;
-        overlayMaps[currentFocosHeatmapLayer.name] = currentFocosHeatmapLayer;
+        if (peWFSLayer) { overlayMaps[peWFSLayer.name] = peWFSLayer; }
+        if (armWFSLayer) { overlayMaps[armWFSLayer.name] = armWFSLayer; }
+        if (currentCasosHeatmapLayer) { overlayMaps[currentCasosHeatmapLayer.name] = currentCasosHeatmapLayer; }
+        //if (declividadeImageLayer) { overlayMaps[declividadeImageLayer.name] = declividadeImageLayer; }
+        //if (demografiaImageLayer) { overlayMaps[demografiaImageLayer.name] = demografiaImageLayer; }
 
         // 3. Adiciona Controle de Camadas
-        map.layersControl = L.control.layers(baseLayers, overlayMaps, { position: 'topright', collapsed: true }).addTo(map);
+        map.layersControl = L.control.layers(baseLayers, overlayMaps, { 
+            position: 'topright', 
+            collapsed: true,
+            sortLayers: true,
+            sortFunction: function (layerA, layerB, nameA, nameB) {
+                // Aqui definimos a ordem desejada exata de cima para baixo
+                const order = [
+                    'Bairros - Oficial',
+                    'Bairros - IBGE',
+                    'Setores Censitários',
+                    'Curva de Nível',
+                    'Declividade',
+                    'Densidade Demográfica',
+                    'Camboriú',
+                    'Casos Positivos',
+                    'Positivos (Mapa de Calor)',
+                    'Clusters de Casos', 
+                    'Focos Aedes',
+                    'Focos (Mapa de Calor)',
+                    'Clusters de Focos', 
+                    'Pontos Estratégicos',
+                    'Armadilhas'
+                ];
+                
+                // Encontra a posição com base no nome
+                let idxA = order.findIndex(item => nameA.trim().startsWith(item));
+                let idxB = order.findIndex(item => nameB.trim().startsWith(item));
+                
+                return (idxA === -1 ? 999 : idxA) - (idxB === -1 ? 999 : idxB);
+            }
+        }).addTo(map);
 
         map.layersControl.getContainer().addEventListener('click', function(event) {
             // Pegamos o rótulo da camada clicada
@@ -552,7 +624,7 @@ window.onload = function() {
 
                 // LISTA DE CAMADAS QUE RESETAM O FILTRO
                 // Se clicar em qualquer outra (como Heatmap), o filtro permanece como está
-                const resetLayers = ['Casos Positivos (Pontos)', 'Focos Aedes (Pontos)'];
+                const resetLayers = ['Casos Positivos ', 'Focos Aedes '];
 
             }, true);
 
@@ -584,28 +656,32 @@ window.onload = function() {
             const layersControl = document.querySelector('.leaflet-control-layers');
     
             // APENAS camadas de PONTOS disparam a abertura do painel de filtro
-            if (e.name === 'Casos Positivos (Pontos)') {
+            if (e.name === 'Casos Positivos ') {
                 mainContainer.style.display = 'flex';
                 document.getElementById('group-filter-casos').style.display = 'block';
-                layersControl.classList.add('leaflet-control-layers-pushed');
                 populateSpecificYears('casos', LAYER_CASOS, 'filter-ano-casos');
-
+                if (map.layersControl) {
+                    addLayerToControlUnique(currentCasosHeatmapLayer, currentCasosHeatmapLayer.name);
+                    if (clusterCasosLayer) addLayerToControlUnique(clusterCasosLayer, clusterCasosLayer.name);
+                }
             }
             
-            if (e.name === 'Focos Aedes (Pontos)') {
+            if (e.name === 'Focos Aedes ') {
                 mainContainer.style.display = 'flex';
                 document.getElementById('group-filter-focos').style.display = 'block';
-                layersControl.classList.add('leaflet-control-layers-pushed');
                 populateSpecificYears('focos', LAYER_FOCOS_SE, 'filter-ano-focos');
-
+                if (map.layersControl) {
+                    addLayerToControlUnique(currentFocosHeatmapLayer, currentFocosHeatmapLayer.name);
+                    if (clusterFocosLayer) addLayerToControlUnique(clusterFocosLayer, clusterFocosLayer.name);
+                }
             }
 
             if (e.name.includes('Mapa de Calor')) { heatmapLegend.style.display = 'block'; }
-            if (e.name === 'Declividade (Polígonos)') { declividadeLegend.style.display = 'block'; }
-            if (e.name === 'Densidade Demográfica (SC)') { demografiaOfcLegend.style.display = 'block'; }
-
+            if (e.name === 'Declividade ') { declividadeLegend.style.display = 'block'; }
+            if (e.name === 'Densidade Demográfica ') { demografiaOfcLegend.style.display = 'block'; }
 
             // DISPARO AQUI: Reorganiza após as legendas aparecerem
+            adjustMenuPosition();
             setTimeout(organizarLegendas, 100);
         });
 
@@ -614,8 +690,8 @@ window.onload = function() {
             
             // Identifica qual contexto estamos removendo
             let contextToRemove = null;
-            if (e.name === 'Casos Positivos (Pontos)') contextToRemove = 'casos';
-            if (e.name === 'Focos Aedes (Pontos)') contextToRemove = 'focos';
+            if (e.name === 'Casos Positivos ') contextToRemove = 'casos';
+            if (e.name === 'Focos Aedes ') contextToRemove = 'focos';
 
             // 1. Limpa APENAS os seletores do contexto que saiu do mapa
             if (contextToRemove) {
@@ -627,9 +703,29 @@ window.onload = function() {
                     se.disabled = true;
                 }
                 
+                // --- NOVO: Lógica dinâmica de limpeza para Casos ---
+                if (contextToRemove === 'casos') {
+                    if (map.layersControl) {
+                        map.layersControl.removeLayer(currentCasosHeatmapLayer);
+                        if (clusterCasosLayer) map.layersControl.removeLayer(clusterCasosLayer);
+                    }
+                    map.removeLayer(currentCasosHeatmapLayer);
+                    if (clusterCasosLayer) map.removeLayer(clusterCasosLayer);
+                }
+                
+                // --- NOVO: Lógica dinâmica de limpeza para Focos ---
+                if (contextToRemove === 'focos') {
+                    if (map.layersControl) {
+                        map.layersControl.removeLayer(currentFocosHeatmapLayer);
+                        if (clusterFocosLayer) map.layersControl.removeLayer(clusterFocosLayer);
+                    }
+                    map.removeLayer(currentFocosHeatmapLayer);
+                    if (clusterFocosLayer) map.removeLayer(clusterFocosLayer);
+                }
+
                 // Remove camadas auxiliares (clusters) se existirem
-                if (contextToRemove === 'casos' && clusterCasosLayer) map.removeLayer(clusterCasosLayer);
-                if (contextToRemove === 'focos' && clusterFocosLayer) map.removeLayer(clusterFocosLayer);
+                //if (contextToRemove === 'casos' && clusterCasosLayer) map.removeLayer(clusterCasosLayer);
+                //if (contextToRemove === 'focos' && clusterFocosLayer) map.removeLayer(clusterFocosLayer);
                 
                 document.getElementById(`group-filter-${contextToRemove}`).style.display = 'none';
             }
@@ -640,15 +736,15 @@ window.onload = function() {
 
             if (!casosAtivo && !focosAtivo) {
                 document.getElementById('main-filter-container').style.display = 'none';
-                if (layersControl) layersControl.classList.remove('leaflet-control-layers-pushed');
             }
-
+            // Recalcula dinamicamente se o menu deve subir um nível ou voltar ao topo
+            adjustMenuPosition();
             // Gerenciamento de Legendas permanece igual
             const heatmapAtivo = map.hasLayer(currentCasosHeatmapLayer) || map.hasLayer(currentFocosHeatmapLayer);
             if (!heatmapAtivo) heatmapLegend.style.display = 'none';
-            if (e.name === 'Declividade (Polígonos)') declividadeLegend.style.display = 'none';
-            if (e.name === 'Densidade Demográfica (SC)') demografiaOfcLegend.style.display = 'none';
-
+            if (e.name === 'Declividade ') declividadeLegend.style.display = 'none';
+            if (e.name === 'Densidade Demográfica ') demografiaOfcLegend.style.display = 'none';
+            
             organizarLegendas();
         });
 
@@ -680,12 +776,12 @@ function resetFilterSelectors() {
     
 setInterval(() => {
     if (map.hasLayer(clusterCasosLayer)) {
-        clusterCasosLayer = updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', clusterCasosLayer, 'casos').then(layer => {clusterCasosLayer = layer;});
+        updateClustersDinamico(LAYER_CLUSTERS_CASOS, 'Clusters de Casos (Focos Ativos)', clusterCasosLayer, 'casos');
     }
     if (map.hasLayer(clusterFocosLayer)) {
-        clusterFocosLayer = updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos (Áreas Críticas)', clusterFocosLayer, 'focos');
+        updateClustersDinamico(LAYER_CLUSTERS_FOCOS, 'Clusters de Focos (Áreas Críticas)', clusterFocosLayer, 'focos');
     }
-}, 300000); // 5 minutos
+}, 300000); // 5 minutos // 5 minutos
 };
 
 async function startPlayback(context, btnElement) {

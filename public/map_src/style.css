@@ -10,7 +10,8 @@
     --espaco-itens: 8px;
 
     /* Tamanho do deslocamento quando o menu do mapa precisa descer */
-    --empurrao-menu: 210px; 
+    --empurrao-1: 105px; /* Altura média de 1 filtro na tela */
+    --empurrao-2: 210px; /* Altura total de 2 filtros na tela */
 }
 
 /* 1. Reset e Fix de Tela Cheia */
@@ -143,7 +144,73 @@ html, body {
     transition: margin-top 0.3s ease-in-out;
 }
 
-.leaflet-top.leaflet-right .leaflet-control-layers.leaflet-control-layers-pushed {
-    /* Quando aberto, ele desce a distância da parede + o tamanho do empurrão que definimos no topo */
-    margin-top: calc(var(--parede) + var(--empurrao-menu)) !important; 
+/* Deslocamento dinâmico baseado na quantidade de filtros abertos */
+.leaflet-top.leaflet-right .leaflet-control-layers.pushed-1 {
+    margin-top: calc(var(--parede) + var(--empurrao-1)) !important; 
+}
+
+.leaflet-top.leaflet-right .leaflet-control-layers.pushed-2 {
+    margin-top: calc(var(--parede) + var(--empurrao-2)) !important; 
+}
+
+/* ==========================================================================
+   Comportamento Padrão (Desktop)
+   ========================================================================== */
+/* 1. O container pai não deve ter scroll, ele apenas envolve os itens */
+.leaflet-control-layers.leaflet-control-layers-expanded {
+    padding: 6px 10px 6px 6px !important;
+    overflow: hidden !important; /* Garante que o pai não gere barra de rolagem extra */
+}
+
+/* 2. A restrição de altura e a barra de rolagem devem ficar na LISTA INTERNA */
+.leaflet-control-layers-list {
+    max-height: 80vh !important; /* Altura generosa no PC */
+    overflow-y: auto !important; /* Única barra de rolagem vertical */
+    overflow-x: hidden !important;
+    padding-right: 5px !important; /* Evita que o texto encoste na barra */
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ==========================================================================
+   Comportamento Mobile (Menor que 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+    .leaflet-control-layers-list {
+        max-height: 30vh !important; /* Restringe a altura apenas no celular */
+    }
+}
+
+/* Deixa a rolagem mais suave em dispositivos móveis (iOS/Android) */
+.leaflet-control-layers-list {
+    -webkit-overflow-scrolling: touch;
+}
+
+/* ==========================================================================
+   8. ESTILIZAÇÃO DA LISTA DE CAMADAS (SEPARADORES E HOVER)
+   ========================================================================== */
+
+/* Adiciona a linha separadora e um espaçamento entre cada item da lista */
+.leaflet-control-layers-overlays label {
+    border-bottom: 1px solid #eaeaea; /* Linha cinza clara */
+    padding: 1px 1px;
+    margin-bottom: 1px;
+    transition: background-color 0.2s;
+    cursor: pointer;
+}
+
+/* Remove a linha do último item para manter o design limpo */
+.leaflet-control-layers-overlays label:last-child {
+    border-bottom: none;
+}
+
+/* Cria um efeito visual agradável (fundo cinza) quando o mouse passa por cima */
+.leaflet-control-layers-overlays label:hover {
+    background-color: #f4f8f4; /* Um tom de verde/cinza muito sutil */
+    border-radius: 4px;
+}
+
+/* Alinha o checkbox perfeitamente com o texto */
+.leaflet-control-layers-overlays input[type="checkbox"] {
+    margin-right: 8px;
+    cursor: pointer;
 }
