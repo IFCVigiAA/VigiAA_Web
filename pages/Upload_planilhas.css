@@ -63,7 +63,7 @@
   display: grid;
   gap: 8px;
   padding: 12px 12px;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #f5fbf7;
   border: 1px solid rgba(46, 166, 106, 0.35);
 }
@@ -227,7 +227,47 @@
   border-color: #1f9e61;
   box-shadow: 0 0 0 2px rgba(31, 158, 97, 0.2);
 }
+.vigiaa-field-wrapper {
+  position: relative;
+  width: 100%;
+}
 
+
+.vigiaa-field-wrapper input[type="file"].has-file {
+  padding-right: 38px;
+}
+
+/* Botão 'X' vermelho */
+.vigiaa-btn-remove {
+  position: absolute;
+  right: 5px;
+  bottom: 50px;
+  width: 15px;
+  height: 15px;
+  border-radius: 4px;
+  background-color: #ef4444;
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.vigiaa-btn-remove:hover {
+  background-color: #dc2626;
+  transform: scale(1.05);
+}
+
+.vigiaa-btn-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
 /* =========================================================
    ESTILOS DO MODAL DE MAPEAMENTO (CORRIGIDO SEM SCROLLBARS BRUTAS)
    ========================================================= */

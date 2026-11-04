@@ -39,6 +39,7 @@ export default function UploadPlanilhas() {
   const [geoprocessando, setGeoprocessando] = useState(false)
   const [progresso, setProgresso] = useState(0)
   const [log, setLog] = useState('')
+  const [mensagemStatus, setMensagemStatus] = useState('')
 
   // ESTADOS DO MODAL DE MAPEAMENTO
   const [modalOpen, setModalOpen] = useState(false)
@@ -56,7 +57,20 @@ export default function UploadPlanilhas() {
     () => Object.entries(arquivos).filter(([_, file]) => !!file),
     [arquivos]
   )
+  const handleRemoverArquivo = (tipo) => {
 
+  setArquivos(prev => ({ ...prev, [tipo]: null }))
+
+  const inputElement = document.querySelector(`input[name="${tipo}"]`)
+  if (inputElement) {
+    inputElement.value = ''
+  }
+
+  const novosMapeamentos = { ...mapeamentosDefinidos }
+  delete novosMapeamentos[tipo]
+  setMapeamentosDefinidos(novosMapeamentos)
+  sessionStorage.setItem('mapeamento_temp', JSON.stringify(novosMapeamentos))
+  }
   function getAuthHeader() {
     const token = localStorage.getItem('access') || localStorage.getItem('token')
     if (!token) return {}
@@ -64,7 +78,6 @@ export default function UploadPlanilhas() {
     return { Authorization: authValue }
   }
 
-  // Detecta a seleção de arquivo e abre o modal para analisar
   async function handleChange(e) {
     const file = e.target.files?.[0] ?? null
     const tipo = e.target.name
@@ -103,10 +116,7 @@ export default function UploadPlanilhas() {
     }
   }
 
-  // Salva o de-para isolado no estado e no sessionStorage para cada tipo de planilha
   const handleConfirmarMapeamento = (mapeamentoConfirmado) => {
-    console.log(`📌 SALVANDO MAPEAMENTO DO MODAL [${tipoMapeando}]:`, mapeamentoConfirmado)
-
     const mapaAtualizado = {
       ...mapeamentosDefinidos,
       [tipoMapeando]: mapeamentoConfirmado,
@@ -137,38 +147,43 @@ export default function UploadPlanilhas() {
       const interval = setInterval(async () => {
         try {
           const res = await fetch(
-            `${API_BASE}/api/casos/status-processamento/${jobId}/`,
+            `${API_BASE}/api/casos/status-processamento/${jobId}/?t=${Date.now()}`,
             { headers: getAuthHeader() }
           )
           const data = await res.json()
 
-          if (data.progresso !== undefined) setProgresso(data.progresso)
+          if (data.progresso !== undefined && data.progresso !== null) {
+            setProgresso(Number(data.progresso))
+          }
 
-          if (data.mensagem && data.mensagem !== ultimaMensagem.current) {
-            setLog(prev => prev + `[${tipo.toUpperCase()}] ${data.mensagem}\n`)
-            ultimaMensagem.current = data.mensagem
+          // Atualiza apenas o texto inline (mensagemStatus) em vez de acumular no log
+          if (data.mensagem) {
+            setMensagemStatus(`[${tipo.toUpperCase()}] ${data.mensagem}`)
           }
 
           if (data.status === 'finalizado' || data.status === 'concluido') {
             clearInterval(interval)
-            setLog(prev => prev + `✔ ${tipo}: Processamento finalizado.\n\n`)
+            setProgresso(100)
+            setMensagemStatus('')
+            setLog(prev => prev + `✔ ${tipo}: Processamento finalizado com sucesso.\n\n`)
             resolve()
           }
 
           if (data.status === 'erro') {
             clearInterval(interval)
+            setMensagemStatus('')
             setLog(prev => prev + `✖ ${tipo}: Erro -> ${data.mensagem}\n\n`)
             resolve()
           }
-        } catch {
+        } catch (err) {
+          console.error('Erro no monitorarJob:', err)
           clearInterval(interval)
           resolve()
         }
-      }, 2000)
+      }, 1000)
     })
   }
 
-  // Função enviar genérica e compatível com todos os tipos de planilha
   async function enviar({ syncAfter = false, geoprocessarAfter = false } = {}) {
     if (pendentes.length === 0) {
       setLog('Selecione pelo menos 1 planilha.')
@@ -177,9 +192,9 @@ export default function UploadPlanilhas() {
 
     setEnviando(true)
     setLog('')
+    setMensagemStatus('')
     setProgresso(0)
 
-    // 1. Resgata o mapa geral do sessionStorage ou do estado
     let mapaAtivo = {}
     try {
       const salvo = sessionStorage.getItem('mapeamento_temp')
@@ -202,7 +217,6 @@ export default function UploadPlanilhas() {
           formData.append('celula_cabecalho', celulaCabecalho.trim())
         }
 
-        // 2. Busca exata do mapeamento do tipo atual
         const mapeamentoDoTipo =
           mapaAtivo[tipo] ||
           mapaAtivo[uploadKeyByTipo[tipo]] ||
@@ -210,20 +224,19 @@ export default function UploadPlanilhas() {
 
         if (mapeamentoDoTipo && Object.keys(mapeamentoDoTipo).length > 0) {
           const payloadStr = JSON.stringify(mapeamentoDoTipo)
-          console.log(`🚀 [FRONTEND] ENVIANDO MAPEAMENTO PARA [${tipo}]:`, payloadStr)
           formData.append('mapeamento', payloadStr)
-        } else {
-          console.warn(`⚠️ [FRONTEND] NENHUM MAPEAMENTO CUSTOMIZADO PARA [${tipo}] (usará fallback)`)
         }
 
         setLog(prev => prev + `Enviando arquivo ${tipo} para o servidor...\n`)
         const r = await uploadArquivo(url, formData)
 
-        if (r.ok && r.data?.job_id) {
+        const jobIdRecebido = r.data?.job_id || r.data?.task_id || r.data?.id || r.data?.jobId
+
+        if (r.ok && jobIdRecebido) {
           setLog(prev => prev + `✔ ${tipo} recebido! Processando...\n`)
-          await monitorarJob(r.data.job_id, tipo)
+          await monitorarJob(jobIdRecebido, tipo)
         } else {
-          setLog(prev => prev + `✖ ${tipo} Falha ao enviar arquivo.\n\n`)
+          setLog(prev => prev + `✖ ${tipo} Falha ao iniciar processamento.\n\n`)
         }
       }
 
@@ -235,7 +248,7 @@ export default function UploadPlanilhas() {
         if (syncAfter) await sincronizar()
       }
     } catch (err) {
-      console.error(err)
+      console.error('Erro crítico no envio:', err)
       setLog(prev => prev + `✖ Erro crítico no envio.\n`)
     } finally {
       setEnviando(false)
@@ -256,7 +269,8 @@ export default function UploadPlanilhas() {
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       })
       const data = await res.json()
-      if (data.job_id) await monitorarJob(data.job_id, 'Mapa')
+      const jobId = data.job_id || data.task_id || data.id
+      if (jobId) await monitorarJob(jobId, 'Mapa')
     } catch {
       setLog(prev => prev + '\n✖ Erro ao iniciar geoprocessamento\n')
     } finally {
@@ -279,7 +293,8 @@ export default function UploadPlanilhas() {
         headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       })
       const data = await res.json()
-      if (data.job_id) await monitorarJob(data.job_id, 'Sincronização')
+      const jobId = data.job_id || data.task_id || data.id
+      if (jobId) await monitorarJob(jobId, 'Sincronização')
     } catch {
       setLog(prev => prev + '\n✖ Erro ao iniciar sincronização\n')
     } finally {
@@ -303,59 +318,38 @@ export default function UploadPlanilhas() {
           <span className="vigiaa-badge">{pendentes.length} selecionada(s)</span>
         </div>
         <div className="vigiaa-fields">
-          <label className="vigiaa-field">
-            <span>Casos positivos</span>
-            <input
-              type="file"
-              name="casos"
-              accept=".xlsx, .xls, .ods"
-              onChange={handleChange}
-              disabled={enviando}
-            />
-          </label>
+          {[
+            { key: 'casos', label: 'Casos positivos' },
+            { key: 'pontos', label: 'Pontos estratégicos' },
+            { key: 'focos', label: 'Focos' },
+            { key: 'ovitrampas', label: 'Ovitrampas' },
+          ].map(({ key, label }) => (
+            <div key={key} className="vigiaa-field-wrapper">
+              <label className="vigiaa-field">
+                <span>{label}</span>
+                <input
+                  type="file"
+                  name={key}
+                  accept=".xlsx, .xls, .ods"
+                  onChange={handleChange}
+                  disabled={enviando || sincronizando || geoprocessando}
+                  className={arquivos[key] ? 'has-file' : ''}
+                />
+              </label>
 
-          <label className="vigiaa-field">
-            <span>Pontos estratégicos</span>
-            <input
-              type="file"
-              name="pontos"
-              accept=".xlsx, .xls, .ods"
-              onChange={handleChange}
-              disabled={enviando}
-            />
-          </label>
-
-          <label className="vigiaa-field">
-            <span>Focos</span>
-            <input
-              type="file"
-              name="focos"
-              accept=".xlsx, .xls, .ods"
-              onChange={handleChange}
-              disabled={enviando}
-            />
-          </label>
-          <label className="vigiaa-field">
-            <span>Ovitrampas</span>
-            <input
-              type="file"
-              name="ovitrampas"
-              accept=".xlsx, .xls, .ods"
-              onChange={handleChange}
-              disabled={enviando}
-            />
-          </label>
-
-         {/* <label className="vigiaa-field">
-            <span>Armadilhas</span>
-            <input
-              type="file"
-              name="armadilhas"
-              accept=".xlsx, .xls, .ods"
-              onChange={handleChange}
-              disabled={enviando}
-            />
-          </label> */}
+              {arquivos[key] && (
+                <button
+                  type="button"
+                  className="vigiaa-btn-remove"
+                  onClick={() => handleRemoverArquivo(key)}
+                  disabled={enviando || sincronizando || geoprocessando}
+                  title="Remover planilha"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          ))}
         </div>
 
         <div className="vigiaa-actions">
@@ -402,9 +396,16 @@ export default function UploadPlanilhas() {
           <div className="vigiaa-progress">
             <div
               className="vigiaa-progress__bar"
-              style={{ width: `${progresso}%` }}
+              style={{ width: `${progresso}%`, transition: 'width 0.4s ease-in-out' }}
             />
           </div>
+        )}
+
+        {/* Exibe a mensagem de status dinamicamente abaixo da barra sem poluir o log */}
+        {mensagemStatus && (
+          <p style={{ fontSize: '13px', color: '#444', marginTop: '8px', fontWeight: '500' }}>
+            {mensagemStatus}
+          </p>
         )}
 
         {log && (
@@ -414,7 +415,6 @@ export default function UploadPlanilhas() {
         )}
       </div>
 
-      {/* MODAL DE MAPEAMENTO DE COLUNAS */}
       {modalOpen && (
         <ModalMapeamento
           open={modalOpen}
@@ -430,7 +430,6 @@ export default function UploadPlanilhas() {
   )
 }
 
-// Subcomponente do Modal Interativo
 function ModalMapeamento({ open, tipo, colunasPlanilha, camposBanco, sugestao, onConfirm, onCancel }) {
   const [dePara, setDePara] = useState({})
 
