@@ -58,18 +58,30 @@ export default function UploadPlanilhas() {
     [arquivos]
   )
   const handleRemoverArquivo = (tipo) => {
+    if (!tipo) return
 
-  setArquivos(prev => ({ ...prev, [tipo]: null }))
+    setArquivos(prev => ({ ...prev, [tipo]: null }))
 
-  const inputElement = document.querySelector(`input[name="${tipo}"]`)
-  if (inputElement) {
-    inputElement.value = ''
+    const inputElement = document.querySelector(`input[name="${tipo}"]`)
+    if (inputElement) {
+      inputElement.value = ''
+    }
+
+    setMapeamentosDefinidos(prev => {
+      const novos = { ...prev }
+      delete novos[tipo]
+      sessionStorage.setItem('mapeamento_temp', JSON.stringify(novos))
+      return novos
+    })
   }
+  const handleCancelarMapeamento = () => {
+    if (tipoMapeando) {
+      handleRemoverArquivo(tipoMapeando)
+    }
 
-  const novosMapeamentos = { ...mapeamentosDefinidos }
-  delete novosMapeamentos[tipo]
-  setMapeamentosDefinidos(novosMapeamentos)
-  sessionStorage.setItem('mapeamento_temp', JSON.stringify(novosMapeamentos))
+    // 2. Fecha o modal e limpa o tipo
+    setModalOpen(false)
+    setTipoMapeando(null)
   }
   function getAuthHeader() {
     const token = localStorage.getItem('access') || localStorage.getItem('token')
@@ -423,7 +435,7 @@ export default function UploadPlanilhas() {
           camposBanco={dadosMapeamento.camposBanco}
           sugestao={dadosMapeamento.sugestao}
           onConfirm={handleConfirmarMapeamento}
-          onCancel={() => setModalOpen(false)}
+          onCancel={handleCancelarMapeamento}
         />
       )}
     </div>

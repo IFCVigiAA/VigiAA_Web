@@ -168,7 +168,7 @@ class CasoPositivoTemp(models.Model):
     longitude = models.CharField(max_length=50, null=True, blank=True)
     situacao = models.CharField(max_length=50, null=True, blank=True)
     observacoes = models.TextField(null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     class Meta:
         db_table = 'casos_positivos_temp'
@@ -189,7 +189,7 @@ class CasoPositivoTempGL(models.Model):
     situacao = models.CharField(max_length=50, null=True, blank=True)
     observacoes = models.TextField(null=True, blank=True)
     geometry = models.PointField(srid=4674, null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     class Meta:
         db_table = 'casos_positivos_temp_gl'
@@ -215,7 +215,7 @@ class FocoTemp(models.Model):
     latitude = models.CharField(max_length=50, null=True, blank=True)
     longitude = models.CharField(max_length=50, null=True, blank=True)
     geometry = models.PointField(srid=4674, null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     class Meta:
         db_table = 'focos_aedes_temp'
@@ -240,7 +240,7 @@ class PontoEstrategicoTemp(models.Model):
     latitude = models.CharField(max_length=50, null=True, blank=True)
     longitude = models.CharField(max_length=50, null=True, blank=True)
     geometry = models.PointField(srid=4674, null=True, blank=True)
-    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True)
+    hash_registro = models.CharField(max_length=64, unique=True, null=True, blank=True, editable=False)
 
     class Meta:
         db_table = 'pontos_estrategicos_temp'
@@ -258,7 +258,7 @@ class ArmadilhaTemp(models.Model):
     tipo_imovel = models.CharField(max_length=50, null=True, blank=True)
     tipo_armadilha = models.CharField(max_length=50, null=True, blank=True)
     latitude = models.FloatField(null=True, blank=True)
-    longitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True) 
     geometry = models.PointField(srid=4674, null=True, blank=True, editable=False)
     hash_registro = models.CharField(max_length=64, null=True, blank=True, db_index=True, editable=False)
     class Meta:
