@@ -22,7 +22,7 @@ urlpatterns = [
     path("login/", auth_views.LoginView.as_view(template_name="login.html"), name="login"),
     path("logout/", auth_views.LogoutView.as_view(next_page="/api/casos/login/"), name="logout"),
     path("sincronizar/", sincronizar_oficial_api, name="sincronizar_oficial"),
-    path("status-processamento/<int:job_id>/", status_processamento),
+    path("status-processamento/<str:job_id>/", status_processamento),
     path('geoprocessar-positivos/', disparar_geoprocessamento, name='geoprocessar_positivos'),
     path('extrair-cabecalho/', views.extrair_cabecalho_e_sugerir, name='extrair_cabecalho'),
     path("upload/ovitrampas/", views.upload_ovitrampas, name="upload_ovitrampas"),

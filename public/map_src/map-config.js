@@ -3,6 +3,8 @@ const GEOSERVER_WFS_URL = 'http://192.168.70.74:8080/geoserver/wfs';
 const WORKSPACE = 'vigiaa_ofc';
 const LAYER_CASOS = 'vw_casosposi_se';
 const LAYER_FOCOS_SE = 'vw_focos_aedes_se';
+const LAYER_OVITRAMPAS = 'vw_ovitrampas_se';
+const LAYER_PONTOS_EST = 'vw_pontos_est_se';
 
 // --- 2. Variáveis de Camadas (Serão populadas em map-main.js, mas declaradas globalmente) ---
 // Usamos 'let' pois elas serão reatribuídas com as instâncias das camadas Leaflet
@@ -14,6 +16,7 @@ let curvasNivelWFSLayer;
 let setCensDemoCambLayer;
 let focosWFSLayer;
 let peWFSLayer;
+let ovitrampasWFSLayer;
 let armWFSLayer;
 let currentCasosPointLayer; 
 let currentCasosHeatmapLayer;
@@ -59,6 +62,7 @@ const casosPointStyleWFS = function(feature) { return { radius: 5, fillColor: 'r
 const camboriuStyleWFS = function(feature) { return { fillColor: '#ffcc00', color: 'black', weight: 1, fillOpacity: 0.5 }; };
 const focosStyleWFS = function(feature) { return { radius: 5, fillColor: 'orange', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.7 }; };
 const peStyleWFS = function(feature) { return { radius: 5, fillColor: 'green', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.7 }; };
+const ovitrampasStyleWFS = function(feature) { return { radius: 5, fillColor: 'purple', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.7 }; };
 const armStyleWFS = function(feature) { return { radius: 5, fillColor: 'purple', color: '#000', weight: 1, opacity: 1, fillOpacity: 0.7 }; };
 
 // --- 4. Funções de Utilitário (Ajudam a construir o mapa/filtro) ---

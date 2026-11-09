@@ -31,7 +31,6 @@ def rodar_sincronizacao(job_id):
         proc.mensagem = "Iniciando sincronização"
         proc.save()
 
-        # Chama o arquivo 'sincronizar_oficial.py' lá da pasta management/commands
         call_command("sincronizar_oficial", stdout=out, stderr=err)
 
         proc.progresso = 90
