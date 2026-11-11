@@ -10,7 +10,6 @@ function Home() {
   const iframeRef = useRef(null);
   const [iframeLoaded, setIframeLoaded] = useState(false);
   const [mapSrc, setMapSrc] = useState(import.meta.env.BASE_URL + 'map_src/index.html');
-  const [mapTitle, setMapTitle] = useState('Mapa Principal');
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -53,8 +52,6 @@ function Home() {
     <div className={`page-container ${isFullscreen ? 'fullscreen-active' : ''}`}>
       {!isFullscreen && <NavBar />}
       <br /><br />
-      <p className="mapTitle">{mapTitle}</p>
-      <br />
       <div className="mapButtons">
       </div>
 

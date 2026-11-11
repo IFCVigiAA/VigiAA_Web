@@ -319,113 +319,154 @@ export default function UploadPlanilhas() {
       <NavBar />
 
       <div className="vigiaa-card">
-        <div className="vigiaa-card__header">
-          <div>
-            <h2 className="vigiaa-title">Upload de dados</h2>
-            <p className="vigiaa-subtitle">
-              Envie as planilhas e acompanhe o progresso real.
-            </p>
-          </div>
+  <div className="vigiaa-card__header">
+    <div>
+      <h2 className="vigiaa-title">Upload de dados</h2>
+      <p className="vigiaa-subtitle">
+        Envie as planilhas e acompanhe o progresso real.
+      </p>
+    </div>
 
-          <span className="vigiaa-badge">{pendentes.length} selecionada(s)</span>
-        </div>
-        <div className="vigiaa-fields">
-          {[
-            { key: 'casos', label: 'Casos positivos' },
-            { key: 'pontos', label: 'Pontos estratégicos' },
-            { key: 'focos', label: 'Focos' },
-            { key: 'ovitrampas', label: 'Ovitrampas' },
-          ].map(({ key, label }) => (
-            <div key={key} className="vigiaa-field-wrapper">
-              <label className="vigiaa-field">
-                <span>{label}</span>
-                <input
-                  type="file"
-                  name={key}
-                  accept=".xlsx, .xls, .ods"
-                  onChange={handleChange}
-                  disabled={enviando || sincronizando || geoprocessando}
-                  className={arquivos[key] ? 'has-file' : ''}
-                />
-              </label>
+    <span className="vigiaa-badge">{pendentes.length} selecionada(s)</span>
+  </div>
 
-              {arquivos[key] && (
-                <button
-                  type="button"
-                  className="vigiaa-btn-remove"
-                  onClick={() => handleRemoverArquivo(key)}
-                  disabled={enviando || sincronizando || geoprocessando}
-                  title="Remover planilha"
-                >
-                  ✕
-                </button>
-              )}
-            </div>
-          ))}
+
+  <div className="vigiaa-fields">
+  {[
+    { key: 'casos', label: 'Casos positivos' },
+    { key: 'pontos', label: 'Pontos estratégicos' },
+    { key: 'focos', label: 'Focos' },
+    { key: 'ovitrampas', label: 'Ovitrampas' },
+  ].map(({ key, label }) => (
+    <div key={key} className="vigiaa-field-wrapper">
+      <div className={`vigiaa-field ${arquivos[key] ? 'has-file' : ''}`}>
+        <div className="vigiaa-field__header">
+          <span className="vigiaa-field__title">{label}</span>
         </div>
 
-        <div className="vigiaa-actions">
-          <button
-            type="button"
-            className="vigiaa-btn vigiaa-btn--primary"
-            onClick={() => enviar({ syncAfter: false })}
+        <label className="vigiaa-file-dropzone">
+          <input
+            type="file"
+            name={key}
+            accept=".xlsx, .xls, .ods"
+            onChange={handleChange}
             disabled={enviando || sincronizando || geoprocessando}
-          >
-            {enviando ? 'Processando...' : 'Processar planilhas'}
-          </button>
-
-          <button
-            type="button"
-            className="vigiaa-btn vigiaa-btn--map"
-            onClick={geoprocessar}
-            disabled={enviando || sincronizando || geoprocessando}
-          >
-            {geoprocessando ? 'Geocodificando...' : 'Geoprocessar pontos'}
-          </button>
-
-          <button
-            type="button"
-            className="vigiaa-btn vigiaa-btn--outline"
-            onClick={() =>
-              enviar({ syncAfter: true, geoprocessarAfter: true })
-            }
-            disabled={enviando || sincronizando || geoprocessando}
-          >
-            Processar + sincronizar
-          </button>
-
-          <button
-            type="button"
-            className="vigiaa-btn vigiaa-btn--ghost"
-            onClick={sincronizar}
-            disabled={enviando || sincronizando || geoprocessando}
-          >
-            {sincronizando ? 'Sincronizando...' : 'Sincronizar agora'}
-          </button>
-        </div>
-
-        {(enviando || sincronizando || geoprocessando) && (
-          <div className="vigiaa-progress">
-            <div
-              className="vigiaa-progress__bar"
-              style={{ width: `${progresso}%`, transition: 'width 0.4s ease-in-out' }}
-            />
+          />
+          
+          <div className="vigiaa-file-btn">
+            <svg 
+              width="18" 
+              height="18" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+            >
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="12" y1="18" x2="12" y2="12"></line>
+              <polyline points="9 15 12 12 15 15"></polyline>
+            </svg>
+            <span>{arquivos[key] ? 'Alterar planilha' : 'Selecionar arquivo'}</span>
           </div>
-        )}
 
-        {/* Exibe a mensagem de status dinamicamente abaixo da barra sem poluir o log */}
-        {mensagemStatus && (
-          <p style={{ fontSize: '13px', color: '#444', marginTop: '8px', fontWeight: '500' }}>
-            {mensagemStatus}
-          </p>
-        )}
-
-        {log && (
-          <div className="vigiaa-log">
-            <pre>{log}</pre>
-          </div>
-        )}
+          <span className="vigiaa-file-name" title={arquivos[key]?.name || ''}>
+            {arquivos[key] ? arquivos[key].name : 'Nenhum arquivo selecionado'}
+          </span>
+        </label>
       </div>
+
+      {arquivos[key] && (
+        <button
+          type="button"
+          className="vigiaa-btn-remove"
+          onClick={() => handleRemoverArquivo(key)}
+          disabled={enviando || sincronizando || geoprocessando}
+          title="Remover planilha"
+        >
+          ✕
+        </button>
+      )}
+    </div>
+  ))}
+</div>
+
+  {/* BOTÕES EM 1 LINHA (3 COLUNAS - SEM GEOPROCESSAMENTO) */}
+  <div className="vigiaa-actions">
+    <div 
+      className="vigiaa-btn-wrapper" 
+      data-tooltip="Valida e processa os dados das planilhas selecionadas."
+    >
+      <button
+        type="button"
+        className="vigiaa-btn vigiaa-btn--primary"
+        onClick={() => enviar({ syncAfter: false })}
+        disabled={enviando || sincronizando || geoprocessando}
+        title="Valida e processa os dados das planilhas selecionadas."
+      >
+        {enviando ? 'Processando...' : 'Processar planilhas'}
+      </button>
+      <span className="vigiaa-info-icon">i</span>
+    </div>
+
+    <div 
+      className="vigiaa-btn-wrapper" 
+      data-tooltip="Executa o processamento completo e atualiza o banco."
+    >
+      <button
+        type="button"
+        className="vigiaa-btn vigiaa-btn--outline"
+        onClick={() =>
+          enviar({ syncAfter: true, geoprocessarAfter: true })
+        }
+        disabled={enviando || sincronizando || geoprocessando}
+        title="Executa o processamento completo e atualiza o banco de dados."
+      >
+        Processar + sincronizar
+      </button>
+      <span className="vigiaa-info-icon">i</span>
+    </div>
+
+    <div 
+      className="vigiaa-btn-wrapper" 
+      data-tooltip="Envia os dados já processados para o banco de dados."
+    >
+      <button
+        type="button"
+        className="vigiaa-btn vigiaa-btn--ghost"
+        onClick={sincronizar}
+        disabled={enviando || sincronizando || geoprocessando}
+        title="Envia os dados já processados para o banco de dados."
+      >
+        {sincronizando ? 'Sincronizando...' : 'Sincronizar agora'}
+      </button>
+      <span className="vigiaa-info-icon">i</span>
+    </div>
+  </div>
+
+  {(enviando || sincronizando || geoprocessando) && (
+    <div className="vigiaa-progress">
+      <div
+        className="vigiaa-progress__bar"
+        style={{ width: `${progresso}%`, transition: 'width 0.4s ease-in-out' }}
+      />
+    </div>
+  )}
+
+  {mensagemStatus && (
+    <p style={{ fontSize: '13px', color: '#444', marginTop: '8px', fontWeight: '500' }}>
+      {mensagemStatus}
+    </p>
+  )}
+
+  {log && (
+    <div className="vigiaa-log">
+      <pre>{log}</pre>
+    </div>
+  )}
+</div>
 
       {modalOpen && (
         <ModalMapeamento
