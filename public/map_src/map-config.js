@@ -68,18 +68,18 @@ const armStyleWFS = function(feature) { return { radius: 5, fillColor: 'purple',
 // --- 4. Funções de Utilitário (Ajudam a construir o mapa/filtro) ---
 
 // Constrói a sintaxe de filtro WFS (Common Query Language)
-function buildCqlFilter(year, se) {
+function buildCqlFilter(year, periodo, coluna = 'se_num') {
     let filterArray = [];
-    
+
     if (year && year !== '') {
         filterArray.push(`ano_se = ${year}`);
     }
-    
-    if (se && se !== '') {
-        filterArray.push(`se_num = ${se}`);
+
+    if (periodo && periodo !== '') {
+        filterArray.push(`${coluna} = ${periodo}`);
     }
 
-    return filterArray.length > 0 ? filterArray.join(' AND ') : '1=1'; 
+    return filterArray.length > 0 ? filterArray.join(' AND ') : '1=1';
 }
 
 // Busca dados GeoServer para os filtros (Retorna apenas os atributos, sem a geometria)
@@ -104,4 +104,18 @@ async function fetchGeoServerFilterData(layerName, cqlFilter = '1=1', requiredPr
         console.error(`Erro ao buscar dados de filtro para ${layerName}:`, error);
         return [];
     }
+}
+
+function mostrarFiltro(ctx) {
+    const container = document.getElementById('main-filter-container');
+    const grupo = document.getElementById(`group-filter-${ctx}`);
+    container.style.display = 'flex';
+    grupo.style.display = 'block';
+    //grupo.parentElement.appendChild(grupo); // o mais novo vai para o topo da pilha
+    //container.insertBefore(grupo, container.firstElementChild);
+    container.appendChild(grupo);
+    
+    // requestAnimationFrame(() => {
+    //     grupo.scrollIntoView({ block: 'nearest' }); // mostra o filtro recém-aberto
+    // });
 }

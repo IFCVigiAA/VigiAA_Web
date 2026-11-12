@@ -12,6 +12,10 @@
     /* Tamanho do deslocamento quando o menu do mapa precisa descer */
     --empurrao-1: 105px; /* Altura média de 1 filtro na tela */
     --empurrao-2: 210px; /* Altura total de 2 filtros na tela */
+
+    --base-filtros: 40px; /* distância do painel até o rodapé da tela (deixa a atribuição do Leaflet visível) */
+    --altura-filtro: 100px;
+    --filtros-visiveis: 2;
 }
 
 /* 1. Reset e Fix de Tela Cheia */
@@ -68,26 +72,29 @@ html, body {
 /* 5. Filtros */
 .filter-container {
     display: none;
-    flex-direction: column;
+    flex-direction: column; /* o primeiro filtro fica embaixo, os próximos empilham para cima */
     position: fixed;
-    
-    /* Encostado no topo e na direita, respeitando a variável da parede */
-    top: var(--parede); 
-    right: var(--parede); 
-    
-    /* Distância entre as caixinhas de filtro */
-    gap: var(--espaco-itens); 
-    
+
+    bottom: var(--base-filtros);
+    right: var(--parede);
+
+    gap: var(--espaco-itens);
+
     z-index: 1100;
     background-color: white;
     padding: 2px;
     border-radius: 8px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    
-    width: calc(100vw - 60px); 
-    max-width: 250px; 
-    max-height: 50vh;
+
+    width: calc(100vw - 60px);
+    max-width: 250px;
+    max-height: min(
+        50vh,
+        calc(var(--altura-filtro) * var(--filtros-visiveis)
+        + var(--espaco-itens) * (var(--filtros-visiveis) - 1))
+    );
     overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 .filter-group {
@@ -95,6 +102,9 @@ html, body {
     padding: 2px;
     border-radius: 4px;
     background: #fcfcfc;
+    height: var(--altura-filtro);
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .filter-title {
@@ -116,7 +126,7 @@ html, body {
 /* 6. O Botão Flexível */
 .player-controls {
     margin-top: var(--espaco-itens);
-    display: flex; justify-content: center; width: 75%; height: 10%; padding-left:12%;
+    display: flex; justify-content: center; width: 75%; height: auto; padding-left: 12%;
 }
 
 #btn-play {
@@ -142,15 +152,6 @@ html, body {
     /* O controle do mapa respeita a distância da parede do topo */
     margin-top: var(--parede) !important;
     transition: margin-top 0.3s ease-in-out;
-}
-
-/* Deslocamento dinâmico baseado na quantidade de filtros abertos */
-.leaflet-top.leaflet-right .leaflet-control-layers.pushed-1 {
-    margin-top: calc(var(--parede) + var(--empurrao-1)) !important; 
-}
-
-.leaflet-top.leaflet-right .leaflet-control-layers.pushed-2 {
-    margin-top: calc(var(--parede) + var(--empurrao-2)) !important; 
 }
 
 /* ==========================================================================
