@@ -1,6 +1,3 @@
-/* =========================================================
-   CONTAINER PAI E LAYOUT (Mantém a NavBar alinhada)
-   ========================================================= */
 .vigiaa-upload {  
   display: flex;
   flex-direction: column;
@@ -30,8 +27,6 @@
   flex-direction: column;
   justify-content: space-between;
   box-sizing: border-box;
-
-  /* IMPORTANTE: Garante que os tooltips flutuantes não são cortados nas bordas */
   overflow: visible !important; 
 }
 
@@ -70,9 +65,6 @@
   white-space: nowrap;
 }
 
-/* =========================================================
-   CAMPOS DE FICHEIROS (GRID 2x2)
-   ========================================================= */
 .vigiaa-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -98,7 +90,6 @@
   height: 150px;
 }
 
-/* Destaque quando o arquivo é carregado */
 .vigiaa-field.has-file {
   background: #f5fbf7;
   border-color: #2ea66a;
@@ -126,7 +117,6 @@
   border: 1px solid #2ea66a;
 }
 
-/* ÁREA DE SELEÇÃO CUSTOMIZADA */
 .vigiaa-file-dropzone {
   display: flex;
   align-items: center;
@@ -135,12 +125,10 @@
   width: 100%;
 }
 
-/* Oculta o input nativo feio do navegador */
 .vigiaa-file-dropzone input[type='file'] {
   display: none !important;
 }
 
-/* BOTÃO CUSTOMIZADO EM VERDE CLARO */
 .vigiaa-file-btn {
   display: inline-flex;
   align-items: center;
@@ -167,7 +155,6 @@
   transition: stroke 0.2s ease;
 }
 
-/* NOME DO ARQUIVO SELECIONADO OU PLACEHOLDER */
 .vigiaa-file-name {
   font-size: 0.82em;
   color: #64748b;
@@ -340,7 +327,6 @@
   transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
 }
 
-/* SETA DO TOOLTIP */
 .vigiaa-btn-wrapper::after {
   content: "";
   position: absolute;
@@ -358,7 +344,6 @@
   transition: opacity 0.2s ease, visibility 0.2s;
 }
 
-/* EXIBIÇÃO NO HOVER */
 .vigiaa-btn-wrapper:hover::before {
   opacity: 1 !important;
   visibility: visible !important;
@@ -370,9 +355,6 @@
   visibility: visible !important;
 }
 
-/* =========================================================
-   PROGRESSO E LOGS
-   ========================================================= */
 .vigiaa-progress {
   margin-top: 1em;
   width: 100%;
@@ -411,7 +393,6 @@
   word-break: break-word;
 }
 
-/* RESPONSIVIDADE PARA TELAS MENORES QUE 768px */
 @media (max-width: 768px) {
   .vigiaa-fields {
     grid-template-columns: 1fr;
