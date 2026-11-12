@@ -15,6 +15,17 @@ let selectedYear = '';
 let selectedSE = '';
 let map; 
 
+const MESES = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+// Como cada camada filtra o período (SE ou mês)
+const PERIODO_POR_CONTEXTO = {
+    casos:        { coluna: 'se_num', placeholder: 'SE*',  rotulo: v => `SE ${v}` },
+    focos:        { coluna: 'se_num', placeholder: 'SE*',  rotulo: v => `SE ${v}` },
+    ovitrampas:   { coluna: 'mes',    placeholder: 'Mês*', rotulo: v => MESES[v - 1] ?? v },
+    'pontos-est': { coluna: 'mes',    placeholder: 'Mês*', rotulo: v => MESES[v - 1] ?? v }
+};
+
+const getPeriodo = ctx => PERIODO_POR_CONTEXTO[ctx] || PERIODO_POR_CONTEXTO.casos;
+
 // --- Funções de Ajuda para o Mapa ---
 
 function addLayerToControlUnique(layer, name) {
@@ -29,27 +40,24 @@ function addLayerToControlUnique(layer, name) {
     map.layersControl.addOverlay(layer, name);
 }
 
+let isRefreshing = false;
+
 function refreshLayerInControl(oldLayer, newLayer, layerName) {
-    const wasOnMap = oldLayer && oldLayer instanceof L.Layer && map.hasLayer(oldLayer);
+    isRefreshing = true;
+    try {
+        const wasOnMap = oldLayer && oldLayer instanceof L.Layer && map.hasLayer(oldLayer);
 
-    if (oldLayer && wasOnMap) {
-        map.removeLayer(oldLayer);
-    }
+        if (oldLayer && wasOnMap) map.removeLayer(oldLayer);
 
-    if (map.layersControl && oldLayer && oldLayer instanceof L.Layer) {
-        try {
-            map.layersControl.removeLayer(oldLayer);
-        } catch (e) {
-            console.warn("Camada já removida ou inexistente no controle.");
+        if (map.layersControl && oldLayer && oldLayer instanceof L.Layer) {
+            try { map.layersControl.removeLayer(oldLayer); } catch (e) {}
         }
-    }
 
-    if (map.layersControl && newLayer) {
-        addLayerToControlUnique(newLayer, layerName);
-    }
+        if (map.layersControl && newLayer) addLayerToControlUnique(newLayer, layerName);
 
-    if (wasOnMap && newLayer) {
-        newLayer.addTo(map);
+        if (wasOnMap && newLayer) newLayer.addTo(map);
+    } finally {
+        isRefreshing = false;
     }
 }
 
@@ -151,7 +159,7 @@ function updateFocosAedes() {
 }
 
 function updatePontosEstrat() {
-    const filter = buildCqlFilter(selectedYear, selectedSE);
+    const filter = buildCqlFilter(selectedYear, selectedSE, getPeriodo('pontos-est').coluna);
     return fetchWFSData(LAYER_PONTOS_EST, 'Pontos Estratégicos ', peStyleWFS, ['id', 'numero'], '2.0.0', true, filter).then(newLayer => {
         if (newLayer) { 
             refreshLayerInControl(peWFSLayer, newLayer, 'Pontos Estratégicos '); 
@@ -162,8 +170,8 @@ function updatePontosEstrat() {
 }
 
 function updateOvitrampas() {
-    const filter = buildCqlFilter(selectedYear, selectedSE);
-    return fetchWFSData(LAYER_OVITRAMPAS, 'Ovitrampas ', ovitrampasStyleWFS, ['id_ovitrampa', 'ovos_aegypti', 'ovos_albopictus', 'outros_ovos', 'ano_se', 'se_num'], '2.0.0', true, filter).then(newLayer => {
+    const filter = buildCqlFilter(selectedYear, selectedSE, getPeriodo('ovitrampas').coluna);
+    return fetchWFSData(LAYER_OVITRAMPAS, 'Ovitrampas ', ovitrampasStyleWFS, ['id_ovitrampa', 'ovos_aegypti', 'ovos_albopictus', 'outros_ovos', 'ano_se', 'mes'], '2.0.0', true, filter).then(newLayer => {
         if (newLayer) { 
             refreshLayerInControl(ovitrampasWFSLayer, newLayer, 'Ovitrampas '); 
             ovitrampasWFSLayer = newLayer; 
@@ -173,7 +181,7 @@ function updateOvitrampas() {
 }
 
 function updateArmadilhas() {
-    return fetchWFSData('vigiaa_ofc:relat_arm', 'Armadilhas ', armStyleWFS, ['id', 'numero', 'tipo_imovel'], '2.0.0', true).then(newLayer => {
+    return fetchWFSData('vigiaa_ofc:relat_arm', 'Armadilhas (até 2025)', armStyleWFS, ['id', 'numero', 'tipo_imovel'], '2.0.0', true).then(newLayer => {
         if (newLayer) { refreshLayerInControl(armWFSLayer, newLayer, 'Armadilhas '); armWFSLayer = newLayer; }
         return armWFSLayer;
     });
@@ -293,25 +301,27 @@ async function handleYearChangeNew(context, year) {
     if (context === 'ovitrampas') table = LAYER_OVITRAMPAS;
     if (context === 'pontos-est') table = LAYER_PONTOS_EST;
 
-    const seSelectId = `filter-se-${context}`;
-    const seSelect = document.getElementById(seSelectId);
+    const periodo = getPeriodo(context);
+    const seSelect = document.getElementById(`filter-se-${context}`);
     if (!seSelect) return;
 
     if (!year) {
-        seSelect.innerHTML = '<option value="">SE*</option>';
+        seSelect.innerHTML = `<option value="">${periodo.placeholder}</option>`;
         seSelect.disabled = true;
         updateLayerByContext(context);
         return;
     }
 
-    const data = await fetchGeoServerFilterData(table, `ano_se=${year}`, 'se_num');
-    const ses = [...new Set(data.map(item => item.se_num))].filter(s => s).sort((a, b) => a - b);
+    const data = await fetchGeoServerFilterData(table, `ano_se=${year}`, periodo.coluna);
+    const valores = [...new Set(data.map(item => item[periodo.coluna]))]
+        .filter(v => v)
+        .sort((a, b) => a - b);
 
     seSelect.innerHTML = '<option value="">Todos</option>';
-    ses.forEach(se => {
+    valores.forEach(v => {
         const opt = document.createElement('option');
-        opt.value = se;
-        opt.textContent = `SE ${se}`;
+        opt.value = v;
+        opt.textContent = periodo.rotulo(v);
         seSelect.appendChild(opt);
     });
     seSelect.disabled = false;
@@ -339,7 +349,7 @@ async function updateLayerByContext(context) {
     else if (context === 'ovitrampas') { layer = ovitrampasWFSLayer; table = LAYER_OVITRAMPAS; }
     else if (context === 'pontos-est') { layer = peWFSLayer; table = LAYER_PONTOS_EST; }
 
-    const filter = buildCqlFilter(yearVal, seVal);
+    const filter = buildCqlFilter(yearVal, seVal, getPeriodo(context).coluna);
     const url = `${GEOSERVER_WFS_URL}?service=WFS&version=2.0.0&request=GetFeature&typeName=${WORKSPACE}:${table}&outputFormat=application/json&cql_filter=${encodeURIComponent(filter)}`;
     
     try {
@@ -466,7 +476,6 @@ window.onload = function() {
         if (peWFSLayer) overlayMaps[peWFSLayer.name] = peWFSLayer;
         if (ovitrampasWFSLayer) overlayMaps[ovitrampasWFSLayer.name] = ovitrampasWFSLayer;
         if (armWFSLayer) overlayMaps[armWFSLayer.name] = armWFSLayer;
-        if (currentCasosHeatmapLayer) overlayMaps[currentCasosHeatmapLayer.name] = currentCasosHeatmapLayer;
 
         map.layersControl = L.control.layers(baseLayers, overlayMaps, { 
             position: 'topright', 
@@ -478,7 +487,7 @@ window.onload = function() {
                     'Curva de Nível', 'Declividade', 'Densidade Demográfica', 'Camboriú',
                     'Casos Positivos', 'Positivos (Mapa de Calor)', 'Clusters de Casos', 
                     'Focos Aedes', 'Focos (Mapa de Calor)', 'Clusters de Focos', 
-                    'Pontos Estratégicos', 'Ovitrampas', 'Armadilhas'
+                    'Pontos Estratégicos', 'Ovitrampas', 'Armadilhas (até 2025)'
                 ];
                 let idxA = order.findIndex(item => nameA.trim().startsWith(item));
                 let idxB = order.findIndex(item => nameB.trim().startsWith(item));
@@ -502,13 +511,31 @@ window.onload = function() {
             });
         }
 
+        function removerSubcamadas(ctx) {
+            const subcamadas = ctx === 'casos' ? [currentCasosHeatmapLayer, clusterCasosLayer]
+                            : ctx === 'focos' ? [currentFocosHeatmapLayer, clusterFocosLayer]
+                            : [];
+
+            subcamadas.forEach(layer => {
+                if (!layer) return;
+                if (map.hasLayer(layer)) map.removeLayer(layer);
+                if (map.layersControl) map.layersControl.removeLayer(layer);
+            });
+
+            const heatmapAtivo = map.hasLayer(currentCasosHeatmapLayer) || map.hasLayer(currentFocosHeatmapLayer);
+            if (!heatmapAtivo) heatmapLegend.style.display = 'none';
+            organizarLegendas();
+        }
+
         // --- Eventos de Adição de Camada ---
         map.on('overlayadd', function (e) {
+            if (isRefreshing) return;
             const mainContainer = document.getElementById('main-filter-container');
     
             if (e.name === 'Casos Positivos ') {
                 mainContainer.style.display = 'flex';
                 document.getElementById('group-filter-casos').style.display = 'block';
+                mostrarFiltro('casos');
                 populateSpecificYears('casos', LAYER_CASOS, 'filter-ano-casos');
                 if (map.layersControl) {
                     addLayerToControlUnique(currentCasosHeatmapLayer, currentCasosHeatmapLayer.name);
@@ -519,6 +546,7 @@ window.onload = function() {
             if (e.name === 'Focos Aedes ') {
                 mainContainer.style.display = 'flex';
                 document.getElementById('group-filter-focos').style.display = 'block';
+                mostrarFiltro('focos');
                 populateSpecificYears('focos', LAYER_FOCOS_SE, 'filter-ano-focos');
                 if (map.layersControl) {
                     addLayerToControlUnique(currentFocosHeatmapLayer, currentFocosHeatmapLayer.name);
@@ -529,12 +557,14 @@ window.onload = function() {
             if (e.name === 'Pontos Estratégicos ') {
                 mainContainer.style.display = 'flex';
                 document.getElementById('group-filter-pontos-est').style.display = 'block';
+                mostrarFiltro('pontos-est');
                 populateSpecificYears('pontos-est', LAYER_PONTOS_EST, 'filter-ano-pontos-est');
             }
 
             if (e.name === 'Ovitrampas ') {
                 mainContainer.style.display = 'flex';
                 document.getElementById('group-filter-ovitrampas').style.display = 'block';
+                mostrarFiltro('ovitrampas');
                 populateSpecificYears('ovitrampas', LAYER_OVITRAMPAS, 'filter-ano-ovitrampas');
             }
 
@@ -548,6 +578,7 @@ window.onload = function() {
 
         // --- Eventos de Remoção de Camada ---
         map.on('overlayremove', function (e) {
+            if (isRefreshing) return;
             let contextToRemove = null;
             if (e.name === 'Casos Positivos ') contextToRemove = 'casos';
             if (e.name === 'Focos Aedes ') contextToRemove = 'focos';
@@ -559,29 +590,13 @@ window.onload = function() {
                 const se = document.getElementById(`filter-se-${contextToRemove}`);
                 if (ano) ano.value = "";
                 if (se) {
-                    se.innerHTML = '<option value="">SE*</option>';
+                    se.innerHTML = `<option value="">${getPeriodo(contextToRemove).placeholder}</option>`;
                     se.disabled = true;
                 }
                 
-                if (contextToRemove === 'casos') {
-                    if (map.layersControl) {
-                        map.layersControl.removeLayer(currentCasosHeatmapLayer);
-                        if (clusterCasosLayer) map.layersControl.removeLayer(clusterCasosLayer);
-                    }
-                    map.removeLayer(currentCasosHeatmapLayer);
-                    if (clusterCasosLayer) map.removeLayer(clusterCasosLayer);
-                }
-                
-                if (contextToRemove === 'focos') {
-                    if (map.layersControl) {
-                        map.layersControl.removeLayer(currentFocosHeatmapLayer);
-                        if (clusterFocosLayer) map.layersControl.removeLayer(clusterFocosLayer);
-                    }
-                    map.removeLayer(currentFocosHeatmapLayer);
-                    if (clusterFocosLayer) map.removeLayer(clusterFocosLayer);
-                }
-                
                 document.getElementById(`group-filter-${contextToRemove}`).style.display = 'none';
+                // Adiado: o Leaflet ainda está processando o clique e recolocaria as camadas
+                setTimeout(() => removerSubcamadas(contextToRemove), 0);
             }
 
             const casosAtivo = map.hasLayer(currentCasosPointLayer);
@@ -632,9 +647,9 @@ async function startPlayback(context, btnElement) {
         alert("Selecione um ano primeiro para ver a evolução temporal.");
         return;
     }
-
-    const seData = await fetchGeoServerFilterData(table, `ano_se=${yearVal}`, 'se_num');
-    const distinctSE = [...new Set(seData.map(item => item.se_num))].sort((a, b) => a - b);
+    const col = getPeriodo(context).coluna;
+    const seData = await fetchGeoServerFilterData(table, `ano_se=${yearVal}`, col);
+    const distinctSE = [...new Set(seData.map(item => item[col]))].sort((a, b) => a - b);
 
     if (distinctSE.length === 0) {
         alert("Nenhuma semana encontrada para este ano.");
