@@ -156,8 +156,8 @@ hr {
 
 @media (max-width: 2560px) {
   .fullscreen-toggle-btn {
-    top: 18% !important;  
-    left: 7.6% !important; 
+    top: 10.5% !important;  
+    left: 3.5% !important; 
     right: auto; 
     bottom: auto;    
     margin: 0; 
@@ -178,8 +178,8 @@ hr {
 
 @media (min-width: 1900px) {
   .fullscreen-toggle-btn {
-    top: 14% !important;  
-    left: 7.3% !important; 
+    top: 9.2% !important;  
+    left: 3.36% !important; 
     right: auto; 
     bottom: auto;
     margin: 0; 
@@ -200,8 +200,8 @@ hr {
 
 @media (max-width: 1366px) {
   .fullscreen-toggle-btn {
-    top: 14% !important;  
-    left: 7.7% !important; 
+    top: 11% !important;  
+    left: 3.7% !important; 
     right: auto; 
     bottom: auto;    
     margin: 0; 
