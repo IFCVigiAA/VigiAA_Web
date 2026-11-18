@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Mapa Dinâmico - Leaflet & GeoServer</title>
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
-    <link rel="stylesheet" href="style.css"></head>
+    <link rel="stylesheet" href="style.css">
+</head>
 <body>
     <div class="filter-container" id="main-filter-container">
         <div id="group-filter-casos" class="filter-group" style="display: none;">
@@ -107,5 +108,23 @@
 
     <script src="map-config.js"></script>
     <script src="map-main.js"></script>
+
+    <script>
+        window.addEventListener('message', function (event) {
+            if (event.data && event.data.action === 'atualizarMunicipio' && event.data.municipio) {
+                var mun = event.data.municipio;
+                // Verifica se a instância do mapa no map-main.js se chama 'map' ou 'mapa'
+                var leafletMap = (typeof map !== 'undefined') ? map : (typeof mapa !== 'undefined' ? mapa : null);
+
+                if (leafletMap) {
+                    if (mun.bounds && mun.bounds.length === 2) {
+                        leafletMap.fitBounds(mun.bounds, { padding: [20, 20] });
+                    } else if (mun.centro) {
+                        leafletMap.setView([mun.centro.lat, mun.centro.lng], 16);
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>

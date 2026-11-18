@@ -26,4 +26,7 @@ urlpatterns = [
     path('geoprocessar-positivos/', disparar_geoprocessamento, name='geoprocessar_positivos'),
     path('extrair-cabecalho/', views.extrair_cabecalho_e_sugerir, name='extrair_cabecalho'),
     path("upload/ovitrampas/", views.upload_ovitrampas, name="upload_ovitrampas"),
+    path('municipios-disponiveis/', views.municipios_disponiveis, name='municipios_disponiveis'),
+    path('definir-municipio/', views.definir_municipio, name='definir_municipio'),
+    path('municipio-ativo/', views.config_municipio_ativo, name='config_municipio_ativo'),
 ]
