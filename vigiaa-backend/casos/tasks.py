@@ -902,7 +902,6 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
             primeira_coluna = df.columns[0]
             df = df[~df[primeira_coluna].astype(str).str.upper().str.contains("TOTAL", na=False)]
 
-        # Mapeamento completo batendo com os cabeçalhos da imagem
         DE_PARA_PADRAO = {
             'numero': 'Nº PE',
             'regional': 'REGIONAL',
