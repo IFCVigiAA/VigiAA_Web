@@ -150,6 +150,13 @@ const NavBar = () => {
         </div>
 
         <NavLink
+          to="/Noticias"
+          className={({ isActive }) => (isActive ? 'active' : '')}
+          onClick={() => setShowMenu(false)}
+        >
+          Noticias
+        </NavLink>
+        <NavLink
           to="/Publicações"
           className={({ isActive }) => (isActive ? 'active' : '')}
           onClick={() => setShowMenu(false)}

@@ -10,6 +10,7 @@ import Publicações from "../pages/Publicacoes";
 import UploadPlanilhas from "../pages/Upload_planilhas";
 import Login from "../pages/Login";
 import SobreApp from "../pages/SobreApp";
+import Noticias from "../pages/Noticias";
 
 
 
@@ -27,6 +28,7 @@ function App() {
       <Route path="/UploadPlanilhas" element={<UploadPlanilhas />} />
       <Route path="/Login" element={<Login />} />
       <Route path="SobreApp" element={<SobreApp />} /> 
+      <Route path="/Noticias" element={<Noticias />} /> 
     </Routes>
    </Router>
   )

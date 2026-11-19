@@ -16,7 +16,7 @@ const Estacao = () => {
 
           <div className="iframe-wrapper">
             <iframe 
-              src="https://tb.geati.camboriu.ifc.edu.br/dashboard/c50dabf0-5703-11ee-bdd4-b1244f07481c?publicId=d17ce940-5718-11ee-bdd4-b1244f07481c" 
+              src="https://tb.geati.ifc.edu.br/dashboard/9ed45020-a88f-11f1-884b-c356fc451c0c?publicId=2e3fdac0-abd0-11f1-884b-c356fc451c0c" 
               title="Dashboard"
             ></iframe>
           </div>
