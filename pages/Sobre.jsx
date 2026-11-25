@@ -80,9 +80,11 @@
             <br /><br />
           </div>
         </div>
-        <Footer />
+                
       </div>
-    </>);
+    </>
+    
+  );
   };
 
   export default Sobre;
