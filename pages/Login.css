@@ -1,6 +1,3 @@
-
-
-/* Reset global para remover margens padrão e o scroll */
 * {
   margin: 0;
   padding: 0;
@@ -15,11 +12,11 @@
   align-items: center;
   background: linear-gradient(to bottom right, #0d1b2a, #123524);
 
-  position: relative; /* Permite posicionar o botão voltar dentro da tela */
-  overflow: hidden;  /* Trava qualquer rolagem na tela */
+  position: relative; 
+  overflow: hidden;  
 }
 
-/* Botão de voltar posicionado de forma fixa no canto superior esquerdo */
+
 .voltarBtn {
   position: absolute;
   top: 20px;

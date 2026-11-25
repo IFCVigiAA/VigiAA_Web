@@ -556,7 +556,7 @@ def upload_planilhas(request):
     return upload_casos_positivos(request)
 
 
-# --- VIEWS DE EXECUÇÃO / SINCRONIZAÇÃO ---
+# VIEWS DE EXECUÇÃO / SINCRONIZAÇÃO 
 
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
@@ -680,7 +680,7 @@ def noticia_detalhe_view(request, noticia_id):
         noticia.delete(using="oficial")
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    # Edição (PATCH)
+
     if "title" in request.data:
         title = (request.data.get("title") or "").strip()
         if not title:

@@ -157,7 +157,7 @@
   color: #15803d;
 }
 
-/* Modal de leitura completa */
+
 .noticia-modal-overlay {
   position: fixed;
   inset: 0;
@@ -217,7 +217,7 @@
   color: #334155;
 }
 
-/* Modal de cadastro (Admin) */
+
 .noticia-modal-form {
   max-width: 600px;
 }

@@ -393,7 +393,6 @@ export default function UploadPlanilhas() {
   ))}
 </div>
 
-  {/* BOTÕES EM 1 LINHA (3 COLUNAS - SEM GEOPROCESSAMENTO) */}
   <div className="vigiaa-actions">
     <div 
       className="vigiaa-btn-wrapper" 

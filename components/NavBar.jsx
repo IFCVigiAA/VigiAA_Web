@@ -97,7 +97,7 @@ const NavBar = () => {
           Upload dados
         </NavLink>
 
-        {/* Dropdown de Projetos */}
+
         <div ref={modalRef} style={{ position: 'relative' }}>
           <button
             type="button"

@@ -12,7 +12,7 @@ from casos.tasks import task_processar_pontos
 @api_view(["POST"])
 @permission_classes([IsAuthenticated])
 def upload_pontos_estrategicos(request):
-    # 1. Recupera o arquivo de pontos estratégicos
+
     arquivo = (
         request.FILES.get("pontos") 
         or (hasattr(request, 'data') and request.data.get("pontos"))
@@ -20,13 +20,11 @@ def upload_pontos_estrategicos(request):
     if not arquivo:
         return JsonResponse({"erro": "Arquivo não enviado"}, status=400)
 
-    # 2. Captura parâmetro de cabeçalho inicial opcional
     celula_cabecalho = (
         request.POST.get("celula_cabecalho") 
         or (hasattr(request, 'data') and request.data.get("celula_cabecalho"))
     )
 
-    # 3. Captura e converte a string JSON de mapeamento
     mapeamento_raw = (
         (hasattr(request, 'data') and request.data.get("mapeamento"))
         or request.POST.get("mapeamento")
@@ -46,7 +44,7 @@ def upload_pontos_estrategicos(request):
     print(">>> [IMPORTADORES/PONTOS.PY] MAPEAMENTO CAPTURADO:", mapeamento_dict, flush=True)
     print("="*60 + "\n", flush=True)
 
-    # 4. Cria o registro de Log
+
     job = LogSincronizacao.objects.create(
         tipo="pontos",
         nome_arquivo=arquivo.name,
@@ -55,7 +53,7 @@ def upload_pontos_estrategicos(request):
         mensagem="Aguardando processamento de pontos estratégicos..."
     )
 
-    # 5. Salva o arquivo temporariamente
+   
     path_dir = os.path.join(settings.MEDIA_ROOT, "temp_uploads")
     os.makedirs(path_dir, exist_ok=True)
     caminho = os.path.join(path_dir, f"job_{job.id}_{arquivo.name.replace(' ', '_')}")
@@ -64,7 +62,7 @@ def upload_pontos_estrategicos(request):
         for chunk in arquivo.chunks():
             destination.write(chunk)
 
-    # 6. Dispara a Task do Celery com os parâmetros completos
+
     task_processar_pontos.delay(
         job.id,
         caminho,

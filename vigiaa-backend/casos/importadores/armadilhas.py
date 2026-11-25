@@ -13,7 +13,6 @@ def upload_armadilhas(request):
     if not arquivo:
         return JsonResponse({"erro": "Arquivo não enviado"}, status=400)
 
-    # Cria o Log
     job = LogSincronizacao.objects.create(
         tipo="armadilhas",
         nome_arquivo=arquivo.name,
@@ -22,7 +21,6 @@ def upload_armadilhas(request):
         mensagem="Aguardando processamento de armadilhas..."
     )
 
-    # Salva temporariamente
     path_dir = os.path.join(settings.MEDIA_ROOT, "temp_uploads")
     os.makedirs(path_dir, exist_ok=True)
     caminho = os.path.join(path_dir, f"job_{job.id}_{arquivo.name.replace(' ', '_')}")
@@ -31,7 +29,6 @@ def upload_armadilhas(request):
         for chunk in arquivo.chunks():
             destination.write(chunk)
 
-    # Dispara Celery
     task_processar_armadilhas.delay(job.id, caminho)
 
     return JsonResponse({"sucesso": True, "job_id": job.id})

@@ -733,7 +733,6 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
         df = pd.read_excel(arquivo_path, header=h_idx, engine=engine).dropna(how='all')
         df.columns = [str(c).replace('\n', ' ').strip() for c in df.columns]
 
-        # DE_PARA contendo apenas colunas físicas reais da tabela
         DE_PARA_PADRAO = {
             'n_foco': 'Nº FOCO',
             'regional': 'REGIONAL',
@@ -807,7 +806,7 @@ def task_processar_focos(self, job_id, arquivo_path, celula_cabecalho=None, mape
                         valores.append(None if (pd.isna(val) or str(val).strip().upper() in ['NAN', 'NONE', 'NAT', '']) else str(val).strip())
                 else:
                     if is_contagem:
-                        valores.append(0)  # Evita NULL em colunas numéricas NOT NULL
+                        valores.append(0) 
                     else:
                         valores.append(None)
 
@@ -965,7 +964,6 @@ def task_processar_pontos(self, job_id, arquivo_path, celula_cabecalho=None, map
                         val_num = pd.to_numeric(val, errors='coerce')
                         valores_finais.append(0 if pd.isna(val_num) else int(val_num))
                     elif campo_bd == 'municipio':
-                        # Fallback defensivo NOT NULL
                         v_str = str(val).strip() if pd.notna(val) else ""
                         valores_finais.append(v_str if v_str and v_str.upper() not in ['NAN', 'NONE', 'NULL'] else "CAMBORIÚ")
                     elif campo_bd == 'numero':

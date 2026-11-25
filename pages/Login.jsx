@@ -38,7 +38,7 @@ export default function Login() {
 
   return (
     <div className="login-container">
-      {/* Botão flutuante no canto superior esquerdo */}
+
       <button className="voltarBtn" onClick={() => window.history.back()}>
         <FiArrowLeft size={28} className="setaVoltar"/>
       </button>

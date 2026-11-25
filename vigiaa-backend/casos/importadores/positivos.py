@@ -4,8 +4,6 @@ from django.conf import settings
 from django.http import JsonResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
-
-# Importação dos models e tasks da aplicação casos
 from casos.models import LogSincronizacao
 from casos.tasks import task_processar_positivos
 

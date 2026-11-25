@@ -13,7 +13,6 @@ def upload_ovitrampas(request):
     if not arquivo:
         return JsonResponse({"erro": "Arquivo não enviado"}, status=400)
 
-    # Cria o Log de Sincronização
     job = LogSincronizacao.objects.create(
         tipo="ovitrampas",
         nome_arquivo=arquivo.name,
@@ -22,7 +21,6 @@ def upload_ovitrampas(request):
         mensagem="Aguardando processamento de ovitrampas..."
     )
 
-    # Salva o arquivo temporariamente em disco
     path_dir = os.path.join(settings.MEDIA_ROOT, "temp_uploads")
     os.makedirs(path_dir, exist_ok=True)
     caminho = os.path.join(path_dir, f"job_{job.id}_{arquivo.name.replace(' ', '_')}")
@@ -31,7 +29,7 @@ def upload_ovitrampas(request):
         for chunk in arquivo.chunks():
             destination.write(chunk)
 
-    # Dispara a task no Celery
+
     celula_cabecalho = request.POST.get("celula_cabecalho")
     mapeamento = request.POST.get("mapeamento")
 
