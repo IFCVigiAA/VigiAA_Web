@@ -97,25 +97,25 @@
 .noticia-img-wrapper {
   width: 100%;
   aspect-ratio: 1430 / 900;
+  background: #ffffff;
   overflow: hidden;
-  background: #f1f5f9;
 }
 
 .noticia-img-wrapper img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   display: block;
 }
 
 .noticia-modal-img {
-  width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 1430 / 900 !important;
-  object-fit: cover !important;
-  display: block !important;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1430 / 900;
+  object-fit: contain;
+  background: #ffffff;
+  display: block;
 }
-
 .noticia-body {
   padding: 18px 20px;
   display: flex;

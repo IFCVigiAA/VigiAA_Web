@@ -84,8 +84,8 @@
 
 .projetosModal {
   position: fixed;
-  top: 60px;
-  right: 40px;
+  transform: translateX(-50%);
+  min-width: 210px;
   background-color: #123524;
   border: 1px solid #1f9e61;
   border-radius: 6px;
@@ -93,7 +93,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  z-index: 9999;
+  z-index: 99999;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 

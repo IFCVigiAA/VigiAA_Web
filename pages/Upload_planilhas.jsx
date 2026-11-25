@@ -417,9 +417,7 @@ export default function UploadPlanilhas() {
       <button
         type="button"
         className="vigiaa-btn vigiaa-btn--outline"
-        onClick={() =>
-          enviar({ syncAfter: true, geoprocessarAfter: true })
-        }
+        onClick={() => enviar({ syncAfter: true })}
         disabled={enviando || sincronizando || geoprocessando}
         title="Executa o processamento completo e atualiza o banco de dados."
       >
