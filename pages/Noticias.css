@@ -1,7 +1,12 @@
-.page-noticias {
+.container-noticias {
   display: flex;
   flex-direction: column;
   min-height: 120vh;
+}
+
+.img-navbar img{
+  width: 120px;
+  margin-left: -30px;
 }
 
 .noticias-page {

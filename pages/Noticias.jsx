@@ -116,10 +116,11 @@ export default function Noticias() {
   };
 
   return (
-    <div className="page-noticias">
-    <NavBar/>
+    <div className="container-noticias">
+      <div className="img-navbar">
+        <NavBar/>
+      </div>
     <div className="noticias-page">
-      
       <header className="noticias-header noticias-header-flex">
         <div>
           <h1>Notícias e Boletins</h1>
