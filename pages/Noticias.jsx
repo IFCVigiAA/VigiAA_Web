@@ -356,16 +356,18 @@ export default function Noticias() {
                 </div>
 
                 <label>
-                  {noticiaEditandoId ? 'Substituir Imagem de Capa (opcional)' : 'Imagem de Capa (opcional)'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => {
-                      setForm({ ...form, image: e.target.files?.[0] || null });
-                      if (e.target.files?.[0]) setRemoverImagem(false);
-                    }}
-                  />
-                </label>
+                {noticiaEditandoId
+                  ? 'Substituir Imagem de Capa (padrão 1430x900px)'
+                  : 'Imagem de Capa (padrão 1430x900px)'}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    setForm({ ...form, image: e.target.files?.[0] || null });
+                    if (e.target.files?.[0]) setRemoverImagem(false);
+                  }}
+                />
+              </label>
 
                 {noticiaEditandoId && imagemAtualUrl && !form.image && (
                   <label className="noticia-remover-img-check">
@@ -397,6 +399,7 @@ export default function Noticias() {
                   >
                     Cancelar
                   </button>
+                  
                   <button type="submit" className="btn-salvar" disabled={salvando}>
                     {salvando
                       ? 'Salvando...'

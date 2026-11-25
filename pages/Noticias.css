@@ -109,10 +109,11 @@
 }
 
 .noticia-modal-img {
-  width: 100%;
-  aspect-ratio: 1430 / 900;
-  object-fit: cover;
-  display: block;
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1430 / 900 !important;
+  object-fit: cover !important;
+  display: block !important;
 }
 
 .noticia-body {
