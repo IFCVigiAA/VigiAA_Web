@@ -26,4 +26,7 @@ urlpatterns = [
     path('geoprocessar-positivos/', disparar_geoprocessamento, name='geoprocessar_positivos'),
     path('extrair-cabecalho/', views.extrair_cabecalho_e_sugerir, name='extrair_cabecalho'),
     path("upload/ovitrampas/", views.upload_ovitrampas, name="upload_ovitrampas"),
+    path("noticias/", views.noticias_view, name="noticias_view"),
+    path("noticias/<int:noticia_id>/", views.noticia_detalhe_view, name="noticia_detalhe_view"),
 ]
+

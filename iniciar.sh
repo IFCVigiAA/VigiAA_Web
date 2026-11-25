@@ -6,7 +6,7 @@ echo "Iniciando o ecossistema do projeto..."
 echo "-> Iniciando Django Backend..."
 cd vigiaa-backend
 source venv/bin/activate
-python manage.py runserver &
+python manage.py runserver 0.0.0.0:8000 &
 BACKEND_PID=$! # Guarda o ID do processo do Django
 
 # 2. Iniciar o Celery em segundo plano

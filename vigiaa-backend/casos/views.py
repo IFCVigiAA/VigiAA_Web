@@ -14,6 +14,14 @@ from rest_framework.response import Response
 from django.core.files.storage import FileSystemStorage
 from rest_framework.permissions import IsAuthenticated
 from .models import LogSincronizacao
+from django.db.models import Q
+from django.utils import timezone
+from django.utils.dateparse import parse_datetime
+from rest_framework import status
+from rest_framework.decorators import api_view, parser_classes
+from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
+from rest_framework.response import Response
+from .models import Noticia
 from .tasks import (
     task_processar_positivos, 
     task_processar_pontos, 
@@ -161,7 +169,8 @@ def _normalizar_texto(texto):
 
 # VIEWS DE AUTENTICAÇÃO E STATUS 
 
-@login_required
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def me(request):
     u = request.user
     return JsonResponse({
@@ -589,3 +598,126 @@ def sincronizar_oficial_api(request):
 
     except Exception as e:
         return JsonResponse({"status": "erro", "mensagem": str(e)}, status=500)
+    
+def _serializar_noticia(n, request):
+    return {
+        "id": n.id,
+        "title": n.title,
+        "publication_date": n.publication_date.isoformat(),
+        "image": request.build_absolute_uri(n.image.url) if n.image else None,
+        "text": n.text,
+        "expiration_date": n.expiration_date.isoformat() if n.expiration_date else None,
+    }
+
+
+@api_view(["GET", "POST"])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def noticias_view(request):
+    if request.method == "GET":
+        agora = timezone.now()
+        noticias = (
+            Noticia.objects.using("oficial")
+            .filter(publication_date__lte=agora)
+            .filter(Q(expiration_date__isnull=True) | Q(expiration_date__gt=agora))
+        )
+        return Response([_serializar_noticia(n, request) for n in noticias])
+
+    if not request.user or not request.user.is_authenticated or not request.user.is_staff:
+        return Response(
+            {"erro": "Apenas administradores podem cadastrar notícias."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    title = (request.data.get("title") or "").strip()
+    text = (request.data.get("text") or "").strip()
+    if not title or not text:
+        return Response(
+            {"erro": "Título e texto são obrigatórios."},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    pub_raw = request.data.get("publication_date")
+    exp_raw = request.data.get("expiration_date")
+
+    pub_dt = parse_datetime(pub_raw) if pub_raw else timezone.now()
+    if pub_dt and timezone.is_naive(pub_dt):
+        pub_dt = timezone.make_aware(pub_dt)
+
+    exp_dt = parse_datetime(exp_raw) if exp_raw else None
+    if exp_dt and timezone.is_naive(exp_dt):
+        exp_dt = timezone.make_aware(exp_dt)
+
+    noticia = Noticia(
+        title=title,
+        text=text,
+        publication_date=pub_dt or timezone.now(),
+        expiration_date=exp_dt,
+        image=request.FILES.get("image"),
+    )
+    noticia.save(using="oficial")
+
+    return Response(_serializar_noticia(noticia, request), status=status.HTTP_201_CREATED)
+
+@api_view(["PATCH", "DELETE"])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def noticia_detalhe_view(request, noticia_id):
+    if not request.user or not request.user.is_authenticated or not request.user.is_staff:
+        return Response(
+            {"erro": "Apenas administradores podem alterar ou excluir notícias."},
+            status=status.HTTP_403_FORBIDDEN,
+        )
+
+    noticia = Noticia.objects.using("oficial").filter(id=noticia_id).first()
+    if not noticia:
+        return Response(
+            {"erro": "Notícia não encontrada."},
+            status=status.HTTP_404_NOT_FOUND,
+        )
+
+    if request.method == "DELETE":
+        if noticia.image:
+            noticia.image.delete(save=False)
+        noticia.delete(using="oficial")
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # Edição (PATCH)
+    if "title" in request.data:
+        title = (request.data.get("title") or "").strip()
+        if not title:
+            return Response({"erro": "O título não pode ficar vazio."}, status=status.HTTP_400_BAD_REQUEST)
+        noticia.title = title
+
+    if "text" in request.data:
+        text = (request.data.get("text") or "").strip()
+        if not text:
+            return Response({"erro": "O texto não pode ficar vazio."}, status=status.HTTP_400_BAD_REQUEST)
+        noticia.text = text
+
+    if "publication_date" in request.data and request.data.get("publication_date"):
+        pub_dt = parse_datetime(request.data.get("publication_date"))
+        if pub_dt:
+            if timezone.is_naive(pub_dt):
+                pub_dt = timezone.make_aware(pub_dt)
+            noticia.publication_date = pub_dt
+
+    if "expiration_date" in request.data:
+        exp_raw = request.data.get("expiration_date")
+        if exp_raw:
+            exp_dt = parse_datetime(exp_raw)
+            if exp_dt and timezone.is_naive(exp_dt):
+                exp_dt = timezone.make_aware(exp_dt)
+            noticia.expiration_date = exp_dt
+        else:
+            noticia.expiration_date = None
+
+    if request.data.get("remover_imagem") == "true":
+        if noticia.image:
+            noticia.image.delete(save=False)
+        noticia.image = None
+    elif "image" in request.FILES:
+        if noticia.image:
+            noticia.image.delete(save=False)
+        noticia.image = request.FILES["image"]
+
+    noticia.save(using="oficial")
+    return Response(_serializar_noticia(noticia, request))

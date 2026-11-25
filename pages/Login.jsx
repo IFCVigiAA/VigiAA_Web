@@ -28,7 +28,9 @@ export default function Login() {
       localStorage.setItem("access", data.access);
       localStorage.setItem("refresh", data.refresh);
 
-      window.location.href = "/UploadPlanilhas";
+      const params = new URLSearchParams(window.location.search);
+      const nextUrl = params.get("next") || "/UploadPlanilhas";
+      window.location.href = nextUrl;
     } catch (err) {
       setError("Usuário ou senha incorretos");
     }

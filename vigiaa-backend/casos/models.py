@@ -1,6 +1,7 @@
 from django.contrib.gis.db import models
 from django.db.models import Q
-
+import os
+from django.utils import timezone
 
 class Caso(models.Model):
     cidade = models.CharField(max_length=100)
@@ -312,4 +313,36 @@ class OvitrampaTemp(models.Model):
 
     class Meta:
         db_table = "ovitrampas_temp"
-        managed = False  
+        managed = False
+    
+def caminho_imagem_noticia(instance, filename):
+    ext = os.path.splitext(filename)[1].lower() or '.jpg'
+    nome = str(instance.id) if instance.id else timezone.now().strftime('%Y%m%d%H%M%S')
+    return f'noticias/{nome}{ext}'
+
+
+class Noticia(models.Model):
+    title = models.CharField(max_length=255, verbose_name="Título")
+    publication_date = models.DateTimeField(default=timezone.now, verbose_name="Data de Publicação")
+    image = models.ImageField(upload_to=caminho_imagem_noticia, blank=True, null=True, verbose_name="Imagem")
+    text = models.TextField(verbose_name="Conteúdo")
+    expiration_date = models.DateTimeField(blank=True, null=True, verbose_name="Data de Expiração")
+
+    class Meta:
+        db_table = 'noticias'
+        ordering = ['-publication_date']
+        verbose_name = 'Notícia'
+        verbose_name_plural = 'Notícias'
+
+    def __str__(self):
+        return self.title
+
+    def save(self, *args, **kwargs):
+        imagem_nova = self.image if self.pk is None else None
+        if self.pk is None and imagem_nova:
+            self.image = None
+            super().save(*args, **kwargs)
+            self.image = imagem_nova
+            super().save(update_fields=['image'])
+        else:
+            super().save(*args, **kwargs)
