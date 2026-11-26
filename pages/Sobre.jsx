@@ -1,13 +1,11 @@
-  import React from 'react';
-  import NavBar from '../components/NavBar';
-  import Footer from '../components/Footer';
-  import './Sobre.css';
+import React from 'react';
+import NavBar from '../components/NavBar';
+import Footer from '../components/Footer';
+import './Sobre.css';
 
-
-  const Sobre = () => {
-    return (
-      <>
-    
+const Sobre = () => {
+  return (
+    <>
       <div className="page-container">
         <NavBar />
         <div className="sobre-banner">
@@ -16,31 +14,45 @@
             <h2 className="subtitle">Vigilância do Aedes aegypti</h2>
           </div>
           <div className="logo-box">
-            <img src={import.meta.env.BASE_URL + 'logos/logo_home.png'} alt="Logo VigiAA" title="Logo VigiAA" className="logoSobre" />
+            <img
+              src={import.meta.env.BASE_URL + 'logos/logo_home.png'}
+              alt="Logo VigiAA"
+              title="Logo VigiAA"
+              className="logoSobre"
+            />
           </div>
         </div>
+
         <div className="sobre-container">
-        
           <div className="sobre-header">
             <h1>Sobre o Projeto <span>VigiAA</span></h1>
           </div>
+
           <div className="sobre-section">
             <p>
-              O <strong>VigiAA</strong> é uma plataforma georreferenciada voltada a vigilância, 
-              análise epidemiológica e mapeamento preditivo do mosquito <em>Aedes aegypti</em>, vetor da Dengue. 
-              A plataforma automatiza a ingestão de dados municipais brutos e os transforma em inteligência geográfica, 
+              O <strong>VigiAA</strong> é uma plataforma georreferenciada voltada à vigilância,
+              análise epidemiológica e mapeamento preditivo do mosquito <em>Aedes aegypti</em>, vetor da Dengue.
+              A plataforma automatiza a ingestão de dados municipais brutos e os transforma em inteligência geográfica,
               disponibilizando mapas claros e acessíveis para a população, pesquisadores e gestores públicos.
             </p>
             <br />
             <p>
-              Este projeto de pesquisa e desenvolvimento tecnológico foi aprovado e financiado pelo edital institucional 
-              <strong><a href="https://fapesc.sc.gov.br/wp-content/uploads/2024/07/CP_fapesc_37_2024_aedes.pdf" target="_blank" rel="noopener noreferrer"> 37/2024 FAPESC</a></strong>.
+              Este projeto de pesquisa e desenvolvimento tecnológico foi aprovado e financiado pelo edital institucional
+              <strong>
+                <a
+                  href="https://fapesc.sc.gov.br/wp-content/uploads/2024/07/CP_fapesc_37_2024_aedes.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {' '}37/2024 FAPESC
+                </a>
+              </strong>.
             </p>
           </div>
 
           <div className="sobre-section">
             <h2>Arquitetura e Tecnologias Utilizadas</h2>
-            
+
             <ul className="tech-list">
               <li><strong>React</strong> – Engenharia do ecossistema frontend para a construção de uma interface dinâmica e de alta responsividade.</li>
               <li><strong>Django & Django REST Framework</strong> – Arquitetura de backend robusta, responsável pelas regras de negócio, APIs seguras e orquestração do sistema.</li>
@@ -53,15 +65,61 @@
           <div className="sobre-section">
             <h2>Qual a importância do projeto?</h2>
             <p>
-              O VigiAA quebra o gargalo do processamento manual de dados de saúde pública. Ele centraliza de forma inteligente 
-              o ciclo completo da informação: desde o upload rápido de relatórios fragmentados (Casos Positivos, Pontos Estratégicos, 
-              Ovitrampas e Focos de Aedes) até a geração automática de mapas epidemiológicos de risco. 
+              O VigiAA quebra o gargalo do processamento manual de dados de saúde pública. Ele centraliza de forma inteligente
+              o ciclo completo da informação: desde o upload rápido de relatórios fragmentados (Casos Positivos, Pontos Estratégicos,
+              Ovitrampas e Focos de Aedes) até a geração automática de mapas epidemiológicos de risco.
             </p>
             <p>
-              Com isso, o projeto reduz drasticamente o tempo de resposta das equipes de Vigilância Sanitária e Ambiental, 
+              Com isso, o projeto reduz drasticamente o tempo de resposta das equipes de Vigilância Sanitária e Ambiental,
               permitindo a ação mais rápida.
             </p>
           </div>
+
+          <div className="sobre-section">
+            <h2>Documentação e Recursos</h2>
+            <p>
+              Acesse os modelos de planilhas padronizadas para alimentação do sistema, além do manual de instalação e da documentação técnica da plataforma:
+            </p>
+
+            <div className="sobre-recursos-grid">
+              <a
+                href="https://drive.google.com/drive/folders/1jyWQsIdZ-P-04dNWmT6i4_9FyYv3KLPC?usp=drive_link"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sobre-recurso-btn"
+              >
+                <span className="recurso-titulo">Planilhas Padronizadas</span>
+                <span className="recurso-desc">
+                  Modelos oficiais para preenchimento e importação no VigiAA Web
+                </span>
+              </a>
+
+              <a
+                href="https://drive.google.com/drive/folders/1F-13HgN26_84eOkzWKW4ovxrUs50t9g5?usp=sharing"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sobre-recurso-btn"
+              >
+                <span className="recurso-titulo">Manual de Instalação</span>
+                <span className="recurso-desc">
+                  Passo a passo para configuração e implantação da plataforma
+                </span>
+              </a>
+
+              <a
+                href="https://drive.google.com/drive/folders/1RE2iQljatonsVvJBqgZqr9C88HdWvTKP?usp=drive_link"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sobre-recurso-btn"
+              >
+                <span className="recurso-titulo">Documentação Técnica</span>
+                <span className="recurso-desc">
+                  Arquitetura, especificações e detalhes técnicos do projeto
+                </span>
+              </a>
+            </div>
+          </div>
+
           <div className="sobre-section">
             <h2>Localização do Projeto</h2>
             <p>O projeto está localizado no laboratório GEATI no Instituto Federal Catarinense de Camboriú.</p>
@@ -80,10 +138,11 @@
             <br /><br />
           </div>
         </div>
-                
+
+        <Footer />
       </div>
     </>
   );
-  };
+};
 
-  export default Sobre;
+export default Sobre;
